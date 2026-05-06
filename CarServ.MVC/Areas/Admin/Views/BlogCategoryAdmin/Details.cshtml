@@ -1,0 +1,65 @@
+@model CarServ.MVC.Models.BlogCategory
+
+@{
+    ViewData["Title"] = "Chi tiết Chuyên mục Blog";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Chuyên mục Blog</h1>
+        <a href="@Url.Action("Index", "BlogCategoryAdmin", new { area = "Admin" })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Chuyên mục</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">ID:</dt>
+                <dd class="col-sm-9">@Model.Id</dd>
+
+                <dt class="col-sm-3">Tên:</dt>
+                <dd class="col-sm-9">@Model.Name</dd>
+
+                <dt class="col-sm-3">Slug:</dt>
+                <dd class="col-sm-9"><code>@Model.Slug</code></dd>
+
+                <dt class="col-sm-3">Mô tả:</dt>
+                <dd class="col-sm-9">@(Model.Description ?? "Không có")</dd>
+
+                <dt class="col-sm-3">Thứ tự:</dt>
+                <dd class="col-sm-9">@Model.DisplayOrder</dd>
+
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge badge-success">Đang hoạt động</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-secondary">Không hoạt động</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Ngày tạo:</dt>
+                <dd class="col-sm-9">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+            </dl>
+
+            <div class="mt-4">
+                <a href="@Url.Action("Edit", "BlogCategoryAdmin", new { area = "Admin", id = Model.Id })" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Sửa
+                </a>
+                <a href="@Url.Action("Delete", "BlogCategoryAdmin", new { area = "Admin", id = Model.Id })" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Xóa
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+

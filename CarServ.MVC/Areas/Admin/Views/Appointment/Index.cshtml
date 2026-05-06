@@ -1,0 +1,213 @@
+@model IEnumerable<CarServ.MVC.Models.Appointment>
+
+@{
+    ViewData["Title"] = "Quản lý Đặt lịch hẹn";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Đặt lịch hẹn</h1>
+        <a href="@Url.Action("Create", "Appointment", new { area = "Admin" })" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Thêm Lịch hẹn Mới
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm và Lọc</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Tìm kiếm:</label>
+                            <input type="text" name="searchString" class="form-control" value="@ViewData["CurrentFilter"]" placeholder="Mã, tên KH, SĐT, email..." />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Trạng thái:</label>
+                            <select name="statusFilter" class="form-control">
+                                <option value="">Tất cả trạng thái</option>
+                                @if (ViewBag.StatusList != null)
+                                {
+                                    @foreach (var status in ViewBag.StatusList)
+                                    {
+                                        <option value="@status" selected="@(ViewData["CurrentStatus"]?.ToString() == status)">@status</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Ngày hẹn:</label>
+                            <input type="date" name="dateFilter" class="form-control" value="@ViewData["CurrentDate"]" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Sắp xếp:</label>
+                            <select name="sortOrder" class="form-control">
+                                <option value="">Mới nhất</option>
+                                <option value="date_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "date_desc")">Ngày hẹn (mới nhất)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-search"></i> Tìm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Appointment Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Lịch hẹn</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã lịch hẹn</th>
+                            <th>Khách hàng</th>
+                            <th>Dịch vụ</th>
+                            <th>Kỹ thuật viên</th>
+                            <th>Ngày giờ hẹn</th>
+                            <th>Thời gian</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><strong>@(item.AppointmentCode ?? "-")</strong></td>
+                                <td>
+                                    @if (item.Customer != null)
+                                    {
+                                        <div>@item.Customer.FullName</div>
+                                        <small class="text-muted">@item.Customer.Phone</small>
+                                    }
+                                    else if (!string.IsNullOrEmpty(item.CustomerName))
+                                    {
+                                        <div>@item.CustomerName</div>
+                                        <small class="text-muted">@item.CustomerPhone</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Service != null)
+                                    {
+                                        <span>@item.Service.ServiceName</span>
+                                    }
+                                    else if (!string.IsNullOrEmpty(item.ServiceType))
+                                    {
+                                        <span>@item.ServiceType</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Technician != null)
+                                    {
+                                        <span>@item.Technician.FullName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa phân công</span>
+                                    }
+                                </td>
+                                <td>@item.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (item.EstimatedDuration.HasValue)
+                                    {
+                                        <span>@item.EstimatedDuration phút</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.TotalPrice.HasValue)
+                                    {
+                                        <strong>@item.TotalPrice.Value.ToString("N0") đ</strong>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.Status))
+                                    {
+                                        var statusClass = item.Status switch
+                                        {
+                                            "Chờ xác nhận" => "badge-warning",
+                                            "Đã xác nhận" => "badge-info",
+                                            "Đang thực hiện" => "badge-primary",
+                                            "Hoàn thành" => "badge-success",
+                                            "Đã hủy" => "badge-danger",
+                                            _ => "badge-secondary"
+                                        };
+                                        <span class="badge @statusClass">@item.Status</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("Details", "Appointment", new { area = "Admin", id = item.AppointmentId })" class="btn btn-info btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", "Appointment", new { area = "Admin", id = item.AppointmentId })" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="@Url.Action("Delete", "Appointment", new { area = "Admin", id = item.AppointmentId })" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "order": [[0, "desc"]]
+            });
+        });
+    </script>
+}
+
+
+

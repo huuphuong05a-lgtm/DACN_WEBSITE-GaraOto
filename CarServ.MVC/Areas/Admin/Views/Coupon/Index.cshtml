@@ -1,0 +1,246 @@
+@model IEnumerable<CarServ.MVC.Models.Coupon>
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Quản lý Mã giảm giá";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Mã giảm giá</h1>
+        <a href="@Url.Action("Create", "Coupon", new { area = "Admin" })" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Thêm Mã giảm giá Mới
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm và Lọc</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Tìm kiếm:</label>
+                            <input type="text" name="searchString" class="form-control" value="@ViewData["CurrentFilter"]" placeholder="Mã, tên, mô tả..." />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Trạng thái:</label>
+                            <select name="statusFilter" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="Active" selected="@(ViewData["CurrentStatus"]?.ToString() == "Active")">Đang hoạt động</option>
+                                <option value="Inactive" selected="@(ViewData["CurrentStatus"]?.ToString() == "Inactive")">Không hoạt động</option>
+                                <option value="Valid" selected="@(ViewData["CurrentStatus"]?.ToString() == "Valid")">Còn hiệu lực</option>
+                                <option value="Expired" selected="@(ViewData["CurrentStatus"]?.ToString() == "Expired")">Hết hạn</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Loại giảm giá:</label>
+                            <select name="typeFilter" class="form-control">
+                                <option value="">Tất cả</option>
+                                @if (ViewBag.DiscountTypes != null)
+                                {
+                                    @foreach (var type in ViewBag.DiscountTypes)
+                                    {
+                                        <option value="@type" selected="@(ViewData["CurrentType"]?.ToString() == type)">@type</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Sắp xếp:</label>
+                            <select name="sortOrder" class="form-control">
+                                <option value="">Mới nhất</option>
+                                <option value="code" selected="@(ViewData["CurrentSort"]?.ToString() == "code")">Mã (A→Z)</option>
+                                <option value="code_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "code_desc")">Mã (Z→A)</option>
+                                <option value="date_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "date_desc")">Ngày tạo (mới nhất)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-search"></i> Tìm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Coupon Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Mã giảm giá</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã</th>
+                            <th>Tên</th>
+                            <th>Loại giảm giá</th>
+                            <th>Giá trị</th>
+                            <th>Đơn tối thiểu</th>
+                            <th>Giảm tối đa</th>
+                            <th>Sử dụng</th>
+                            <th>Thời hạn</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var isExpired = item.EndDate.HasValue && item.EndDate.Value < DateTime.Now;
+                            var isValid = item.IsActive == true 
+                                && (!item.StartDate.HasValue || item.StartDate.Value <= DateTime.Now)
+                                && (!item.EndDate.HasValue || item.EndDate.Value >= DateTime.Now);
+                            
+                            <tr>
+                                <td><strong class="text-primary">@item.Code</strong></td>
+                                <td>@(item.Name ?? "-")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.DiscountType))
+                                    {
+                                        <span class="badge badge-info">@item.DiscountType</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.DiscountValue.HasValue)
+                                    {
+                                        @if (item.DiscountType == "Percentage")
+                                        {
+                                            <text>@item.DiscountValue%</text>
+                                        }
+                                        else
+                                        {
+                                            <text>@item.DiscountValue.Value.ToString("N0") đ</text>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.MinimumOrder.HasValue)
+                                    {
+                                        <text>@item.MinimumOrder.Value.ToString("N0") đ</text>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.MaximumDiscount.HasValue)
+                                    {
+                                        <text>@item.MaximumDiscount.Value.ToString("N0") đ</text>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.UsageLimit.HasValue)
+                                    {
+                                        <text>@(item.UsedCount ?? 0) / @item.UsageLimit</text>
+                                        @if (item.UsedCount.HasValue && item.UsageLimit.HasValue && item.UsedCount.Value >= item.UsageLimit.Value)
+                                        {
+                                            <br /><small class="text-danger">Đã hết</small>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <text>@(item.UsedCount ?? 0) / Không giới hạn</text>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.StartDate.HasValue || item.EndDate.HasValue)
+                                    {
+                                        <div>
+                                            @if (item.StartDate.HasValue)
+                                            {
+                                                <small>Từ: @item.StartDate.Value.ToString("dd/MM/yyyy")</small>
+                                            }
+                                            @if (item.EndDate.HasValue)
+                                            {
+                                                <br /><small>Đến: @item.EndDate.Value.ToString("dd/MM/yyyy")</small>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không giới hạn</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (isExpired)
+                                    {
+                                        <span class="badge badge-danger">Hết hạn</span>
+                                    }
+                                    else if (isValid)
+                                    {
+                                        <span class="badge badge-success">Còn hiệu lực</span>
+                                    }
+                                    else if (item.IsActive == true)
+                                    {
+                                        <span class="badge badge-warning">Chưa bắt đầu</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Không hoạt động</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("Details", "Coupon", new { area = "Admin", id = item.CouponId })" class="btn btn-info btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", "Coupon", new { area = "Admin", id = item.CouponId })" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="@Url.Action("Delete", "Coupon", new { area = "Admin", id = item.CouponId })" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "order": [[0, "desc"]]
+            });
+        });
+    </script>
+}
+
+

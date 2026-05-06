@@ -1,0 +1,243 @@
+@model CarServ.MVC.Models.Technician
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Chi tiết Kỹ thuật viên";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Kỹ thuật viên</h1>
+        <div>
+            <a href="@Url.Action("Edit", "Technician", new { area = "Admin", id = Model.TechnicianId })" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Chỉnh sửa
+            </a>
+            <a href="@Url.Action("Index", "Technician", new { area = "Admin" })" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Technician Information -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Kỹ thuật viên</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.FullName" class="img-thumbnail" style="max-width: 250px; max-height: 250px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 250px; height: 250px; font-size: 5rem;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    }
+                </div>
+                <div class="col-md-9">
+                    <dl class="row">
+                        <dt class="col-sm-3">Họ và tên:</dt>
+                        <dd class="col-sm-9"><strong>@Model.FullName</strong></dd>
+
+                        <dt class="col-sm-3">Vị trí:</dt>
+                        <dd class="col-sm-9">@(Model.Position ?? "-")</dd>
+
+                        <dt class="col-sm-3">Kinh nghiệm:</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.ExperienceYears.HasValue)
+                            {
+                                <text>@Model.ExperienceYears năm</text>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Số điện thoại:</dt>
+                        <dd class="col-sm-9">@(Model.Phone ?? "-")</dd>
+
+                        <dt class="col-sm-3">Email:</dt>
+                        <dd class="col-sm-9">@(Model.Email ?? "-")</dd>
+
+                        <dt class="col-sm-3">Đánh giá:</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.Rating.HasValue)
+                            {
+                                <div>
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= Math.Round(Model.Rating.Value))
+                                        {
+                                            <i class="fas fa-star text-warning"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="far fa-star text-muted"></i>
+                                        }
+                                    }
+                                    <span class="ml-2"><strong>@Model.Rating.Value.ToString("F1")</strong></span>
+                                </div>
+                                @if (Model.TotalReviews.HasValue && Model.TotalReviews.Value > 0)
+                                {
+                                    <div class="mt-1">
+                                        <small class="text-muted">(@Model.TotalReviews đánh giá)</small>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">Chưa có đánh giá</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Trạng thái:</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.IsActive == true)
+                            {
+                                <span class="badge badge-success">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Không hoạt động</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Ngày tạo:</dt>
+                        <dd class="col-sm-9">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+
+                        <dt class="col-sm-3">Ngày cập nhật:</dt>
+                        <dd class="col-sm-9">@(Model.UpdatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Bio))
+            {
+                <hr />
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="font-weight-bold">Tiểu sử:</h6>
+                        <p>@Model.Bio</p>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Skills))
+            {
+                <hr />
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="font-weight-bold">Kỹ năng:</h6>
+                        <p>@Model.Skills</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Appointments History -->
+    @if (Model.Appointments != null && Model.Appointments.Any())
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Lịch sử Lịch hẹn (@Model.Appointments.Count())</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Mã lịch hẹn</th>
+                                <th>Khách hàng</th>
+                                <th>Dịch vụ</th>
+                                <th>Ngày hẹn</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var appointment in Model.Appointments.OrderByDescending(a => a.AppointmentDate))
+                            {
+                                <tr>
+                                    <td><strong>@(appointment.AppointmentCode ?? "-")</strong></td>
+                                    <td>
+                                        @if (appointment.Customer != null)
+                                        {
+                                            <text>@appointment.Customer.FullName</text>
+                                        }
+                                        else if (!string.IsNullOrEmpty(appointment.CustomerName))
+                                        {
+                                            <text>@appointment.CustomerName</text>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (appointment.Service != null)
+                                        {
+                                            <text>@appointment.Service.ServiceName</text>
+                                        }
+                                        else if (!string.IsNullOrEmpty(appointment.ServiceType))
+                                        {
+                                            <text>@appointment.ServiceType</text>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>@appointment.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td><strong class="text-danger">@(appointment.TotalPrice?.ToString("N0") ?? "0") đ</strong></td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(appointment.Status))
+                                        {
+                                            string statusClass = "badge-secondary";
+                                            @switch (appointment.Status)
+                                            {
+                                                case "Chờ xác nhận":
+                                                    statusClass = "badge-warning";
+                                                    break;
+                                                case "Đã xác nhận":
+                                                    statusClass = "badge-info";
+                                                    break;
+                                                case "Đang thực hiện":
+                                                    statusClass = "badge-primary";
+                                                    break;
+                                                case "Hoàn thành":
+                                                    statusClass = "badge-success";
+                                                    break;
+                                                case "Đã hủy":
+                                                    statusClass = "badge-danger";
+                                                    break;
+                                            }
+                                            <span class="badge @statusClass">@appointment.Status</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Appointment", new { area = "Admin", id = appointment.AppointmentId })" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+

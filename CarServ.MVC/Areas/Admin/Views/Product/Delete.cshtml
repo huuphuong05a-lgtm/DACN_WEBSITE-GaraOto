@@ -1,0 +1,85 @@
+@model CarServ.MVC.Models.Product
+
+@{
+    ViewData["Title"] = "Xóa Sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Sản phẩm</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger">
+            <h6 class="m-0 font-weight-bold text-white">Xác nhận xóa</h6>
+        </div>
+        <div class="card-body">
+            <h4 class="text-danger">Bạn có chắc chắn muốn xóa sản phẩm này?</h4>
+            
+            <hr />
+            
+            <div class="row">
+                <div class="col-md-4">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.ProductName" class="img-fluid img-thumbnail" />
+                    }
+                </div>
+                <div class="col-md-8">
+                    <dl class="row">
+                        <dt class="col-sm-4">Tên Sản phẩm:</dt>
+                        <dd class="col-sm-8"><strong>@Model.ProductName</strong></dd>
+
+                        <dt class="col-sm-4">Danh mục:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Category != null)
+                            {
+                                <span class="badge badge-info">@Model.Category.CategoryName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">SKU:</dt>
+                        <dd class="col-sm-8">@(Model.Sku ?? "-")</dd>
+
+                        <dt class="col-sm-4">Giá:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Price.HasValue)
+                            {
+                                @Model.Price.Value.ToString("N0") <text>đ</text>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Tồn kho:</dt>
+                        <dd class="col-sm-8">@(Model.StockQuantity ?? 0)</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="alert alert-warning mt-3">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Cảnh báo:</strong> Hành động này không thể hoàn tác.
+            </div>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="ProductId" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Xóa
+                </button>
+                <a href="@Url.Action("Index", "Product", new { area = "Admin" })" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+

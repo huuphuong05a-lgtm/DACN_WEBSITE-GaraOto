@@ -1,0 +1,139 @@
+@model IEnumerable<CarServ.MVC.Models.Product>
+
+@{
+    ViewData["Title"] = "Sản Phẩm";
+    var categories = ViewData["Categories"] as List<CarServ.MVC.Models.Category> ?? new List<CarServ.MVC.Models.Category>();
+    var selectedCategoryId = ViewData["CategoryId"] as int?;
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center pb-5">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Sản Phẩm</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang Chủ</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Sản Phẩm</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Products Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <!-- Search and Filter -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <form asp-action="Index" method="get" class="d-flex">
+                    <input type="hidden" name="categoryId" value="@selectedCategoryId">
+                    <input type="text" name="searchString" class="form-control me-2" placeholder="Tìm kiếm sản phẩm..." value="@ViewData["CurrentFilter"]">
+                    <button type="submit" class="btn btn-primary">Tìm Kiếm</button>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <form asp-action="Index" method="get" class="d-flex">
+                    <input type="hidden" name="searchString" value="@ViewData["CurrentFilter"]">
+                    <select name="categoryId" class="form-select" onchange="this.form.submit()">
+                        <option value="">Tất cả danh mục</option>
+                        @foreach (var category in categories)
+                        {
+                            <option value="@category.CategoryId" selected="@(selectedCategoryId == category.CategoryId)">@category.CategoryName</option>
+                        }
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <!-- Products Count -->
+        @if (Model != null && Model.Any())
+        {
+            <div class="row mb-4">
+                <div class="col-12">
+                    <p class="text-muted">Hiển thị <strong>@Model.Count()</strong> sản phẩm</p>
+                </div>
+            </div>
+        }
+
+        <!-- Products Grid -->
+        <div class="row g-4">
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var product in Model)
+                {
+                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="product-item bg-light d-flex flex-column overflow-hidden h-100">
+                            <div class="position-relative overflow-hidden">
+                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                {
+                                    <img class="img-fluid" src="@product.ImageUrl" alt="@product.ProductName" style="width: 100%; height: 250px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <img class="img-fluid" src="~/img/product-1.jpg" alt="@product.ProductName" style="width: 100%; height: 250px; object-fit: cover;">
+                                }
+                                @if (product.IsNew)
+                                {
+                                    <div class="position-absolute top-0 start-0 bg-danger text-white px-3 py-1">Mới</div>
+                                }
+                                @if (product.IsFeatured)
+                                {
+                                    <div class="position-absolute top-0 end-0 bg-primary text-white px-3 py-1">Nổi bật</div>
+                                }
+                                <div class="product-overlay position-absolute start-0 top-0 w-100 h-100">
+                                    <a class="btn btn-lg btn-primary btn-lg-square rounded-circle m-1" href="@(string.IsNullOrEmpty(product.Slug) ? Url.Action("Details", "Product", new { id = product.ProductId }) : Url.Action("Details", "Product", new { slug = product.Slug }))">
+                                        <i class="fa fa-link"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="text-center p-4 pt-0 flex-grow-1 d-flex flex-column">
+                                @if (product.Category != null)
+                                {
+                                    <div class="d-inline-block bg-primary text-white rounded-pill mb-3 px-3 py-1">
+                                        <small>@product.Category.CategoryName</small>
+                                    </div>
+                                }
+                                <h5 class="mb-3">@product.ProductName</h5>
+                                @if (!string.IsNullOrEmpty(product.ShortDescription))
+                                {
+                                    <p class="mb-3 flex-grow-1">@product.ShortDescription</p>
+                                }
+                                <div class="d-flex justify-content-between align-items-center mt-auto">
+                                    <div>
+                                        @if (product.SalePrice.HasValue && product.SalePrice < product.Price)
+                                        {
+                                            <h5 class="text-primary mb-0">@product.SalePrice.Value.ToString("N0") đ</h5>
+                                            <small class="text-muted text-decoration-line-through">@product.Price.Value.ToString("N0") đ</small>
+                                        }
+                                        else if (product.Price.HasValue)
+                                        {
+                                            <h5 class="text-primary mb-0">@product.Price.Value.ToString("N0") đ</h5>
+                                        }
+                                        else
+                                        {
+                                            <h5 class="text-primary mb-0">Liên hệ</h5>
+                                        }
+                                    </div>
+                                    <a class="btn btn-sm btn-primary rounded py-2 px-4" href="@(string.IsNullOrEmpty(product.Slug) ? Url.Action("Details", "Product", new { id = product.ProductId }) : Url.Action("Details", "Product", new { slug = product.Slug }))">
+                                        Xem <i class="fa fa-arrow-right ms-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center">
+                    <p class="text-muted">Không tìm thấy sản phẩm nào.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<!-- Products End -->
+

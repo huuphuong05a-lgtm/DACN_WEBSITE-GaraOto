@@ -1,0 +1,124 @@
+@model CarServ.MVC.Models.Customer
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Xóa Khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Khách hàng</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger">
+            <h6 class="m-0 font-weight-bold text-white">Xác nhận xóa khách hàng</h6>
+        </div>
+        <div class="card-body">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+                </div>
+            }
+
+            <h4 class="text-danger">Bạn có chắc chắn muốn xóa khách hàng này?</h4>
+            <hr />
+
+            <dl class="row">
+                <dt class="col-sm-3">Họ và tên:</dt>
+                <dd class="col-sm-9"><strong>@Model.FullName</strong></dd>
+
+                <dt class="col-sm-3">Email:</dt>
+                <dd class="col-sm-9">@(Model.Email ?? "-")</dd>
+
+                <dt class="col-sm-3">Số điện thoại:</dt>
+                <dd class="col-sm-9">@(Model.Phone ?? "-")</dd>
+
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.IsActive == true)
+                    {
+                        <span class="badge badge-success">Đang hoạt động</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-secondary">Không hoạt động</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Ngày tạo:</dt>
+                <dd class="col-sm-9">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+
+                <dt class="col-sm-3">Số đơn hàng:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Orders != null && Model.Orders.Any())
+                    {
+                        <text>@Model.Orders.Count() đơn hàng</text>
+                    }
+                    else
+                    {
+                        <text>0</text>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Số lịch hẹn:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Appointments != null && Model.Appointments.Any())
+                    {
+                        <text>@Model.Appointments.Count() lịch hẹn</text>
+                    }
+                    else
+                    {
+                        <text>0</text>
+                    }
+                </dd>
+            </dl>
+
+            @if ((Model.Orders != null && Model.Orders.Any()) || (Model.Appointments != null && Model.Appointments.Any()))
+            {
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <strong>Cảnh báo:</strong> Khách hàng này có 
+                    @if (Model.Orders != null && Model.Orders.Any())
+                    {
+                        <text>@Model.Orders.Count() đơn hàng</text>
+                    }
+                    @if (Model.Orders != null && Model.Orders.Any() && Model.Appointments != null && Model.Appointments.Any())
+                    {
+                        <text> và </text>
+                    }
+                    @if (Model.Appointments != null && Model.Appointments.Any())
+                    {
+                        <text>@Model.Appointments.Count() lịch hẹn</text>
+                    }
+                    . Không thể xóa khách hàng có đơn hàng hoặc lịch hẹn liên quan.
+                </div>
+            }
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="CustomerId" />
+                <div class="form-group">
+                    @if ((Model.Orders != null && Model.Orders.Any()) || (Model.Appointments != null && Model.Appointments.Any()))
+                    {
+                        <button type="submit" class="btn btn-danger" disabled>
+                            <i class="fas fa-trash"></i> Xóa (Không thể xóa)
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Xóa
+                        </button>
+                    }
+                    <a href="@Url.Action("Index", "Customer", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

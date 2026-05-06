@@ -1,0 +1,14 @@
+# Bỏ qua thư mục hệ thống của Visual Studio (Cái gây lỗi hiện tại)
+.vs/
+
+# Bỏ qua thư mục build (kết quả chạy code, không cần lưu)
+bin/
+obj/
+
+# Bỏ qua các file cấu hình cá nhân của người dùng
+*.user
+*.suo
+
+# Bỏ qua file chứa thông tin đăng nhập nhạy cảm
+**/VNPAY_CREDENTIALS.md
+**/appsettings.Development.json

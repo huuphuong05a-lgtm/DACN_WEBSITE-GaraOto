@@ -1,0 +1,174 @@
+@model CarServ.MVC.Models.Order
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Chi Tiết Đơn Hàng</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Orders", "Customer")">Đơn hàng</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Chi tiết</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Order Details Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="bg-light rounded p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>Mã đơn hàng: <strong>@(Model.OrderCode ?? "-")</strong></h4>
+                        <div>
+                            @{
+                                var statusClass = Model.Status switch
+                                {
+                                    "Đã giao hàng" => "success",
+                                    "Đang giao hàng" => "info",
+                                    "Đang xử lý" => "warning",
+                                    "Đã hủy" => "danger",
+                                    _ => "secondary"
+                                };
+                            }
+                            <span class="badge bg-@statusClass fs-6">@(Model.Status ?? "Chờ xử lý")</span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Ngày đặt:</strong> @(Model.OrderDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</p>
+                            <p><strong>Phương thức thanh toán:</strong> @(Model.PaymentMethod ?? "-")</p>
+                            <p><strong>Trạng thái thanh toán:</strong> 
+                                <span class="badge bg-@(Model.PaymentStatus == "Đã thanh toán" ? "success" : "warning")">
+                                    @(Model.PaymentStatus ?? "Chưa thanh toán")
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            @if (Model.PaymentDate.HasValue)
+                            {
+                                <p><strong>Ngày thanh toán:</strong> @Model.PaymentDate.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.TransactionCode))
+                            {
+                                <p><strong>Mã giao dịch:</strong> @Model.TransactionCode</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="bg-light rounded p-4 mb-4">
+                    <h5 class="mb-3">Sản phẩm đã đặt</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @if (!string.IsNullOrEmpty(item.ProductImage))
+                                                {
+                                                    <img src="@item.ProductImage" alt="@item.ProductName" class="me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                                }
+                                                <div>
+                                                    <strong>@item.ProductName</strong>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@item.Quantity</td>
+                                        <td>@((item.UnitPrice ?? 0).ToString("N0")) đ</td>
+                                        <td><strong>@((item.TotalPrice ?? 0).ToString("N0")) đ</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Tạm tính:</strong></td>
+                                    <td><strong>@((Model.TotalAmount ?? 0).ToString("N0")) đ</strong></td>
+                                </tr>
+                                @if (Model.ShippingFee > 0)
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Phí vận chuyển:</strong></td>
+                                        <td><strong>@(Model.ShippingFee.Value.ToString("N0")) đ</strong></td>
+                                    </tr>
+                                }
+                                @if (Model.DiscountAmount > 0)
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Giảm giá:</strong></td>
+                                        <td><strong class="text-danger">-@(Model.DiscountAmount.Value.ToString("N0")) đ</strong></td>
+                                    </tr>
+                                }
+                                <tr class="table-primary">
+                                    <td colspan="3" class="text-end"><strong>Tổng cộng:</strong></td>
+                                    <td><strong class="fs-5">@((Model.FinalAmount ?? 0).ToString("N0")) đ</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Shipping Address -->
+                @if (!string.IsNullOrEmpty(Model.ShippingAddress))
+                {
+                    <div class="bg-light rounded p-4 mb-4">
+                        <h5 class="mb-3">Địa chỉ giao hàng</h5>
+                        <p>
+                            @Model.ShippingAddress<br>
+                            @if (!string.IsNullOrEmpty(Model.ShippingWard))
+                            {
+                                <text>@Model.ShippingWard, </text>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.ShippingDistrict))
+                            {
+                                <text>@Model.ShippingDistrict, </text>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.ShippingCity))
+                            {
+                                <text>@Model.ShippingCity</text>
+                            }
+                        </p>
+                    </div>
+                }
+
+                <!-- Notes -->
+                @if (!string.IsNullOrEmpty(Model.CustomerNotes))
+                {
+                    <div class="bg-light rounded p-4 mb-4">
+                        <h5 class="mb-3">Ghi chú của bạn</h5>
+                        <p>@Model.CustomerNotes</p>
+                    </div>
+                }
+
+                <div class="text-center">
+                    <a href="@Url.Action("Orders", "Customer")" class="btn btn-primary">
+                        <i class="fa fa-arrow-left me-2"></i>Quay lại danh sách
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Order Details End -->
+
+

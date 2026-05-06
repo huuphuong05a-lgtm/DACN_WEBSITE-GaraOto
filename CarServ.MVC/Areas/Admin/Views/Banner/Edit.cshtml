@@ -1,0 +1,154 @@
+@model CarServ.MVC.Models.Banner
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Banner";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chỉnh sửa Banner</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Banner</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="BannerId" />
+                <input type="hidden" asp-for="CreatedDate" />
+
+                <div class="form-group">
+                    <label asp-for="Title" class="control-label">Tiêu đề</label>
+                    <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề banner" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Subtitle" class="control-label">Phụ đề</label>
+                    <input asp-for="Subtitle" class="form-control" placeholder="Nhập phụ đề banner" />
+                    <span asp-validation-for="Subtitle" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label">Mô tả</label>
+                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Nhập mô tả banner"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ImageUrl" class="control-label">URL Ảnh Desktop</label>
+                            <input asp-for="ImageUrl" class="form-control" placeholder="/images/banners/banner1.jpg" />
+                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                            <small class="form-text text-muted">Đường dẫn ảnh cho màn hình desktop</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="MobileImageUrl" class="control-label">URL Ảnh Mobile</label>
+                            <input asp-for="MobileImageUrl" class="form-control" placeholder="/images/banners/banner1-mobile.jpg" />
+                            <span asp-validation-for="MobileImageUrl" class="text-danger"></span>
+                            <small class="form-text text-muted">Đường dẫn ảnh cho màn hình mobile (tùy chọn)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="LinkUrl" class="control-label">URL Liên kết</label>
+                            <input asp-for="LinkUrl" class="form-control" placeholder="/products/123 hoặc https://example.com" />
+                            <span asp-validation-for="LinkUrl" class="text-danger"></span>
+                            <small class="form-text text-muted">URL khi click vào banner</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="ButtonText" class="control-label">Text Nút</label>
+                            <input asp-for="ButtonText" class="form-control" placeholder="Xem thêm" />
+                            <span asp-validation-for="ButtonText" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="ButtonColor" class="control-label">Màu Nút</label>
+                            <select asp-for="ButtonColor" class="form-control">
+                                <option value="primary">Primary (Xanh)</option>
+                                <option value="success">Success (Xanh lá)</option>
+                                <option value="danger">Danger (Đỏ)</option>
+                                <option value="warning">Warning (Vàng)</option>
+                                <option value="info">Info (Xanh nhạt)</option>
+                                <option value="dark">Dark (Đen)</option>
+                            </select>
+                            <span asp-validation-for="ButtonColor" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="BannerType" class="control-label">Loại Banner</label>
+                            <input asp-for="BannerType" class="form-control" placeholder="Homepage" />
+                            <span asp-validation-for="BannerType" class="text-danger"></span>
+                            <small class="form-text text-muted">Ví dụ: Homepage, Sidebar, Popup</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="SortOrder" class="control-label">Thứ tự hiển thị</label>
+                            <input asp-for="SortOrder" type="number" class="form-control" min="0" />
+                            <span asp-validation-for="SortOrder" class="text-danger"></span>
+                            <small class="form-text text-muted">Số nhỏ hơn sẽ hiển thị trước</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="StartDate" class="control-label">Ngày bắt đầu</label>
+                            <input asp-for="StartDate" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                            <small class="form-text text-muted">Banner sẽ hiển thị từ ngày này (tùy chọn)</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="EndDate" class="control-label">Ngày kết thúc</label>
+                            <input asp-for="EndDate" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                            <small class="form-text text-muted">Banner sẽ ẩn sau ngày này (tùy chọn)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="hidden" name="IsActive" value="false" />
+                        <input type="checkbox" name="IsActive" id="IsActive" class="form-check-input" value="true" checked="@(Model.IsActive == true)" />
+                        <label class="form-check-label" for="IsActive">Kích hoạt</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                    <a href="@Url.Action("Index", "Banner", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

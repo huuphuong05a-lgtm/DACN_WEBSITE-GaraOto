@@ -1,0 +1,219 @@
+@model IEnumerable<CarServ.MVC.Models.Order>
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Quản lý Đơn hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Đơn hàng</h1>
+        <a href="@Url.Action("Create", "Order", new { area = "Admin" })" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Thêm Đơn hàng Mới
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm và Lọc</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Tìm kiếm:</label>
+                            <input type="text" name="searchString" class="form-control" value="@ViewData["CurrentFilter"]" placeholder="Mã đơn, tên KH, SĐT..." />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Trạng thái:</label>
+                            <select name="statusFilter" class="form-control">
+                                <option value="">Tất cả trạng thái</option>
+                                @if (ViewBag.StatusList != null)
+                                {
+                                    @foreach (var status in ViewBag.StatusList)
+                                    {
+                                        <option value="@status" selected="@(ViewData["CurrentStatus"]?.ToString() == status)">@status</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Thanh toán:</label>
+                            <select name="paymentStatusFilter" class="form-control">
+                                <option value="">Tất cả</option>
+                                @if (ViewBag.PaymentStatusList != null)
+                                {
+                                    @foreach (var paymentStatus in ViewBag.PaymentStatusList)
+                                    {
+                                        <option value="@paymentStatus" selected="@(ViewData["CurrentPaymentStatus"]?.ToString() == paymentStatus)">@paymentStatus</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Sắp xếp:</label>
+                            <select name="sortOrder" class="form-control">
+                                <option value="">Mới nhất</option>
+                                <option value="date_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "date_desc")">Ngày đặt (mới nhất)</option>
+                                <option value="amount_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "amount_desc")">Giá trị (cao → thấp)</option>
+                                <option value="amount" selected="@(ViewData["CurrentSort"]?.ToString() == "amount")">Giá trị (thấp → cao)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-search"></i> Tìm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Đơn hàng</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Số lượng SP</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thanh toán</th>
+                            <th>Ngày đặt</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><strong>@(item.OrderCode ?? "-")</strong></td>
+                                <td>
+                                    @if (item.Customer != null)
+                                    {
+                                        <div>@item.Customer.FullName</div>
+                                        <small class="text-muted">@item.Customer.Phone</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.OrderItems != null && item.OrderItems.Any())
+                                    {
+                                        <span>@item.OrderItems.Sum(oi => oi.Quantity ?? 0) sản phẩm</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">0</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.FinalAmount.HasValue)
+                                    {
+                                        <strong class="text-danger">@item.FinalAmount.Value.ToString("N0") đ</strong>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.Status))
+                                    {
+                                        string statusClass = "badge-secondary";
+                                        @switch (item.Status)
+                                        {
+                                            case "Chờ xử lý":
+                                                statusClass = "badge-warning";
+                                                break;
+                                            case "Đang xử lý":
+                                                statusClass = "badge-info";
+                                                break;
+                                            case "Đang giao hàng":
+                                                statusClass = "badge-primary";
+                                                break;
+                                            case "Đã giao hàng":
+                                                statusClass = "badge-success";
+                                                break;
+                                            case "Đã hủy":
+                                                statusClass = "badge-danger";
+                                                break;
+                                            case "Hoàn trả":
+                                                statusClass = "badge-dark";
+                                                break;
+                                        }
+                                        <span class="badge @statusClass">@item.Status</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.PaymentStatus))
+                                    {
+                                        string paymentClass = item.PaymentStatus == "Đã thanh toán" ? "badge-success" : 
+                                                              item.PaymentStatus == "Chưa thanh toán" ? "badge-danger" : 
+                                                              "badge-warning";
+                                        <span class="badge @paymentClass">@item.PaymentStatus</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">-</span>
+                                    }
+                                </td>
+                                <td>@(item.OrderDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                                <td>
+                                    <a href="@Url.Action("Details", "Order", new { area = "Admin", id = item.OrderId })" class="btn btn-info btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", "Order", new { area = "Admin", id = item.OrderId })" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="@Url.Action("Delete", "Order", new { area = "Admin", id = item.OrderId })" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "order": [[0, "desc"]]
+            });
+        });
+    </script>
+}
+

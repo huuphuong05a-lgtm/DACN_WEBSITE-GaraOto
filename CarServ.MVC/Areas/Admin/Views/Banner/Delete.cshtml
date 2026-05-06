@@ -1,0 +1,73 @@
+@model CarServ.MVC.Models.Banner
+
+@{
+    ViewData["Title"] = "Xóa Banner";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Banner</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger">
+            <h6 class="m-0 font-weight-bold text-white">Xác nhận xóa</h6>
+        </div>
+        <div class="card-body">
+            <h4 class="text-danger">Bạn có chắc chắn muốn xóa banner này?</h4>
+            
+            <hr />
+            
+            <div class="row">
+                <div class="col-md-4">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.Title" class="img-fluid img-thumbnail" />
+                    }
+                </div>
+                <div class="col-md-8">
+                    <dl class="row">
+                        <dt class="col-sm-4">Tiêu đề:</dt>
+                        <dd class="col-sm-8"><strong>@(Model.Title ?? "-")</strong></dd>
+
+                        <dt class="col-sm-4">Loại Banner:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge badge-info">@(Model.BannerType ?? "Homepage")</span>
+                        </dd>
+
+                        <dt class="col-sm-4">Thứ tự:</dt>
+                        <dd class="col-sm-8">@(Model.SortOrder ?? 0)</dd>
+
+                        <dt class="col-sm-4">Trạng thái:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive == true)
+                            {
+                                <span class="badge badge-success">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Không hoạt động</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="alert alert-warning mt-3">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Cảnh báo:</strong> Hành động này không thể hoàn tác.
+            </div>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="BannerId" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Xóa
+                </button>
+                <a href="@Url.Action("Index", "Banner", new { area = "Admin" })" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+

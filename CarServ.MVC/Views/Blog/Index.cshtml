@@ -1,0 +1,227 @@
+@model CarServ.MVC.Models.ViewModels.BlogListViewModel
+
+@{
+    ViewData["Title"] = "Blog - Tin Tức";
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center pb-5">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Blog - Tin Tức</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang Chủ</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Blog</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Blog Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Main Content - Left Column (8/12) -->
+            <div class="col-lg-8">
+                @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                {
+                    <div class="mb-4">
+                        <h4>Kết quả tìm kiếm: "@(Model.SearchQuery ?? "")"</h4>
+                        <p class="text-muted">Tìm thấy @Model.TotalPosts bài viết</p>
+                    </div>
+                }
+                else if (Model.CurrentCategoryId.HasValue)
+                {
+                    <div class="mb-4">
+                        <h4>Chuyên mục: @(Model.CurrentCategoryName ?? "")</h4>
+                        <p class="text-muted">@Model.TotalPosts bài viết</p>
+                    </div>
+                }
+
+                @if (Model.Posts.Any())
+                {
+                    @foreach (var post in Model.Posts)
+                    {
+                        <div class="card mb-4 shadow-sm">
+                            <div class="row g-0">
+                                @if (!string.IsNullOrEmpty(post.Thumbnail))
+                                {
+                                    <div class="col-md-4">
+                                        <a href="@Url.Action("Detail", "Blog", new { slug = post.Slug })">
+                                            <img src="@(post.Thumbnail ?? "")" class="img-fluid rounded-start" alt="@post.Title" style="width: 100%; height: 200px; object-fit: cover;">
+                                        </a>
+                                    </div>
+                                }
+                                <div class="@(string.IsNullOrEmpty(post.Thumbnail ?? "") ? "col-md-12" : "col-md-8")">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-2">
+                                            @if (post.PublishedDate.HasValue)
+                                            {
+                                                <small class="text-muted me-3">
+                                                    <i class="fa fa-calendar me-1"></i>@post.PublishedDate.Value.ToString("dd/MM/yyyy")
+                                                </small>
+                                            }
+                                            @if (!string.IsNullOrEmpty(post.CategoryName))
+                                            {
+                                                <a href="@Url.Action("Index", "Blog", new { categoryId = post.CategoryId })" class="badge bg-primary text-decoration-none">
+                                                    @(post.CategoryName ?? "")
+                                                </a>
+                                            }
+                                            <small class="text-muted ms-auto">
+                                                <i class="fa fa-eye me-1"></i>@post.ViewCount lượt xem
+                                            </small>
+                                        </div>
+                                        <h5 class="card-title">
+                                            <a href="@Url.Action("Detail", "Blog", new { slug = post.Slug })" class="text-dark text-decoration-none">
+                                                @post.Title
+                                            </a>
+                                        </h5>
+                                        @if (!string.IsNullOrEmpty(post.ShortDescription))
+                                        {
+                                            <p class="card-text text-muted">@(post.ShortDescription ?? "")</p>
+                                        }
+                                        <a href="@Url.Action("Detail", "Blog", new { slug = post.Slug })" class="btn btn-primary btn-sm">
+                                            Xem chi tiết <i class="fa fa-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Pagination -->
+                    @if (Model.TotalPages > 1)
+                    {
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                @if (Model.CurrentPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", "Blog", new { categoryId = Model.CurrentCategoryId, search = Model.SearchQuery, page = Model.CurrentPage - 1 })">
+                                            <i class="fa fa-chevron-left"></i> Trước
+                                        </a>
+                                    </li>
+                                }
+
+                                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Index", "Blog", new { categoryId = Model.CurrentCategoryId, search = Model.SearchQuery, page = i })">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Model.CurrentPage < Model.TotalPages)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", "Blog", new { categoryId = Model.CurrentCategoryId, search = Model.SearchQuery, page = Model.CurrentPage + 1 })">
+                                            Sau <i class="fa fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fa fa-file-alt fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Chưa có bài viết nào.</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Sidebar - Right Column (4/12) -->
+            <div class="col-lg-4">
+                <!-- Search Box -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fa fa-search me-2"></i>Tìm Kiếm</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="Index" method="get">
+                            <input type="hidden" name="categoryId" value="@Model.CurrentCategoryId">
+                            <div class="input-group">
+                                <input type="text" name="search" class="form-control" placeholder="Tìm kiếm bài viết..." value="@Model.SearchQuery">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Categories -->
+                @if (Model.Categories.Any())
+                {
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fa fa-folder me-2"></i>Chuyên Mục</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <a href="@Url.Action("Index", "Blog")" class="text-decoration-none @(Model.CurrentCategoryId == null ? "fw-bold text-primary" : "text-dark")">
+                                        <i class="fa fa-list me-2"></i>Tất cả
+                                    </a>
+                                </li>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <li class="list-group-item">
+                                        <a href="@Url.Action("Index", "Blog", new { categoryId = category.Id })" class="text-decoration-none @(Model.CurrentCategoryId == category.Id ? "fw-bold text-primary" : "text-dark")">
+                                            <i class="fa fa-folder-open me-2"></i>@category.Name
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+
+                <!-- Latest Posts -->
+                @{
+                    var latestPosts = ViewData["LatestPosts"] as List<CarServ.MVC.Models.ViewModels.BlogPostItemViewModel> ?? new List<CarServ.MVC.Models.ViewModels.BlogPostItemViewModel>();
+                }
+                @if (latestPosts.Any())
+                {
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fa fa-clock me-2"></i>Bài Viết Mới Nhất</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                @foreach (var post in latestPosts)
+                                {
+                                    <li class="list-group-item">
+                                        <a href="@Url.Action("Detail", "Blog", new { slug = post.Slug })" class="text-decoration-none text-dark">
+                                            <div class="d-flex align-items-start">
+                                                @if (!string.IsNullOrEmpty(post.Thumbnail))
+                                                {
+                                                    <img src="@(post.Thumbnail ?? "")" class="me-3 rounded" alt="@post.Title" style="width: 60px; height: 60px; object-fit: cover;">
+                                                }
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1" style="font-size: 0.9rem;">@post.Title</h6>
+                                                    @if (post.PublishedDate.HasValue)
+                                                    {
+                                                        <small class="text-muted">@post.PublishedDate.Value.ToString("dd/MM/yyyy")</small>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Blog End -->
+

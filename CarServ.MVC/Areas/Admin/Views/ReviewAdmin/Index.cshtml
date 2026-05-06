@@ -1,0 +1,220 @@
+@model IEnumerable<CarServ.MVC.Models.Review>
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Quản lý Đánh giá";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Đánh giá</h1>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm và Lọc</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Tìm kiếm:</label>
+                            <input type="text" name="searchString" class="form-control" value="@ViewData["CurrentFilter"]" placeholder="Tên khách hàng, nội dung..." />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Trạng thái duyệt:</label>
+                            <select name="approvedFilter" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="approved" selected="@(ViewData["CurrentApproved"]?.ToString() == "approved")">Đã duyệt</option>
+                                <option value="unapproved" selected="@(ViewData["CurrentApproved"]?.ToString() == "unapproved")">Chưa duyệt</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Loại:</label>
+                            <select name="typeFilter" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="Product" selected="@(ViewData["CurrentType"]?.ToString() == "Product")">Sản phẩm</option>
+                                <option value="Service" selected="@(ViewData["CurrentType"]?.ToString() == "Service")">Dịch vụ</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Sắp xếp:</label>
+                            <select name="sortOrder" class="form-control">
+                                <option value="">Mới nhất</option>
+                                <option value="Date" selected="@(ViewData["CurrentSort"]?.ToString() == "Date")">Cũ nhất</option>
+                                <option value="Rating" selected="@(ViewData["CurrentSort"]?.ToString() == "Rating")">Sao (thấp→cao)</option>
+                                <option value="rating_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "rating_desc")">Sao (cao→thấp)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-search"></i> Tìm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reviews Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Đánh giá (@Model.Count())</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Khách hàng</th>
+                            <th>Loại</th>
+                            <th>Sản phẩm/Dịch vụ</th>
+                            <th>Đánh giá</th>
+                            <th>Nội dung</th>
+                            <th>Ngày tạo</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var review in Model)
+                        {
+                            <tr>
+                                <td>@review.CustomerName</td>
+                                <td>
+                                    @if (review.ProductId != null)
+                                    {
+                                        <span class="badge badge-info">Sản phẩm</span>
+                                    }
+                                    else if (review.ServiceId != null)
+                                    {
+                                        <span class="badge badge-success">Dịch vụ</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (review.ProductId != null && review.Product != null)
+                                    {
+                                        <a href="@Url.Action("Details", "Product", new { area = "", id = review.ProductId })" target="_blank">
+                                            @review.Product.ProductName
+                                        </a>
+                                    }
+                                    else if (review.ServiceId != null && review.Service != null)
+                                    {
+                                        <a href="@Url.Action("Details", "Service", new { area = "", id = review.ServiceId })" target="_blank">
+                                            @review.Service.ServiceName
+                                        </a>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="rating-stars">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= review.Rating)
+                                            {
+                                                <i class="fas fa-star text-warning"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="far fa-star text-warning"></i>
+                                            }
+                                        }
+                                    </div>
+                                    <small class="text-muted">(@review.Rating/5)</small>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(review.Comment))
+                                    {
+                                        <span title="@review.Comment">
+                                            @(review.Comment.Length > 50 ? review.Comment.Substring(0, 50) + "..." : review.Comment)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không có nhận xét</span>
+                                    }
+                                </td>
+                                <td>@review.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (review.IsApproved)
+                                    {
+                                        <span class="badge badge-success">Đã duyệt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-warning">Chưa duyệt</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="@Url.Action("Details", "ReviewAdmin", new { area = "Admin", id = review.Id })" class="btn btn-sm btn-info" title="Chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @if (!review.IsApproved)
+                                        {
+                                            <form asp-action="Approve" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@review.Id" />
+                                                <button type="submit" class="btn btn-sm btn-success" title="Duyệt">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="Unapprove" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@review.Id" />
+                                                <button type="submit" class="btn btn-sm btn-warning" title="Hủy duyệt">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        <a href="@Url.Action("Delete", "ReviewAdmin", new { area = "Admin", id = review.Id })" class="btn btn-sm btn-danger" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "order": [[5, "desc"]]
+            });
+        });
+    </script>
+}
+
+

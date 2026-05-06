@@ -1,0 +1,193 @@
+@model IEnumerable<CarServ.MVC.Models.BlogPost>
+
+@{
+    ViewData["Title"] = "Quản lý Bài viết Blog";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var categories = ViewData["Categories"] as List<CarServ.MVC.Models.BlogCategory> ?? new List<CarServ.MVC.Models.BlogCategory>();
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Bài viết Blog</h1>
+        <a href="@Url.Action("Create", "BlogPostAdmin", new { area = "Admin" })" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Thêm Bài viết Mới
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm và Lọc</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Tìm kiếm:</label>
+                            <input type="text" name="searchString" class="form-control" value="@ViewData["CurrentFilter"]" placeholder="Tiêu đề, mô tả..." />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Chuyên mục:</label>
+                            <select name="categoryId" class="form-control">
+                                <option value="">Tất cả</option>
+                                @foreach (var category in categories)
+                                {
+                                    <option value="@category.Id" selected="@(ViewData["CurrentCategory"]?.ToString() == category.Id.ToString())">@category.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Trạng thái:</label>
+                            <select name="publishedFilter" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="published" selected="@(ViewData["CurrentPublished"]?.ToString() == "published")">Đã xuất bản</option>
+                                <option value="unpublished" selected="@(ViewData["CurrentPublished"]?.ToString() == "unpublished")">Chưa xuất bản</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Sắp xếp:</label>
+                            <select name="sortOrder" class="form-control">
+                                <option value="">Mới nhất</option>
+                                <option value="Date" selected="@(ViewData["CurrentSort"]?.ToString() == "Date")">Cũ nhất</option>
+                                <option value="title_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "title_desc")">Tiêu đề Z-A</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-search"></i> Tìm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Posts Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Bài viết (@Model.Count())</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Tiêu đề</th>
+                            <th>Chuyên mục</th>
+                            <th>Ngày xuất bản</th>
+                            <th>Lượt xem</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var post in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(post.Thumbnail))
+                                    {
+                                        <img src="@post.Thumbnail" alt="@post.Title" style="width: 80px; height: 60px; object-fit: cover;" class="img-thumbnail" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa có ảnh</span>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@post.Title</strong>
+                                    @if (!string.IsNullOrEmpty(post.ShortDescription))
+                                    {
+                                        <br />
+                                        <small class="text-muted">@(post.ShortDescription.Length > 50 ? post.ShortDescription.Substring(0, 50) + "..." : post.ShortDescription)</small>
+                                    }
+                                </td>
+                                <td>
+                                    @if (post.Category != null)
+                                    {
+                                        <span class="badge badge-info">@post.Category.Name</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa phân loại</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (post.PublishedDate.HasValue)
+                                    {
+                                        @post.PublishedDate.Value.ToString("dd/MM/yyyy")
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa xuất bản</span>
+                                    }
+                                </td>
+                                <td>@post.ViewCount</td>
+                                <td>
+                                    @if (post.IsPublished)
+                                    {
+                                        <span class="badge badge-success">Đã xuất bản</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-warning">Chưa xuất bản</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="@Url.Action("Details", "BlogPostAdmin", new { area = "Admin", id = post.Id })" class="btn btn-sm btn-info" title="Chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", "BlogPostAdmin", new { area = "Admin", id = post.Id })" class="btn btn-sm btn-warning" title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="@Url.Action("Delete", "BlogPostAdmin", new { area = "Admin", id = post.Id })" class="btn btn-sm btn-danger" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "order": [[3, "desc"]]
+            });
+        });
+    </script>
+}
+
+

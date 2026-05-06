@@ -1,0 +1,133 @@
+@model CarServ.MVC.Models.Testimonial
+
+@{
+    ViewData["Title"] = "Chi tiết Đánh giá";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Đánh giá</h1>
+        <div>
+            <a href="@Url.Action("Edit", "Testimonial", new { area = "Admin", id = Model.TestimonialId })" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Chỉnh sửa
+            </a>
+            <a href="@Url.Action("Index", "Testimonial", new { area = "Admin" })" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Testimonial Information -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Đánh giá</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    @if (!string.IsNullOrEmpty(Model.CustomerAvatar))
+                    {
+                        <img src="@Model.CustomerAvatar" alt="@Model.CustomerName" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                    }
+                    else if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.CustomerName" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                    }
+                    else
+                    {
+                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 200px; height: 200px; font-size: 4rem;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    }
+                </div>
+                <div class="col-md-9">
+                    <dl class="row">
+                        <dt class="col-sm-3">Khách hàng:</dt>
+                        <dd class="col-sm-9">
+                            <strong>@(Model.CustomerName ?? Model.Customer?.FullName ?? "-")</strong>
+                            @if (Model.Customer != null)
+                            {
+                                <br /><small class="text-muted">ID: @Model.Customer.CustomerId</small>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Chức vụ/Vị trí:</dt>
+                        <dd class="col-sm-9">@(Model.CustomerPosition ?? "-")</dd>
+
+                        <dt class="col-sm-3">Đánh giá:</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.Rating.HasValue)
+                            {
+                                <div>
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= Model.Rating.Value)
+                                        {
+                                            <i class="fas fa-star text-warning" style="font-size: 1.5rem;"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="far fa-star text-muted" style="font-size: 1.5rem;"></i>
+                                        }
+                                    }
+                                    <span class="ml-2">(@Model.Rating.Value/5 sao)</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Loại dịch vụ:</dt>
+                        <dd class="col-sm-9">@(Model.ServiceType ?? "-")</dd>
+
+                        <dt class="col-sm-3">Nội dung:</dt>
+                        <dd class="col-sm-9">
+                            <div class="border p-3 bg-light rounded">
+                                @Model.Content
+                            </div>
+                        </dd>
+
+                        <dt class="col-sm-3">Trạng thái:</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.IsPublished == true)
+                            {
+                                <span class="badge badge-success">Đã xuất bản</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-warning">Chưa xuất bản</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Thứ tự hiển thị:</dt>
+                        <dd class="col-sm-9">@(Model.SortOrder ?? 0)</dd>
+
+                        <dt class="col-sm-3">Ngày tạo:</dt>
+                        <dd class="col-sm-9">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm:ss") ?? "-")</dd>
+
+                        <dt class="col-sm-3">Ngày cập nhật:</dt>
+                        <dd class="col-sm-9">@(Model.UpdatedDate?.ToString("dd/MM/yyyy HH:mm:ss") ?? "-")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <hr />
+                <div class="row">
+                    <div class="col-md-12">
+                        <dt>Ảnh đánh giá:</dt>
+                        <dd>
+                            <img src="@Model.ImageUrl" alt="Testimonial image" class="img-thumbnail" style="max-width: 400px; max-height: 400px;" />
+                        </dd>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+

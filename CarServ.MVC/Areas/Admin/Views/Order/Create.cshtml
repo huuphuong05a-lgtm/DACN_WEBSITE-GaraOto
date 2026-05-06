@@ -1,0 +1,231 @@
+@model CarServ.MVC.Models.Order
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Thêm Đơn hàng Mới";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Thêm Đơn hàng Mới</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Đơn hàng</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CustomerId" class="control-label">Khách hàng</label>
+                            <select asp-for="CustomerId" class="form-control">
+                                <option value="">Chọn khách hàng...</option>
+                                @if (ViewBag.Customers != null)
+                                {
+                                    @foreach (SelectListItem customer in ViewBag.Customers)
+                                    {
+                                        <option value="@customer.Value">@customer.Text</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="CustomerId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Status" class="control-label">Trạng thái</label>
+                            <select asp-for="Status" class="form-control">
+                                @if (ViewBag.StatusList != null)
+                                {
+                                    @foreach (var status in ViewBag.StatusList)
+                                    {
+                                        <option value="@status">@status</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="PaymentStatus" class="control-label">Trạng thái thanh toán</label>
+                            <select asp-for="PaymentStatus" class="form-control">
+                                @if (ViewBag.PaymentStatusList != null)
+                                {
+                                    @foreach (var paymentStatus in ViewBag.PaymentStatusList)
+                                    {
+                                        <option value="@paymentStatus">@paymentStatus</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="PaymentStatus" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="TotalAmount" class="control-label">Tổng tiền (VNĐ)</label>
+                            <input asp-for="TotalAmount" type="text" class="form-control price-input" placeholder="0" />
+                            <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                            <small class="form-text text-muted">Nhập số nguyên</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="ShippingFee" class="control-label">Phí vận chuyển (VNĐ)</label>
+                            <input asp-for="ShippingFee" type="text" class="form-control price-input" placeholder="0" />
+                            <span asp-validation-for="ShippingFee" class="text-danger"></span>
+                            <small class="form-text text-muted">Nhập số nguyên</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="DiscountAmount" class="control-label">Giảm giá (VNĐ)</label>
+                            <input asp-for="DiscountAmount" type="text" class="form-control price-input" placeholder="0" />
+                            <span asp-validation-for="DiscountAmount" class="text-danger"></span>
+                            <small class="form-text text-muted">Nhập số nguyên</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="FinalAmount" class="control-label">Thành tiền (VNĐ)</label>
+                            <input asp-for="FinalAmount" type="text" class="form-control price-input" placeholder="0" />
+                            <span asp-validation-for="FinalAmount" class="text-danger"></span>
+                            <small class="form-text text-muted">Nhập số nguyên</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="DiscountCode" class="control-label">Mã giảm giá</label>
+                            <input asp-for="DiscountCode" class="form-control" />
+                            <span asp-validation-for="DiscountCode" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="PaymentMethod" class="control-label">Phương thức thanh toán</label>
+                            <select asp-for="PaymentMethod" class="form-control">
+                                <option value="">Chọn phương thức...</option>
+                                @if (ViewBag.PaymentMethodList != null)
+                                {
+                                    @foreach (var method in ViewBag.PaymentMethodList)
+                                    {
+                                        <option value="@method">@method</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="TransactionCode" class="control-label">Mã giao dịch</label>
+                            <input asp-for="TransactionCode" class="form-control" />
+                            <span asp-validation-for="TransactionCode" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ShippingAddress" class="control-label">Địa chỉ giao hàng</label>
+                            <input asp-for="ShippingAddress" class="form-control" />
+                            <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label asp-for="ShippingCity" class="control-label">Thành phố</label>
+                            <input asp-for="ShippingCity" class="form-control" />
+                            <span asp-validation-for="ShippingCity" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label asp-for="ShippingDistrict" class="control-label">Quận/Huyện</label>
+                            <input asp-for="ShippingDistrict" class="form-control" />
+                            <span asp-validation-for="ShippingDistrict" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label asp-for="ShippingWard" class="control-label">Phường/Xã</label>
+                            <input asp-for="ShippingWard" class="form-control" />
+                            <span asp-validation-for="ShippingWard" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CustomerNotes" class="control-label">Ghi chú khách hàng</label>
+                            <textarea asp-for="CustomerNotes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="CustomerNotes" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="AdminNotes" class="control-label">Ghi chú quản trị</label>
+                            <textarea asp-for="AdminNotes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="AdminNotes" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                    <a href="@Url.Action("Index", "Order", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Format price inputs - remove commas, dots, and non-numeric characters
+            $('.price-input').on('input', function() {
+                var value = $(this).val();
+                // Remove all non-numeric characters except digits
+                value = value.replace(/[^0-9]/g, '');
+                $(this).val(value);
+            });
+
+            // Format on blur to ensure clean value
+            $('.price-input').on('blur', function() {
+                var value = $(this).val();
+                if (value) {
+                    value = value.replace(/[^0-9]/g, '');
+                    $(this).val(value);
+                }
+            });
+
+            // Auto calculate FinalAmount
+            $('#TotalAmount, #ShippingFee, #DiscountAmount').on('input', function() {
+                var total = parseFloat($('#TotalAmount').val() || 0);
+                var shipping = parseFloat($('#ShippingFee').val() || 0);
+                var discount = parseFloat($('#DiscountAmount').val() || 0);
+                var final = total + shipping - discount;
+                $('#FinalAmount').val(final > 0 ? final : 0);
+            });
+        });
+    </script>
+}
+

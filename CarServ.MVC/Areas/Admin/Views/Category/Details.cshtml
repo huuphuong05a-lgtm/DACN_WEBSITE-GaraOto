@@ -1,0 +1,141 @@
+@model CarServ.MVC.Models.Category
+
+@{
+    ViewData["Title"] = "Chi tiết Danh mục";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Danh mục</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Danh mục</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.CategoryName" class="img-fluid img-thumbnail" />
+                    }
+                    else
+                    {
+                        <div class="bg-light p-5 text-center text-muted">
+                            <i class="fas fa-image fa-3x mb-3"></i>
+                            <p>Chưa có ảnh</p>
+                        </div>
+                    }
+                </div>
+                <div class="col-md-8">
+                    <dl class="row">
+                        <dt class="col-sm-4">Tên Danh mục:</dt>
+                        <dd class="col-sm-8"><strong>@Model.CategoryName</strong></dd>
+
+                        <dt class="col-sm-4">Mô tả:</dt>
+                        <dd class="col-sm-8">@(Model.Description ?? "-")</dd>
+
+                        <dt class="col-sm-4">Danh mục Cha:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Parent != null)
+                            {
+                                <span class="badge badge-info">@Model.Parent.CategoryName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Danh mục gốc</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Icon:</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.IconClass))
+                            {
+                                <i class="@Model.IconClass"></i> @Model.IconClass
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Thứ tự:</dt>
+                        <dd class="col-sm-8">@(Model.SortOrder ?? 0)</dd>
+
+                        <dt class="col-sm-4">Trạng thái:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge badge-success">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Không hoạt động</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Số sản phẩm:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Products != null)
+                            {
+                                <span class="badge badge-secondary">@Model.Products.Count sản phẩm</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">0</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Meta Title:</dt>
+                        <dd class="col-sm-8">@(Model.MetaTitle ?? "-")</dd>
+
+                        <dt class="col-sm-4">Meta Description:</dt>
+                        <dd class="col-sm-8">@(Model.MetaDescription ?? "-")</dd>
+
+                        <dt class="col-sm-4">Ngày tạo:</dt>
+                        <dd class="col-sm-8">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+
+                        <dt class="col-sm-4">Ngày cập nhật:</dt>
+                        <dd class="col-sm-8">@(Model.UpdatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (Model.InverseParent != null && Model.InverseParent.Any())
+            {
+                <hr />
+                <h5>Danh mục con:</h5>
+                <ul>
+                    @foreach (var child in Model.InverseParent.OrderBy(c => c.SortOrder))
+                    {
+                        <li>
+                            <strong>@child.CategoryName</strong>
+                            @if (child.IsActive)
+                            {
+                                <span class="badge badge-success">Hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Không hoạt động</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+
+            <div class="mt-4">
+                <a href="@Url.Action("Edit", "Category", new { area = "Admin", id = Model.CategoryId })" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Chỉnh sửa
+                </a>
+                <a href="@Url.Action("Index", "Category", new { area = "Admin" })" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

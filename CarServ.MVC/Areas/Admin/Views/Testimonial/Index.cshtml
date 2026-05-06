@@ -1,0 +1,217 @@
+@model IEnumerable<CarServ.MVC.Models.Testimonial>
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Quản lý Đánh giá";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Đánh giá</h1>
+        <a href="@Url.Action("Create", "Testimonial", new { area = "Admin" })" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Thêm Đánh giá Mới
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm và Lọc</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Tìm kiếm:</label>
+                            <input type="text" name="searchString" class="form-control" value="@ViewData["CurrentFilter"]" placeholder="Tên, nội dung, dịch vụ..." />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Đánh giá:</label>
+                            <select name="ratingFilter" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="5" selected="@(ViewData["CurrentRating"]?.ToString() == "5")">5 sao</option>
+                                <option value="4" selected="@(ViewData["CurrentRating"]?.ToString() == "4")">4 sao</option>
+                                <option value="3" selected="@(ViewData["CurrentRating"]?.ToString() == "3")">3 sao</option>
+                                <option value="2" selected="@(ViewData["CurrentRating"]?.ToString() == "2")">2 sao</option>
+                                <option value="1" selected="@(ViewData["CurrentRating"]?.ToString() == "1")">1 sao</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Trạng thái:</label>
+                            <select name="publishedFilter" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="Published" selected="@(ViewData["CurrentPublished"]?.ToString() == "Published")">Đã xuất bản</option>
+                                <option value="Unpublished" selected="@(ViewData["CurrentPublished"]?.ToString() == "Unpublished")">Chưa xuất bản</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Sắp xếp:</label>
+                            <select name="sortOrder" class="form-control">
+                                <option value="">Mới nhất</option>
+                                <option value="name_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "name_desc")">Tên (Z→A)</option>
+                                <option value="Rating" selected="@(ViewData["CurrentSort"]?.ToString() == "Rating")">Đánh giá (thấp→cao)</option>
+                                <option value="rating_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "rating_desc")">Đánh giá (cao→thấp)</option>
+                                <option value="Date" selected="@(ViewData["CurrentSort"]?.ToString() == "Date")">Ngày tạo (cũ nhất)</option>
+                                <option value="date_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "date_desc")">Ngày tạo (mới nhất)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-search"></i> Tìm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Testimonial Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Đánh giá</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Khách hàng</th>
+                            <th>Nội dung</th>
+                            <th>Đánh giá</th>
+                            <th>Dịch vụ</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.IsPublished != true ? "table-warning" : "")">
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.CustomerAvatar))
+                                    {
+                                        <img src="@item.CustomerAvatar" alt="@item.CustomerName" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;" />
+                                    }
+                                    else if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.CustomerName" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@(item.CustomerName ?? item.Customer?.FullName ?? "-")</strong>
+                                    @if (!string.IsNullOrEmpty(item.CustomerPosition))
+                                    {
+                                        <br /><small class="text-muted">@item.CustomerPosition</small>
+                                    }
+                                </td>
+                                <td>
+                                    <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">
+                                        @if (item.Content.Length > 100)
+                                        {
+                                            <text>@item.Content.Substring(0, 100)...</text>
+                                        }
+                                        else
+                                        {
+                                            <text>@item.Content</text>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (item.Rating.HasValue)
+                                    {
+                                        <div>
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (i <= item.Rating.Value)
+                                                {
+                                                    <i class="fas fa-star text-warning"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="far fa-star text-muted"></i>
+                                                }
+                                            }
+                                            <br /><small class="text-muted">(@item.Rating.Value/5)</small>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>@(item.ServiceType ?? "-")</td>
+                                <td>
+                                    @if (item.IsPublished == true)
+                                    {
+                                        <span class="badge badge-success">Đã xuất bản</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-warning">Chưa xuất bản</span>
+                                    }
+                                </td>
+                                <td>@(item.CreatedDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                <td>
+                                    <a href="@Url.Action("Details", "Testimonial", new { area = "Admin", id = item.TestimonialId })" class="btn btn-info btn-sm" title="Xem chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", "Testimonial", new { area = "Admin", id = item.TestimonialId })" class="btn btn-warning btn-sm" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="@Url.Action("Delete", "Testimonial", new { area = "Admin", id = item.TestimonialId })" class="btn btn-danger btn-sm" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "order": [[6, "desc"]]
+            });
+        });
+    </script>
+}
+
+

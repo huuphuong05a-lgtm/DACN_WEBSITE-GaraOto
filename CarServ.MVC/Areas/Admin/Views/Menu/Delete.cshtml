@@ -1,0 +1,74 @@
+@model CarServ.MVC.Models.Menu
+
+@{
+    ViewData["Title"] = "Xóa Menu";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Menu</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger">
+            <h6 class="m-0 font-weight-bold text-white">Xác nhận xóa</h6>
+        </div>
+        <div class="card-body">
+            <h4 class="text-danger">Bạn có chắc chắn muốn xóa menu này?</h4>
+            
+            <hr />
+            
+            <dl class="row">
+                <dt class="col-sm-3">Tên Menu:</dt>
+                <dd class="col-sm-9"><strong>@Model.MenuName</strong></dd>
+
+                <dt class="col-sm-3">URL:</dt>
+                <dd class="col-sm-9">@(Model.MenuUrl ?? "-")</dd>
+
+                <dt class="col-sm-3">Menu Cha:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Parent != null)
+                    {
+                        <span class="badge badge-info">@Model.Parent.MenuName</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Menu gốc</span>
+                    }
+                </dd>
+
+                @if (Model.InverseParent != null && Model.InverseParent.Any())
+                {
+                    <dt class="col-sm-3">Menu con:</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge badge-warning">Có @Model.InverseParent.Count() menu con sẽ bị xóa cùng</span>
+                        <ul class="mt-2">
+                            @foreach (var child in Model.InverseParent)
+                            {
+                                <li>@child.MenuName</li>
+                            }
+                        </ul>
+                    </dd>
+                }
+            </dl>
+
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Cảnh báo:</strong> Hành động này không thể hoàn tác. Tất cả menu con (nếu có) cũng sẽ bị xóa.
+            </div>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="MenuId" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Xóa
+                </button>
+                <a href="@Url.Action("Index", "Menu", new { area = "Admin" })" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+

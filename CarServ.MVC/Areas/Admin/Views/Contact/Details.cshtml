@@ -1,0 +1,137 @@
+@model CarServ.MVC.Models.Contact
+
+@{
+    ViewData["Title"] = "Chi tiết Liên hệ";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Liên hệ</h1>
+        <div>
+            <a href="@Url.Action("Edit", "Contact", new { area = "Admin", id = Model.ContactId })" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Chỉnh sửa
+            </a>
+            <a href="@Url.Action("Index", "Contact", new { area = "Admin" })" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Liên hệ</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Họ và tên:</dt>
+                <dd class="col-sm-9"><strong>@Model.FullName</strong></dd>
+
+                <dt class="col-sm-3">Email:</dt>
+                <dd class="col-sm-9">@(Model.Email ?? "-")</dd>
+
+                <dt class="col-sm-3">Số điện thoại:</dt>
+                <dd class="col-sm-9">@(Model.Phone ?? "-")</dd>
+
+                <dt class="col-sm-3">Tiêu đề:</dt>
+                <dd class="col-sm-9">@(Model.Subject ?? "-")</dd>
+
+                <dt class="col-sm-3">Nội dung tin nhắn:</dt>
+                <dd class="col-sm-9">
+                    <div class="border p-3 bg-light rounded">
+                        @Model.Message
+                    </div>
+                </dd>
+
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Status == "Chưa đọc")
+                    {
+                        <span class="badge badge-warning">Chưa đọc</span>
+                    }
+                    else if (Model.Status == "Đã đọc")
+                    {
+                        <span class="badge badge-info">Đã đọc</span>
+                    }
+                    else if (Model.Status == "Đã trả lời")
+                    {
+                        <span class="badge badge-success">Đã trả lời</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-secondary">@(Model.Status ?? "-")</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Đã đọc:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.IsRead == true)
+                    {
+                        <span class="badge badge-success"><i class="fas fa-check"></i> Đã đọc</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-warning"><i class="fas fa-envelope"></i> Chưa đọc</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Đã trả lời:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.IsReplied == true)
+                    {
+                        <span class="badge badge-success"><i class="fas fa-reply"></i> Đã trả lời</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-secondary">Chưa trả lời</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Địa chỉ IP:</dt>
+                <dd class="col-sm-9">@(Model.Ipaddress ?? "-")</dd>
+
+                <dt class="col-sm-3">Ngày tạo:</dt>
+                <dd class="col-sm-9">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm:ss") ?? "-")</dd>
+
+                <dt class="col-sm-3">Ngày cập nhật:</dt>
+                <dd class="col-sm-9">@(Model.UpdatedDate?.ToString("dd/MM/yyyy HH:mm:ss") ?? "-")</dd>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Reply Information -->
+    @if (!string.IsNullOrEmpty(Model.ReplyMessage) || Model.IsReplied == true)
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Thông tin Trả lời</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Nội dung trả lời:</dt>
+                    <dd class="col-sm-9">
+                        @if (!string.IsNullOrEmpty(Model.ReplyMessage))
+                        {
+                            <div class="border p-3 bg-light rounded">
+                                @Model.ReplyMessage
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Người trả lời:</dt>
+                    <dd class="col-sm-9">@(Model.RepliedBy ?? "-")</dd>
+
+                    <dt class="col-sm-3">Ngày trả lời:</dt>
+                    <dd class="col-sm-9">@(Model.RepliedDate?.ToString("dd/MM/yyyy HH:mm:ss") ?? "-")</dd>
+                </dl>
+            </div>
+        </div>
+    }
+</div>
+
+

@@ -1,0 +1,193 @@
+@model CarServ.MVC.Models.Coupon
+
+@{
+    ViewData["Title"] = "Chi tiết Mã giảm giá";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Mã giảm giá</h1>
+        <div>
+            <a href="@Url.Action("Edit", "Coupon", new { area = "Admin", id = Model.CouponId })" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Chỉnh sửa
+            </a>
+            <a href="@Url.Action("Index", "Coupon", new { area = "Admin" })" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Coupon Information -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Mã giảm giá</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Mã giảm giá:</dt>
+                <dd class="col-sm-9"><strong class="text-primary" style="font-size: 1.2em;">@Model.Code</strong></dd>
+
+                <dt class="col-sm-3">Tên:</dt>
+                <dd class="col-sm-9">@(Model.Name ?? "-")</dd>
+
+                <dt class="col-sm-3">Mô tả:</dt>
+                <dd class="col-sm-9">@(Model.Description ?? "-")</dd>
+
+                <dt class="col-sm-3">Loại giảm giá:</dt>
+                <dd class="col-sm-9">
+                    @if (!string.IsNullOrEmpty(Model.DiscountType))
+                    {
+                        <span class="badge badge-info">@Model.DiscountType</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Giá trị giảm giá:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.DiscountValue.HasValue)
+                    {
+                        @if (Model.DiscountType == "Percentage")
+                        {
+                            <strong class="text-danger">@Model.DiscountValue%</strong>
+                        }
+                        else
+                        {
+                            <strong class="text-danger">@Model.DiscountValue.Value.ToString("N0") đ</strong>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Đơn hàng tối thiểu:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.MinimumOrder.HasValue)
+                    {
+                        <text>@Model.MinimumOrder.Value.ToString("N0") đ</text>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Không yêu cầu</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Giảm tối đa:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.MaximumDiscount.HasValue)
+                    {
+                        <text>@Model.MaximumDiscount.Value.ToString("N0") đ</text>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Không giới hạn</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Giới hạn sử dụng:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.UsageLimit.HasValue)
+                    {
+                        <text>@Model.UsageLimit lần</text>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Không giới hạn</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Số lần đã sử dụng:</dt>
+                <dd class="col-sm-9">
+                    <strong>@(Model.UsedCount ?? 0)</strong>
+                    @if (Model.UsageLimit.HasValue)
+                    {
+                        <text> / @Model.UsageLimit</text>
+                        @if (Model.UsedCount.HasValue && Model.UsedCount.Value >= Model.UsageLimit.Value)
+                        {
+                            <span class="badge badge-danger ml-2">Đã hết</span>
+                        }
+                        else
+                        {
+                            var remaining = Model.UsageLimit.Value - (Model.UsedCount ?? 0);
+                            <span class="badge badge-success ml-2">Còn @remaining lần</span>
+                        }
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Thời hạn:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.StartDate.HasValue || Model.EndDate.HasValue)
+                    {
+                        <div>
+                            @if (Model.StartDate.HasValue)
+                            {
+                                <div>Từ: <strong>@Model.StartDate.Value.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                            }
+                            else
+                            {
+                                <div>Từ: <span class="text-muted">Không giới hạn</span></div>
+                            }
+                            @if (Model.EndDate.HasValue)
+                            {
+                                <div>Đến: <strong>@Model.EndDate.Value.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                                @if (Model.EndDate.Value < DateTime.Now)
+                                {
+                                    <span class="badge badge-danger">Đã hết hạn</span>
+                                }
+                                else if (Model.EndDate.Value >= DateTime.Now)
+                                {
+                                    var daysLeft = (Model.EndDate.Value - DateTime.Now).Days;
+                                    <span class="badge badge-info">Còn @daysLeft ngày</span>
+                                }
+                            }
+                            else
+                            {
+                                <div>Đến: <span class="text-muted">Không giới hạn</span></div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Không giới hạn thời gian</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    @{
+                        var isExpired = Model.EndDate.HasValue && Model.EndDate.Value < DateTime.Now;
+                        var isValid = Model.IsActive == true 
+                            && (!Model.StartDate.HasValue || Model.StartDate.Value <= DateTime.Now)
+                            && (!Model.EndDate.HasValue || Model.EndDate.Value >= DateTime.Now);
+                    }
+                    @if (isExpired)
+                    {
+                        <span class="badge badge-danger">Hết hạn</span>
+                    }
+                    else if (isValid)
+                    {
+                        <span class="badge badge-success">Còn hiệu lực</span>
+                    }
+                    else if (Model.IsActive == true)
+                    {
+                        <span class="badge badge-warning">Chưa bắt đầu</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-secondary">Không hoạt động</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Ngày tạo:</dt>
+                <dd class="col-sm-9">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+
+

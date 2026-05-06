@@ -1,0 +1,86 @@
+@model CarServ.MVC.Models.Menu
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Menu";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chỉnh sửa Menu</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Menu</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="MenuId" />
+                <input type="hidden" asp-for="CreatedDate" />
+
+                <div class="form-group">
+                    <label asp-for="MenuName" class="control-label">Tên Menu <span class="text-danger">*</span></label>
+                    <input asp-for="MenuName" class="form-control" required />
+                    <span asp-validation-for="MenuName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="MenuUrl" class="control-label">URL</label>
+                    <input asp-for="MenuUrl" class="form-control" placeholder="/example hoặc #" />
+                    <span asp-validation-for="MenuUrl" class="text-danger"></span>
+                    <small class="form-text text-muted">Để trống hoặc nhập "#" nếu là menu cha có menu con</small>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ParentId" class="control-label">Menu Cha</label>
+                    <select asp-for="ParentId" class="form-control" asp-items="ViewBag.ParentId">
+                        <option value="">-- Chọn menu cha (để trống nếu là menu gốc) --</option>
+                    </select>
+                    <span asp-validation-for="ParentId" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="IconClass" class="control-label">Icon Class</label>
+                            <input asp-for="IconClass" class="form-control" placeholder="fas fa-home" />
+                            <span asp-validation-for="IconClass" class="text-danger"></span>
+                            <small class="form-text text-muted">Ví dụ: fas fa-home, fa fa-cog</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="SortOrder" class="control-label">Thứ tự hiển thị</label>
+                            <input asp-for="SortOrder" type="number" class="form-control" />
+                            <span asp-validation-for="SortOrder" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="hidden" name="IsActive" value="false" />
+                        <input type="checkbox" name="IsActive" id="IsActive" class="form-check-input" value="true" @(Model.IsActive == true ? "checked" : "") />
+                        <label class="form-check-label" for="IsActive">Kích hoạt</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Cập nhật
+                    </button>
+                    <a href="@Url.Action("Index", "Menu", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

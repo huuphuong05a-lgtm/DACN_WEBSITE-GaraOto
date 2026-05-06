@@ -1,0 +1,183 @@
+@model IEnumerable<CarServ.MVC.Models.Vehicle>
+@{
+    ViewData["Title"] = "Quản lý xe";
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Quản Lý Xe</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Quản lý xe</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Vehicles Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="bg-light rounded p-4">
+                    <h5 class="mb-3">Menu</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="@Url.Action("Profile", "Customer")" class="text-dark">
+                                <i class="fa fa-user me-2"></i>Thông tin cá nhân
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="@Url.Action("Orders", "Customer")" class="text-dark">
+                                <i class="fa fa-shopping-bag me-2"></i>Đơn hàng
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="@Url.Action("Appointments", "Customer")" class="text-dark">
+                                <i class="fa fa-calendar me-2"></i>Lịch hẹn
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="@Url.Action("Vehicles", "Customer")" class="text-primary">
+                                <i class="fa fa-car me-2"></i>Quản lý xe
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4>Danh sách xe của tôi (@Model.Count())</h4>
+                    <a href="@Url.Action("AddVehicle", "Customer")" class="btn btn-primary">
+                        <i class="fa fa-plus me-2"></i>Thêm xe mới
+                    </a>
+                </div>
+
+                @if (!Model.Any())
+                {
+                    <div class="bg-light rounded p-5 text-center">
+                        <i class="fa fa-car fa-4x text-muted mb-3"></i>
+                        <h4>Bạn chưa có xe nào</h4>
+                        <p class="text-muted">Hãy thêm thông tin xe để đặt lịch hẹn dễ dàng hơn!</p>
+                        <a href="@Url.Action("AddVehicle", "Customer")" class="btn btn-primary mt-3">
+                            <i class="fa fa-plus me-2"></i>Thêm xe ngay
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @foreach (var vehicle in Model)
+                        {
+                            <div class="col-md-6 mb-4">
+                                <div class="bg-light rounded p-4 h-100">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <h5 class="mb-1">@vehicle.LicensePlate</h5>
+                                            @if (!string.IsNullOrEmpty(vehicle.VehicleName))
+                                            {
+                                                <p class="text-muted mb-0">@vehicle.VehicleName</p>
+                                            }
+                                        </div>
+                                        @if (vehicle.IsActive == true)
+                                        {
+                                            <span class="badge bg-success">Đang sử dụng</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Ngừng sử dụng</span>
+                                        }
+                                    </div>
+
+                                    @if (vehicle.Brand != null || vehicle.Model != null)
+                                    {
+                                        <div class="mb-2">
+                                            <i class="fa fa-car text-primary me-2"></i>
+                                            <strong>Hãng/Dòng:</strong> 
+                                            @(vehicle.Brand?.BrandName ?? "") 
+                                            @if (vehicle.Model != null)
+                                            {
+                                                <text> - @vehicle.Model.ModelName</text>
+                                            }
+                                        </div>
+                                    }
+
+                                    @if (vehicle.Year.HasValue)
+                                    {
+                                        <div class="mb-2">
+                                            <i class="fa fa-calendar text-primary me-2"></i>
+                                            <strong>Năm sản xuất:</strong> @vehicle.Year
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(vehicle.Color))
+                                    {
+                                        <div class="mb-2">
+                                            <i class="fa fa-palette text-primary me-2"></i>
+                                            <strong>Màu sắc:</strong> @vehicle.Color
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(vehicle.FuelType))
+                                    {
+                                        <div class="mb-2">
+                                            <i class="fa fa-gas-pump text-primary me-2"></i>
+                                            <strong>Nhiên liệu:</strong> @vehicle.FuelType
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(vehicle.Notes))
+                                    {
+                                        <div class="mb-3">
+                                            <i class="fa fa-sticky-note text-primary me-2"></i>
+                                            <strong>Ghi chú:</strong> @vehicle.Notes
+                                        </div>
+                                    }
+
+                                    <div class="mt-3">
+                                        <a href="@Url.Action("EditVehicle", "Customer", new { id = vehicle.VehicleId })" class="btn btn-sm btn-primary me-2">
+                                            <i class="fa fa-edit me-1"></i>Sửa
+                                        </a>
+                                        <form asp-action="DeleteVehicle" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@vehicle.VehicleId" />
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa xe này?');">
+                                                <i class="fa fa-trash me-1"></i>Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Vehicles End -->
+
+

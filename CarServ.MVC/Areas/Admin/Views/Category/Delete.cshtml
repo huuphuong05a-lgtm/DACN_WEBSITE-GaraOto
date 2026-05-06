@@ -1,0 +1,115 @@
+@model CarServ.MVC.Models.Category
+
+@{
+    ViewData["Title"] = "Xóa Danh mục";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Danh mục</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger">
+            <h6 class="m-0 font-weight-bold text-white">Xác nhận xóa</h6>
+        </div>
+        <div class="card-body">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+                </div>
+            }
+
+            <h4 class="text-danger">Bạn có chắc chắn muốn xóa danh mục này?</h4>
+            
+            <hr />
+            
+            <div class="row">
+                <div class="col-md-4">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.CategoryName" class="img-fluid img-thumbnail" />
+                    }
+                </div>
+                <div class="col-md-8">
+                    <dl class="row">
+                        <dt class="col-sm-4">Tên Danh mục:</dt>
+                        <dd class="col-sm-8"><strong>@Model.CategoryName</strong></dd>
+
+                        <dt class="col-sm-4">Danh mục Cha:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Parent != null)
+                            {
+                                <span class="badge badge-info">@Model.Parent.CategoryName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Danh mục gốc</span>
+                            }
+                        </dd>
+
+                        @if (Model.InverseParent != null && Model.InverseParent.Any())
+                        {
+                            <dt class="col-sm-4">Danh mục con:</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge badge-warning">Có @Model.InverseParent.Count() danh mục con</span>
+                                <ul class="mt-2">
+                                    @foreach (var child in Model.InverseParent)
+                                    {
+                                        <li>@child.CategoryName</li>
+                                    }
+                                </ul>
+                            </dd>
+                        }
+
+                        @if (Model.Products != null && Model.Products.Any())
+                        {
+                            <dt class="col-sm-4">Sản phẩm:</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge badge-warning">Có @Model.Products.Count() sản phẩm</span>
+                            </dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+
+            <div class="alert alert-warning mt-3">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Cảnh báo:</strong> Hành động này không thể hoàn tác.
+                @if (Model.InverseParent != null && Model.InverseParent.Any())
+                {
+                    <text><br />Nếu xóa danh mục này, tất cả @Model.InverseParent.Count() danh mục con cũng sẽ bị xóa.</text>
+                }
+                @if (Model.Products != null && Model.Products.Any())
+                {
+                    <text><br />Bạn không thể xóa danh mục có sản phẩm. Vui lòng xóa hoặc chuyển các sản phẩm sang danh mục khác trước.</text>
+                }
+            </div>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="CategoryId" />
+                @{
+                    var productCount = Model.Products?.Count() ?? 0;
+                    var hasProducts = productCount > 0;
+                }
+                @if (hasProducts)
+                {
+                    <button type="button" class="btn btn-danger" disabled>
+                        <i class="fas fa-trash"></i> Xóa (Không thể xóa vì có sản phẩm)
+                    </button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Xóa
+                    </button>
+                }
+                <a href="@Url.Action("Index", "Category", new { area = "Admin" })" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+

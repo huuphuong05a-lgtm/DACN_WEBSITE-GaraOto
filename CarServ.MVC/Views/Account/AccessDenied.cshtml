@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Truy cập bị từ chối";
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Truy cập bị từ chối</h1>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Access Denied Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <div class="mb-4">
+                        <i class="fa fa-lock fa-5x text-danger"></i>
+                    </div>
+                    <h2 class="mb-3">Bạn không có quyền truy cập trang này</h2>
+                    <p class="mb-4">Vui lòng liên hệ quản trị viên nếu bạn cần quyền truy cập.</p>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                        <i class="fa fa-home me-2"></i>Về trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Access Denied End -->
+
+

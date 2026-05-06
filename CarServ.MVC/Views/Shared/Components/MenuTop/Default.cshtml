@@ -1,0 +1,32 @@
+﻿@model List<CarServ.MVC.Models.Menu>
+
+<ul class="navbar-nav ms-auto p-4 p-lg-0">
+
+    @foreach (var item in Model)
+    {
+        if (item.Children.Any())
+        {
+            <li class="nav-item dropdown">
+                <a href="@item.MenuUrl" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="@item.IconClass"></i> @item.MenuName
+                </a>
+
+                <div class="dropdown-menu fade-down m-0">
+                    @foreach (var child in item.Children)
+                    {
+                        <a class="dropdown-item" href="@child.MenuUrl">@child.MenuName</a>
+                    }
+                </div>
+            </li>
+        }
+        else
+        {
+            <li class="nav-item">
+                <a class="nav-link" href="@item.MenuUrl">
+                    <i class="@item.IconClass"></i> @item.MenuName
+                </a>
+            </li>
+        }
+    }
+
+</ul>

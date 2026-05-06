@@ -1,0 +1,181 @@
+@model IEnumerable<CarServ.MVC.Models.Appointment>
+@{
+    ViewData["Title"] = "Lịch hẹn của tôi";
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Lịch Hẹn Của Tôi</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Lịch hẹn</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Appointments Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="bg-light rounded p-4">
+                    <h5 class="mb-3">Menu</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="@Url.Action("Profile", "Customer")" class="text-dark">
+                                <i class="fa fa-user me-2"></i>Thông tin cá nhân
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="@Url.Action("Orders", "Customer")" class="text-dark">
+                                <i class="fa fa-shopping-bag me-2"></i>Đơn hàng
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="@Url.Action("Appointments", "Customer")" class="text-primary">
+                                <i class="fa fa-calendar me-2"></i>Lịch hẹn
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="@Url.Action("Vehicles", "Customer")" class="text-dark">
+                                <i class="fa fa-car me-2"></i>Quản lý xe
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4>Danh sách lịch hẹn (@Model.Count())</h4>
+                    <a href="@Url.Action("Index", "Booking")" class="btn btn-primary">
+                        <i class="fa fa-plus me-2"></i>Đặt lịch mới
+                    </a>
+                </div>
+
+                @if (!Model.Any())
+                {
+                    <div class="bg-light rounded p-5 text-center">
+                        <i class="fa fa-calendar fa-4x text-muted mb-3"></i>
+                        <h4>Bạn chưa có lịch hẹn nào</h4>
+                        <p class="text-muted">Hãy đặt lịch hẹn để được phục vụ tốt nhất!</p>
+                        <a href="@Url.Action("Index", "Booking")" class="btn btn-primary mt-3">
+                            <i class="fa fa-calendar-plus me-2"></i>Đặt lịch ngay
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @foreach (var appointment in Model)
+                        {
+                            <div class="col-md-6 mb-4">
+                                <div class="bg-light rounded p-4 h-100">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <h5 class="mb-1">@(appointment.AppointmentCode ?? "N/A")</h5>
+                                            <small class="text-muted">@(appointment.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</small>
+                                        </div>
+                                        @{
+                                            var statusClass = appointment.Status switch
+                                            {
+                                                "Hoàn thành" => "success",
+                                                "Đang xử lý" => "info",
+                                                "Chờ xác nhận" => "warning",
+                                                "Đã hủy" => "danger",
+                                                _ => "secondary"
+                                            };
+                                        }
+                                        <span class="badge bg-@statusClass">@(appointment.Status ?? "Chờ xác nhận")</span>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <i class="fa fa-calendar-alt text-primary me-2"></i>
+                                        <strong>Ngày giờ:</strong> @appointment.AppointmentDate.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+
+                                    @if (appointment.Service != null)
+                                    {
+                                        <div class="mb-2">
+                                            <i class="fa fa-cog text-primary me-2"></i>
+                                            <strong>Dịch vụ:</strong> @appointment.Service.ServiceName
+                                        </div>
+                                    }
+
+                                    @if (appointment.Technician != null)
+                                    {
+                                        <div class="mb-2">
+                                            <i class="fa fa-user-cog text-primary me-2"></i>
+                                            <strong>Kỹ thuật viên:</strong> @appointment.Technician.FullName
+                                        </div>
+                                    }
+
+                                    @if (appointment.Vehicle != null)
+                                    {
+                                        <div class="mb-2">
+                                            <i class="fa fa-car text-primary me-2"></i>
+                                            <strong>Xe:</strong> @appointment.Vehicle.LicensePlate
+                                        </div>
+                                    }
+
+                                    @if (appointment.TotalPrice > 0)
+                                    {
+                                        <div class="mb-2">
+                                            <i class="fa fa-money-bill text-primary me-2"></i>
+                                            <strong>Tổng tiền:</strong> <span class="text-danger">@(appointment.TotalPrice.Value.ToString("N0")) đ</span>
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(appointment.Notes))
+                                    {
+                                        <div class="mb-3">
+                                            <i class="fa fa-sticky-note text-primary me-2"></i>
+                                            <strong>Ghi chú:</strong> @appointment.Notes
+                                        </div>
+                                    }
+
+                                    @if (appointment.Status != "Hoàn thành" && appointment.Status != "Đã hủy")
+                                    {
+                                        <form asp-action="CancelAppointment" method="post" class="mt-3">
+                                            <input type="hidden" name="id" value="@appointment.AppointmentId" />
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
+                                                <i class="fa fa-times me-1"></i>Hủy lịch hẹn
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Appointments End -->
+
+

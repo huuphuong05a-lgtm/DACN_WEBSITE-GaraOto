@@ -1,0 +1,128 @@
+@model CarServ.MVC.Models.Service
+
+@{
+    ViewData["Title"] = "Chi tiết Dịch vụ";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Dịch vụ</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Dịch vụ</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.ServiceName" class="img-fluid img-thumbnail" />
+                    }
+                    else
+                    {
+                        <div class="bg-light p-5 text-center text-muted">
+                            <i class="fas fa-image fa-3x mb-3"></i>
+                            <p>Chưa có ảnh</p>
+                        </div>
+                    }
+                </div>
+                <div class="col-md-8">
+                    <dl class="row">
+                        <dt class="col-sm-4">Tên Dịch vụ:</dt>
+                        <dd class="col-sm-8"><strong>@Model.ServiceName</strong></dd>
+
+                        <dt class="col-sm-4">Slug:</dt>
+                        <dd class="col-sm-8">@(Model.Slug ?? "-")</dd>
+
+                        <dt class="col-sm-4">Mô tả ngắn:</dt>
+                        <dd class="col-sm-8">@(Model.ShortDescription ?? "-")</dd>
+
+                        <dt class="col-sm-4">Mô tả chi tiết:</dt>
+                        <dd class="col-sm-8">@(Model.Description ?? "-")</dd>
+
+                        <dt class="col-sm-4">Giá:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Price.HasValue)
+                            {
+                                <strong class="text-primary">@Model.Price.Value.ToString("N0") đ</strong>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Thời gian ước tính:</dt>
+                        <dd class="col-sm-8">@(Model.EstimatedDuration?.ToString() + " phút" ?? "-")</dd>
+
+                        <dt class="col-sm-4">Danh mục:</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.ServiceCategory))
+                            {
+                                <span class="badge badge-info">@Model.ServiceCategory</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Thứ tự:</dt>
+                        <dd class="col-sm-8">@(Model.SortOrder ?? 0)</dd>
+
+                        <dt class="col-sm-4">Trạng thái:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge badge-success">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Không hoạt động</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Nổi bật:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsFeatured)
+                            {
+                                <span class="badge badge-warning"><i class="fas fa-star"></i> Nổi bật</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Không</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Meta Title:</dt>
+                        <dd class="col-sm-8">@(Model.MetaTitle ?? "-")</dd>
+
+                        <dt class="col-sm-4">Meta Description:</dt>
+                        <dd class="col-sm-8">@(Model.MetaDescription ?? "-")</dd>
+
+                        <dt class="col-sm-4">Ngày tạo:</dt>
+                        <dd class="col-sm-8">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+
+                        <dt class="col-sm-4">Ngày cập nhật:</dt>
+                        <dd class="col-sm-8">@(Model.UpdatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="@Url.Action("Edit", "Service", new { area = "Admin", id = Model.ServiceId })" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Chỉnh sửa
+                </a>
+                <a href="@Url.Action("Index", "Service", new { area = "Admin" })" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

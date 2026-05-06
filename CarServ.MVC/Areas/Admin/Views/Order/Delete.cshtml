@@ -1,0 +1,91 @@
+@model CarServ.MVC.Models.Order
+
+@{
+    ViewData["Title"] = "Xóa Đơn hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Đơn hàng</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger">
+            <h6 class="m-0 font-weight-bold text-white">Xác nhận xóa đơn hàng</h6>
+        </div>
+        <div class="card-body">
+            <h4 class="text-danger">Bạn có chắc chắn muốn xóa đơn hàng này?</h4>
+            <hr />
+
+            <dl class="row">
+                <dt class="col-sm-3">Mã đơn hàng:</dt>
+                <dd class="col-sm-9"><strong>@(Model.OrderCode ?? "-")</strong></dd>
+
+                <dt class="col-sm-3">Khách hàng:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Customer != null)
+                    {
+                        <text>@Model.Customer.FullName</text>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Tổng tiền:</dt>
+                <dd class="col-sm-9"><strong class="text-danger">@(Model.FinalAmount?.ToString("N0") ?? "0") đ</strong></dd>
+
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    @if (!string.IsNullOrEmpty(Model.Status))
+                    {
+                        <span class="badge badge-info">@Model.Status</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-secondary">-</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Ngày đặt:</dt>
+                <dd class="col-sm-9">@(Model.OrderDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+
+                <dt class="col-sm-3">Số lượng sản phẩm:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.OrderItems != null && Model.OrderItems.Any())
+                    {
+                        <text>@Model.OrderItems.Sum(oi => oi.Quantity ?? 0) sản phẩm</text>
+                    }
+                    else
+                    {
+                        <text>0</text>
+                    }
+                </dd>
+            </dl>
+
+            @if (Model.OrderItems != null && Model.OrderItems.Any())
+            {
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <strong>Cảnh báo:</strong> Đơn hàng này có @Model.OrderItems.Count() sản phẩm. Tất cả các sản phẩm trong đơn hàng sẽ bị xóa cùng.
+                </div>
+            }
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="OrderId" />
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Xóa
+                    </button>
+                    <a href="@Url.Action("Index", "Order", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,161 @@
+@model CarServ.MVC.Models.Customer
+
+@{
+    ViewData["Title"] = "Thêm Khách hàng Mới";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Thêm Khách hàng Mới</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Khách hàng</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="FullName" class="control-label">Họ và tên <span class="text-danger">*</span></label>
+                            <input asp-for="FullName" class="form-control" required />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Email" class="control-label">Email</label>
+                            <input asp-for="Email" type="email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Phone" class="control-label">Số điện thoại</label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Address" class="control-label">Địa chỉ</label>
+                            <input asp-for="Address" class="form-control" />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label asp-for="City" class="control-label">Thành phố</label>
+                            <input asp-for="City" class="form-control" />
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label asp-for="District" class="control-label">Quận/Huyện</label>
+                            <input asp-for="District" class="form-control" />
+                            <span asp-validation-for="District" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label asp-for="Ward" class="control-label">Phường/Xã</label>
+                            <input asp-for="Ward" class="form-control" />
+                            <span asp-validation-for="Ward" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="DateOfBirth" class="control-label">Ngày sinh</label>
+                            <input asp-for="DateOfBirth" type="date" class="form-control" />
+                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Gender" class="control-label">Giới tính</label>
+                            <select asp-for="Gender" class="form-control">
+                                <option value="">Chọn giới tính...</option>
+                                @if (ViewBag.GenderList != null)
+                                {
+                                    @foreach (var gender in ViewBag.GenderList)
+                                    {
+                                        <option value="@gender">@gender</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="Gender" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Avatar" class="control-label">URL ảnh đại diện</label>
+                            <input asp-for="Avatar" class="form-control" placeholder="https://..." />
+                            <span asp-validation-for="Avatar" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        @if (!string.IsNullOrEmpty(Model?.Avatar))
+                        {
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div>
+                                    <img src="@Model.Avatar" alt="Avatar preview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" name="IsActive" class="form-check-input" id="IsActive" value="true" />
+                                <input type="hidden" name="IsActive" value="false" />
+                                <label class="form-check-label" for="IsActive">
+                                    Đang hoạt động
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" name="EmailConfirmed" class="form-check-input" id="EmailConfirmed" value="true" />
+                                <input type="hidden" name="EmailConfirmed" value="false" />
+                                <label class="form-check-label" for="EmailConfirmed">
+                                    Đã xác nhận email
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                    <a href="@Url.Action("Index", "Customer", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

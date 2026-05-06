@@ -1,0 +1,262 @@
+@model CarServ.MVC.Models.Customer
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Chi tiết Khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Khách hàng</h1>
+        <div>
+            <a href="@Url.Action("Edit", "Customer", new { area = "Admin", id = Model.CustomerId })" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Chỉnh sửa
+            </a>
+            <a href="@Url.Action("Index", "Customer", new { area = "Admin" })" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Customer Information -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Khách hàng</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    @if (!string.IsNullOrEmpty(Model.Avatar))
+                    {
+                        <img src="@Model.Avatar" alt="@Model.FullName" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                    }
+                    else
+                    {
+                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 200px; height: 200px; font-size: 4rem;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    }
+                </div>
+                <div class="col-md-9">
+                    <dl class="row">
+                        <dt class="col-sm-3">Họ và tên:</dt>
+                        <dd class="col-sm-9"><strong>@Model.FullName</strong></dd>
+
+                        <dt class="col-sm-3">Email:</dt>
+                        <dd class="col-sm-9">
+                            @(Model.Email ?? "-")
+                            @if (Model.EmailConfirmed == true)
+                            {
+                                <span class="badge badge-success ml-2">Đã xác nhận</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Số điện thoại:</dt>
+                        <dd class="col-sm-9">@(Model.Phone ?? "-")</dd>
+
+                        <dt class="col-sm-3">Ngày sinh:</dt>
+                        <dd class="col-sm-9">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "-")</dd>
+
+                        <dt class="col-sm-3">Giới tính:</dt>
+                        <dd class="col-sm-9">@(Model.Gender ?? "-")</dd>
+
+                        <dt class="col-sm-3">Địa chỉ:</dt>
+                        <dd class="col-sm-9">
+                            @if (!string.IsNullOrEmpty(Model.Address))
+                            {
+                                <div>@Model.Address</div>
+                                <div>
+                                    @if (!string.IsNullOrEmpty(Model.Ward))
+                                    {
+                                        <text>@Model.Ward, </text>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.District))
+                                    {
+                                        <text>@Model.District, </text>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.City))
+                                    {
+                                        <text>@Model.City</text>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Trạng thái:</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.IsActive == true)
+                            {
+                                <span class="badge badge-success">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Không hoạt động</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Lần đăng nhập cuối:</dt>
+                        <dd class="col-sm-9">@(Model.LastLoginDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa đăng nhập")</dd>
+
+                        <dt class="col-sm-3">Ngày tạo:</dt>
+                        <dd class="col-sm-9">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+
+                        <dt class="col-sm-3">Ngày cập nhật:</dt>
+                        <dd class="col-sm-9">@(Model.UpdatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders History -->
+    @if (Model.Orders != null && Model.Orders.Any())
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Lịch sử Đơn hàng (@Model.Orders.Count())</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Ngày đặt</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Thanh toán</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.Orders.OrderByDescending(o => o.OrderDate))
+                            {
+                                <tr>
+                                    <td><strong>@(order.OrderCode ?? "-")</strong></td>
+                                    <td>@(order.OrderDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                                    <td><strong class="text-danger">@(order.FinalAmount?.ToString("N0") ?? "0") đ</strong></td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(order.Status))
+                                        {
+                                            <span class="badge badge-info">@order.Status</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(order.PaymentStatus))
+                                        {
+                                            string paymentClass = order.PaymentStatus == "Đã thanh toán" ? "badge-success" : "badge-warning";
+                                            <span class="badge @paymentClass">@order.PaymentStatus</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Order", new { area = "Admin", id = order.OrderId })" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Appointments History -->
+    @if (Model.Appointments != null && Model.Appointments.Any())
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Lịch sử Đặt lịch hẹn (@Model.Appointments.Count())</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Mã lịch hẹn</th>
+                                <th>Dịch vụ</th>
+                                <th>Ngày hẹn</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var appointment in Model.Appointments.OrderByDescending(a => a.AppointmentDate))
+                            {
+                                <tr>
+                                    <td><strong>@(appointment.AppointmentCode ?? "-")</strong></td>
+                                    <td>
+                                        @if (appointment.Service != null)
+                                        {
+                                            <text>@appointment.Service.ServiceName</text>
+                                        }
+                                        else if (!string.IsNullOrEmpty(appointment.ServiceType))
+                                        {
+                                            <text>@appointment.ServiceType</text>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>@appointment.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td><strong class="text-danger">@(appointment.TotalPrice?.ToString("N0") ?? "0") đ</strong></td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(appointment.Status))
+                                        {
+                                            string statusClass = "badge-secondary";
+                                            @switch (appointment.Status)
+                                            {
+                                                case "Chờ xác nhận":
+                                                    statusClass = "badge-warning";
+                                                    break;
+                                                case "Đã xác nhận":
+                                                    statusClass = "badge-info";
+                                                    break;
+                                                case "Đang thực hiện":
+                                                    statusClass = "badge-primary";
+                                                    break;
+                                                case "Hoàn thành":
+                                                    statusClass = "badge-success";
+                                                    break;
+                                                case "Đã hủy":
+                                                    statusClass = "badge-danger";
+                                                    break;
+                                            }
+                                            <span class="badge @statusClass">@appointment.Status</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Appointment", new { area = "Admin", id = appointment.AppointmentId })" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+

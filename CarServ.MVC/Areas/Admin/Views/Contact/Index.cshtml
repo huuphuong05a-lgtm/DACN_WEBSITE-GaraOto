@@ -1,0 +1,187 @@
+@model IEnumerable<CarServ.MVC.Models.Contact>
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Quản lý Liên hệ";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Liên hệ</h1>
+        <a href="@Url.Action("Create", "Contact", new { area = "Admin" })" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Thêm Liên hệ Mới
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm và Lọc</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Tìm kiếm:</label>
+                            <input type="text" name="searchString" class="form-control" value="@ViewData["CurrentFilter"]" placeholder="Tên, email, SĐT, tiêu đề..." />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Trạng thái:</label>
+                            <select name="statusFilter" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="Chưa đọc" selected="@(ViewData["CurrentStatus"]?.ToString() == "Chưa đọc")">Chưa đọc</option>
+                                <option value="Đã đọc" selected="@(ViewData["CurrentStatus"]?.ToString() == "Đã đọc")">Đã đọc</option>
+                                <option value="Đã trả lời" selected="@(ViewData["CurrentStatus"]?.ToString() == "Đã trả lời")">Đã trả lời</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Trạng thái đọc:</label>
+                            <select name="readFilter" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="Read" selected="@(ViewData["CurrentRead"]?.ToString() == "Read")">Đã đọc</option>
+                                <option value="Unread" selected="@(ViewData["CurrentRead"]?.ToString() == "Unread")">Chưa đọc</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Sắp xếp:</label>
+                            <select name="sortOrder" class="form-control">
+                                <option value="">Mới nhất</option>
+                                <option value="name_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "name_desc")">Tên (Z→A)</option>
+                                <option value="Date" selected="@(ViewData["CurrentSort"]?.ToString() == "Date")">Ngày tạo (cũ nhất)</option>
+                                <option value="date_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "date_desc")">Ngày tạo (mới nhất)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-search"></i> Tìm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contact Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Liên hệ</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Họ tên</th>
+                            <th>Email</th>
+                            <th>Số điện thoại</th>
+                            <th>Tiêu đề</th>
+                            <th>Trạng thái</th>
+                            <th>Đã đọc</th>
+                            <th>Đã trả lời</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.IsRead != true ? "table-warning" : "")">
+                                <td><strong>@item.FullName</strong></td>
+                                <td>@(item.Email ?? "-")</td>
+                                <td>@(item.Phone ?? "-")</td>
+                                <td>@(item.Subject ?? "-")</td>
+                                <td>
+                                    @if (item.Status == "Chưa đọc")
+                                    {
+                                        <span class="badge badge-warning">Chưa đọc</span>
+                                    }
+                                    else if (item.Status == "Đã đọc")
+                                    {
+                                        <span class="badge badge-info">Đã đọc</span>
+                                    }
+                                    else if (item.Status == "Đã trả lời")
+                                    {
+                                        <span class="badge badge-success">Đã trả lời</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">@(item.Status ?? "-")</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsRead == true)
+                                    {
+                                        <span class="badge badge-success"><i class="fas fa-check"></i> Đã đọc</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-warning"><i class="fas fa-envelope"></i> Chưa đọc</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsReplied == true)
+                                    {
+                                        <span class="badge badge-success"><i class="fas fa-reply"></i> Đã trả lời</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Chưa trả lời</span>
+                                    }
+                                </td>
+                                <td>@(item.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                                <td>
+                                    <a href="@Url.Action("Details", "Contact", new { area = "Admin", id = item.ContactId })" class="btn btn-info btn-sm" title="Xem chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", "Contact", new { area = "Admin", id = item.ContactId })" class="btn btn-warning btn-sm" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="@Url.Action("Delete", "Contact", new { area = "Admin", id = item.ContactId })" class="btn btn-danger btn-sm" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "order": [[7, "desc"]]
+            });
+        });
+    </script>
+}
+
+

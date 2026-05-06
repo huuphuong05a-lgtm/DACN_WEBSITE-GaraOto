@@ -1,0 +1,409 @@
+@model CarServ.MVC.Models.BlogPost
+
+@{
+    ViewData["Title"] = "Thêm Bài viết Blog";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Thêm Bài viết Blog</h1>
+        <a href="@Url.Action("Index", "BlogPostAdmin", new { area = "Admin" })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Bài viết</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="Title" class="control-label">Tiêu đề <span class="text-danger">*</span></label>
+                    <input asp-for="Title" class="form-control" required maxlength="200" id="titleInput" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                    <small class="form-text text-muted">Slug sẽ tự động tạo từ tiêu đề</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">Slug (tự động)</label>
+                    <input type="text" class="form-control" id="slugPreview" readonly placeholder="Slug sẽ tự động tạo..." />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ShortDescription" class="control-label">Mô tả ngắn</label>
+                    <textarea asp-for="ShortDescription" class="form-control" rows="3" maxlength="500" placeholder="Mô tả ngắn về bài viết..."></textarea>
+                    <span asp-validation-for="ShortDescription" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Content" class="control-label">Nội dung</label>
+                    <textarea asp-for="Content" class="form-control" rows="15" placeholder="Nội dung bài viết (có thể dùng HTML)..."></textarea>
+                    <span asp-validation-for="Content" class="text-danger"></span>
+                    <small class="form-text text-muted">Có thể sử dụng HTML để định dạng nội dung</small>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Ảnh đại diện</label>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imageBrowserModal">
+                                <i class="fas fa-images"></i> Chọn ảnh
+                            </button>
+                            <input type="hidden" asp-for="Thumbnail" id="selectedImageUrl" />
+                            <div id="selectedImagePreview" class="mt-3" style="display: none;">
+                                <div class="border p-2 d-inline-block">
+                                    <img id="previewImg" src="" alt="Preview" style="max-width: 200px; max-height: 200px;" class="img-thumbnail" />
+                                    <br /><small class="text-muted">Ảnh đã chọn: <span id="selectedImageName"></span></small>
+                                    <button type="button" class="btn btn-sm btn-danger ml-2" onclick="clearSelectedImage()">
+                                        <i class="fas fa-times"></i> Xóa
+                                    </button>
+                                </div>
+                            </div>
+                            <span asp-validation-for="Thumbnail" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CategoryId" class="control-label">Chuyên mục</label>
+                            <select asp-for="CategoryId" class="form-control" asp-items="@(ViewData["CategoryId"] as SelectList)">
+                                <option value="">Chọn chuyên mục</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="PublishedDate" class="control-label">Ngày xuất bản</label>
+                            <input asp-for="PublishedDate" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="PublishedDate" class="text-danger"></span>
+                            <small class="form-text text-muted">Để trống sẽ dùng ngày hiện tại khi xuất bản</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="SeoTitle" class="control-label">SEO Title</label>
+                            <input asp-for="SeoTitle" class="form-control" maxlength="200" />
+                            <span asp-validation-for="SeoTitle" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <div class="form-check mt-4">
+                                <input asp-for="IsPublished" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsPublished" class="form-check-label">
+                                    Xuất bản ngay
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="SeoDescription" class="control-label">SEO Description</label>
+                    <textarea asp-for="SeoDescription" class="form-control" rows="2" maxlength="300"></textarea>
+                    <span asp-validation-for="SeoDescription" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                    <a href="@Url.Action("Index", "BlogPostAdmin", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Image Browser Modal -->
+<div class="modal fade" id="imageBrowserModal" tabindex="-1" role="dialog" aria-labelledby="imageBrowserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageBrowserModalLabel">Chọn ảnh từ thư viện</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Upload Section -->
+                <div class="form-group border p-3 mb-3">
+                    <h6 class="text-primary">Tải ảnh lên từ máy tính</h6>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="imageUpload" accept=".jpg,.jpeg,.png,.gif,.webp">
+                        <label class="custom-file-label" for="imageUpload">Chọn file ảnh...</label>
+                    </div>
+                    <small class="form-text text-muted">Chỉ chấp nhận JPG, JPEG, PNG, GIF, WEBP. Tối đa 10MB.</small>
+                    <button class="btn btn-success mt-2" type="button" id="btnUploadImage" disabled><i class="fas fa-upload"></i> Tải lên</button>
+                    <div class="progress mt-2" id="uploadProgress" style="display: none;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                <!-- Image List -->
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="imageTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Ảnh</th>
+                                <th>Tên file</th>
+                                <th>Kích thước</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="imageTableBody">
+                            <!-- Images will be loaded here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Auto-generate slug preview from title
+        document.getElementById('titleInput').addEventListener('input', function() {
+            var title = this.value;
+            var slug = title.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim();
+            document.getElementById('slugPreview').value = slug;
+        });
+
+        $(document).ready(function() {
+            // Đảm bảo jQuery đã load
+            if (typeof $ === 'undefined') {
+                console.error('jQuery chưa được load!');
+                return;
+            }
+
+            // Load images when modal is opened
+            $('#imageBrowserModal').on('show.bs.modal', function() {
+                loadImages();
+            });
+
+            // Handle file input change
+            $('#imageUpload').on('change', function() {
+                var fileName = $(this).val().split('\\').pop();
+                $(this).siblings('.custom-file-label').text(fileName || 'Chọn file ảnh...');
+                $('#btnUploadImage').prop('disabled', !fileName);
+            });
+
+            // Handle upload button click
+            $('#btnUploadImage').on('click', function() {
+                var fileInput = $('#imageUpload')[0];
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    alert('Vui lòng chọn file ảnh');
+                    return;
+                }
+
+                var file = fileInput.files[0];
+                const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+                if (file.size > MAX_FILE_SIZE) {
+                    alert('Kích thước file không được vượt quá 10MB.');
+                    return;
+                }
+
+                var formData = new FormData();
+                formData.append('file', file);
+
+                $('#uploadProgress').show();
+                $('#btnUploadImage').prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("UploadImage", "BlogPostAdmin", new { area = "Admin" })',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    xhr: function() {
+                        var xhr = new window.XMLHttpRequest();
+                        xhr.upload.addEventListener("progress", function(evt) {
+                            if (evt.lengthComputable) {
+                                var percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                                $('#uploadProgress .progress-bar').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete).text(percentComplete + '%');
+                            }
+                        }, false);
+                        return xhr;
+                    },
+                    success: function(response) {
+                        $('#uploadProgress').hide();
+                        $('#btnUploadImage').prop('disabled', false);
+                        $('#imageUpload').val('');
+                        $('.custom-file-label').text('Chọn file ảnh...');
+                        $('#uploadProgress .progress-bar').css('width', '0%').attr('aria-valuenow', '0').text('0%'); // Reset progress bar
+
+                        if (response.success) {
+                            loadImages(); // Reload images
+                            alert('Upload ảnh thành công!');
+                        } else {
+                            var errorMsg = response.message || 'Lỗi khi upload ảnh';
+                            alert('Lỗi: ' + errorMsg);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#uploadProgress').hide();
+                        $('#btnUploadImage').prop('disabled', false);
+                        $('#uploadProgress .progress-bar').css('width', '0%').attr('aria-valuenow', '0').text('0%'); // Reset progress bar
+                        var errorMessage = 'Lỗi khi upload ảnh';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.responseText) {
+                            try {
+                                var response = JSON.parse(xhr.responseText);
+                                if (response.message) {
+                                    errorMessage = response.message;
+                                }
+                            } catch (e) {
+                                errorMessage = 'Lỗi: ' + xhr.status + ' - ' + error;
+                            }
+                        }
+                        alert(errorMessage);
+                        console.error('Upload error:', xhr, status, error);
+                    }
+                });
+            });
+
+
+            function loadImages() {
+                $.ajax({
+                    url: '@Url.Action("BrowseImages", "BlogPostAdmin", new { area = "Admin" })',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        var tbody = $('#imageTable tbody');
+                        tbody.empty();
+                        
+                        if (!data || data.length === 0) {
+                            tbody.append('<tr><td colspan="4" class="text-center text-muted"><p>Chưa có ảnh nào trong thư viện</p></td></tr>');
+                            return;
+                        }
+
+                        data.forEach(function(image) {
+                            var sizeKB = (image.size / 1024).toFixed(2);
+                            var row = '<tr id="image-row-' + image.name.replace(/[^a-zA-Z0-9]/g, '-') + '">' +
+                                '<td><img src="' + image.url + '" alt="' + image.name + '" style="max-width: 100px; max-height: 100px;" class="img-thumbnail" /></td>' +
+                                '<td>' + image.name + '</td>' +
+                                '<td>' + sizeKB + ' KB</td>' +
+                                '<td style="white-space: nowrap;">' +
+                                '<button type="button" class="btn btn-sm btn-primary mr-1" onclick="selectImage(\'' + image.url.replace(/'/g, "\\'") + '\', \'' + image.name.replace(/'/g, "\\'") + '\')">Chọn</button>' +
+                                '<button type="button" class="btn btn-sm btn-danger" onclick="deleteImage(\'' + image.url.replace(/'/g, "\\'") + '\', \'' + image.name.replace(/'/g, "\\'") + '\')">Xóa</button>' +
+                                '</td>' +
+                                '</tr>';
+                            tbody.append(row);
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading images:', status, error, xhr.responseText);
+                        var errorMsg = 'Lỗi khi tải danh sách ảnh';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg += ': ' + xhr.responseJSON.message;
+                        } else if (xhr.status === 0) {
+                            errorMsg += ': Không thể kết nối đến server';
+                        } else if (xhr.status === 404) {
+                            errorMsg += ': Không tìm thấy trang';
+                        } else if (xhr.status === 500) {
+                            errorMsg += ': Lỗi server';
+                        }
+                        $('#imageTableBody').html('<tr><td colspan="4" class="text-center text-danger">' + errorMsg + '</td></tr>');
+                    }
+                });
+            }
+
+            window.selectImage = function(url, name) {
+                $('#selectedImageUrl').val(url);
+                $('#previewImg').attr('src', url);
+                $('#selectedImageName').text(name);
+                $('#selectedImagePreview').show();
+                $('#imageBrowserModal').modal('hide');
+            };
+
+            window.clearSelectedImage = function() {
+                $('#selectedImageUrl').val('');
+                $('#previewImg').attr('src', '');
+                $('#selectedImageName').text('');
+                $('#selectedImagePreview').hide();
+            };
+
+            window.deleteImage = function(url, name) {
+                if (!confirm('Bạn có chắc chắn muốn xóa ảnh "' + name + '"?')) {
+                    return;
+                }
+
+                var rowId = 'image-row-' + name.replace(/[^a-zA-Z0-9]/g, '-');
+                var $row = $('#' + rowId);
+                $row.find('td:last').html('<i class="fas fa-spinner fa-spin"></i> Đang xóa...');
+
+                $.ajax({
+                    url: '@Url.Action("DeleteImage", "BlogPostAdmin", new { area = "Admin" })',
+                    type: 'POST',
+                    data: { imageUrl: url },
+                    success: function(response) {
+                        if (response.success) {
+                            $row.fadeOut(300, function() {
+                                $(this).remove();
+                                if ($('#imageTableBody tr').length === 0) {
+                                    $('#imageTableBody').html('<tr><td colspan="4" class="text-center text-muted"><p>Chưa có ảnh nào trong thư viện</p></td></tr>');
+                                }
+                            });
+                            if ($('#selectedImageUrl').val() === url) {
+                                clearSelectedImage();
+                            }
+                            alert('Xóa ảnh thành công!');
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                            $row.find('td:last').html(
+                                '<span style="white-space: nowrap;">' +
+                                '<button type="button" class="btn btn-sm btn-primary mr-1" onclick="selectImage(\'' + url.replace(/'/g, "\\'") + '\', \'' + name.replace(/'/g, "\\'") + '\')">Chọn</button>' +
+                                '<button type="button" class="btn btn-sm btn-danger" onclick="deleteImage(\'' + url.replace(/'/g, "\\'") + '\', \'' + name.replace(/'/g, "\\'") + '\')">Xóa</button>' +
+                                '</span>'
+                            );
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        var errorMessage = 'Lỗi khi xóa ảnh';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.responseText) {
+                            try {
+                                var response = JSON.parse(xhr.responseText);
+                                if (response.message) {
+                                    errorMessage = response.message;
+                                }
+                            } catch (e) {
+                                errorMessage = 'Lỗi: ' + xhr.status + ' - ' + error;
+                            }
+                        }
+                        alert(errorMessage);
+                        console.error('Delete error:', xhr, status, error);
+                        $row.find('td:last').html(
+                            '<span style="white-space: nowrap;">' +
+                            '<button type="button" class="btn btn-sm btn-primary mr-1" onclick="selectImage(\'' + url.replace(/'/g, "\\'") + '\', \'' + name.replace(/'/g, "\\'") + '\')">Chọn</button>' +
+                            '<button type="button" class="btn btn-sm btn-danger" onclick="deleteImage(\'' + url.replace(/'/g, "\\'") + '\', \'' + name.replace(/'/g, "\\'") + '\')">Xóa</button>' +
+                            '</span>'
+                        );
+                    }
+                });
+            };
+        });
+    </script>
+}
+

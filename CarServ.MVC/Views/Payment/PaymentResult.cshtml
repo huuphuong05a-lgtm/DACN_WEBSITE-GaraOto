@@ -1,0 +1,113 @@
+@{
+    ViewData["Title"] = "Kết quả Thanh toán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var success = ViewBag.Success as bool? ?? false;
+    var message = ViewBag.Message as string;
+    var orderCode = ViewBag.OrderCode as string;
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center pb-5">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Kết quả Thanh toán</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang Chủ</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Kết quả Thanh toán</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Payment Result Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-lg">
+                    <div class="card-body text-center p-5">
+                        @if (success)
+                        {
+                            <div class="mb-4">
+                                <i class="fas fa-check-circle text-success" style="font-size: 80px;"></i>
+                            </div>
+                            <h2 class="text-success mb-3">Thanh toán thành công!</h2>
+                            @if (!string.IsNullOrEmpty(orderCode))
+                            {
+                                <p class="lead mb-4">
+                                    Mã đơn hàng của bạn: <strong class="text-primary">@orderCode</strong>
+                                </p>
+                            }
+                            <p class="text-muted mb-4">
+                                Cảm ơn bạn đã mua hàng! Đơn hàng của bạn đã được xác nhận và sẽ được xử lý trong thời gian sớm nhất.
+                            </p>
+                            <div class="d-flex justify-content-center gap-3">
+                                <a href="@Url.Action("Orders", "Customer")" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-list me-2"></i>Xem Đơn hàng
+                                </a>
+                                <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary btn-lg">
+                                    <i class="fas fa-home me-2"></i>Về Trang Chủ
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mb-4">
+                                <i class="fas fa-times-circle text-danger" style="font-size: 80px;"></i>
+                            </div>
+                            <h2 class="text-danger mb-3">Thanh toán thất bại!</h2>
+                            @if (!string.IsNullOrEmpty(message))
+                            {
+                                <p class="lead mb-4 text-muted">@message</p>
+                            }
+                            else
+                            {
+                                <p class="lead mb-4 text-muted">
+                                    Có vấn đề xảy ra trong quá trình thanh toán. Vui lòng thử lại hoặc liên hệ với chúng tôi để được hỗ trợ.
+                                </p>
+                            }
+                            <div class="d-flex justify-content-center gap-3">
+                                <a href="@Url.Action("Index", "Cart")" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-shopping-cart me-2"></i>Quay lại Giỏ hàng
+                                </a>
+                                <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary btn-lg">
+                                    <i class="fas fa-home me-2"></i>Về Trang Chủ
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (success)
+                {
+                    <div class="card shadow mt-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin bổ sung</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Bạn sẽ nhận được email xác nhận đơn hàng trong vài phút tới.
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Đơn hàng của bạn sẽ được xử lý và giao hàng trong thời gian sớm nhất.
+                                </li>
+                                <li>
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ hotline: <strong>1900-xxxx</strong>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Payment Result End -->
+

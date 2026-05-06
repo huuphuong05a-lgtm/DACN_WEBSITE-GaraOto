@@ -1,0 +1,165 @@
+@model CarServ.MVC.Controllers.VehicleViewModel
+@{
+    ViewData["Title"] = "Thêm xe mới";
+    var brands = ViewBag.Brands as IEnumerable<CarServ.MVC.Models.VehicleBrand>;
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Thêm Xe Mới</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Vehicles", "Customer")">Quản lý xe</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Thêm xe</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Add Vehicle Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="bg-light rounded p-5">
+                    <h3 class="mb-4">Thông tin xe</h3>
+
+                    <form asp-action="AddVehicle" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="LicensePlate" class="form-label">Biển số <span class="text-danger">*</span></label>
+                                <input asp-for="LicensePlate" class="form-control" placeholder="VD: 30A-12345" />
+                                <span asp-validation-for="LicensePlate" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="VehicleName" class="form-label">Tên xe</label>
+                                <input asp-for="VehicleName" class="form-control" placeholder="VD: Xe gia đình" />
+                                <span asp-validation-for="VehicleName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="BrandId" class="form-label">Hãng xe</label>
+                                <select asp-for="BrandId" class="form-select" id="brandSelect">
+                                    <option value="">-- Chọn hãng --</option>
+                                    @if (brands != null)
+                                    {
+                                        @foreach (var brand in brands)
+                                        {
+                                            <option value="@brand.BrandId">@brand.BrandName</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="BrandId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ModelId" class="form-label">Dòng xe</label>
+                                <select asp-for="ModelId" class="form-select" id="modelSelect" disabled>
+                                    <option value="">-- Chọn dòng --</option>
+                                </select>
+                                <span asp-validation-for="ModelId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Year" class="form-label">Năm sản xuất</label>
+                                <input asp-for="Year" type="number" class="form-control" min="1900" max="@DateTime.Now.Year" />
+                                <span asp-validation-for="Year" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Color" class="form-label">Màu sắc</label>
+                                <input asp-for="Color" class="form-control" />
+                                <span asp-validation-for="Color" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="FuelType" class="form-label">Loại nhiên liệu</label>
+                                <select asp-for="FuelType" class="form-select">
+                                    <option value="">-- Chọn --</option>
+                                    <option value="Xăng">Xăng</option>
+                                    <option value="Dầu">Dầu</option>
+                                    <option value="Điện">Điện</option>
+                                    <option value="Hybrid">Hybrid</option>
+                                </select>
+                                <span asp-validation-for="FuelType" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="RegistrationDate" class="form-label">Ngày đăng ký</label>
+                                <input asp-for="RegistrationDate" type="date" class="form-control" />
+                                <span asp-validation-for="RegistrationDate" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ChassisNumber" class="form-label">Số khung</label>
+                                <input asp-for="ChassisNumber" class="form-control" />
+                                <span asp-validation-for="ChassisNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EngineNumber" class="form-label">Số máy</label>
+                                <input asp-for="EngineNumber" class="form-control" />
+                                <span asp-validation-for="EngineNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="Notes" class="form-label">Ghi chú</label>
+                                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-save me-2"></i>Thêm xe
+                            </button>
+                            <a href="@Url.Action("Vehicles", "Customer")" class="btn btn-secondary">
+                                <i class="fa fa-times me-2"></i>Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Add Vehicle End -->
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Load models when brand changes
+        document.getElementById('brandSelect').addEventListener('change', function() {
+            var brandId = this.value;
+            var modelSelect = document.getElementById('modelSelect');
+            
+            if (brandId) {
+                fetch('@Url.Action("GetModels", "Customer")?brandId=' + brandId)
+                    .then(response => response.json())
+                    .then(data => {
+                        modelSelect.innerHTML = '<option value="">-- Chọn dòng --</option>';
+                        data.forEach(function(model) {
+                            var option = document.createElement('option');
+                            option.value = model.modelId;
+                            option.textContent = model.modelName;
+                            modelSelect.appendChild(option);
+                        });
+                        modelSelect.disabled = false;
+                    });
+            } else {
+                modelSelect.innerHTML = '<option value="">-- Chọn dòng --</option>';
+                modelSelect.disabled = true;
+            }
+        });
+    </script>
+}
+
+

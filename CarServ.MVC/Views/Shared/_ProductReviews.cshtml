@@ -1,0 +1,195 @@
+@model CarServ.MVC.Models.Product
+@{
+    var reviews = ViewData["Reviews"] as List<CarServ.MVC.Models.Review> ?? new List<CarServ.MVC.Models.Review>();
+    var averageRating = ViewData["AverageRating"] as double? ?? 0.0;
+    var reviewCount = ViewData["ReviewCount"] as int? ?? 0;
+}
+
+<!-- Reviews Section Start -->
+<div class="mt-5">
+    <h3 class="mb-4">Đánh Giá Sản Phẩm</h3>
+    
+    <!-- Rating Summary -->
+    <div class="bg-light rounded p-4 mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-4 text-center">
+                <div class="mb-2">
+                    <h2 class="text-primary mb-0">@averageRating.ToString("F1")</h2>
+                    <div class="rating-stars mb-2">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Math.Floor(averageRating))
+                            {
+                                <i class="fas fa-star text-warning"></i>
+                            }
+                            else if (i - 0.5 <= averageRating)
+                            {
+                                <i class="fas fa-star-half-alt text-warning"></i>
+                            }
+                            else
+                            {
+                                <i class="far fa-star text-warning"></i>
+                            }
+                        }
+                    </div>
+                    <p class="text-muted mb-0">@reviewCount đánh giá</p>
+                </div>
+            </div>
+            <div class="col-md-8">
+                @if (reviewCount > 0)
+                {
+                    <div class="rating-breakdown">
+                        @for (int star = 5; star >= 1; star--)
+                        {
+                            var count = reviews.Count(r => r.Rating == star);
+                            var percentage = reviewCount > 0 ? (count * 100.0 / reviewCount) : 0;
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="me-2" style="width: 60px;">@star <i class="fas fa-star text-warning"></i></span>
+                                <div class="progress flex-grow-1" style="height: 20px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: @percentage%"></div>
+                                </div>
+                                <span class="ms-2 text-muted">@count</span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Form -->
+    <div class="bg-light rounded p-4 mb-4">
+        <h4 class="mb-3">Viết đánh giá</h4>
+        <form asp-controller="Review" asp-action="AddReview" method="post">
+            <input type="hidden" name="productId" value="@Model.ProductId" />
+            
+            <div class="mb-3">
+                <label for="customerName" class="form-label">Họ tên <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="customerName" name="customerName" required maxlength="100" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Đánh giá <span class="text-danger">*</span></label>
+                <div class="rating-input">
+                    @for (int i = 5; i >= 1; i--)
+                    {
+                        <input type="radio" id="rating@(i)" name="rating" value="@i" required />
+                        <label for="rating@(i)" class="rating-star">
+                            <i class="far fa-star"></i>
+                        </label>
+                    }
+                </div>
+                <small class="text-muted d-block mt-1">Chọn số sao từ 1 đến 5</small>
+            </div>
+
+            <div class="mb-3">
+                <label for="comment" class="form-label">Nhận xét</label>
+                <textarea class="form-control" id="comment" name="comment" rows="4" maxlength="2000"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-paper-plane me-2"></i>Gửi đánh giá
+            </button>
+        </form>
+    </div>
+
+    <!-- Reviews List -->
+    @if (reviews.Any())
+    {
+        <div class="reviews-list">
+            <h4 class="mb-3">Đánh giá khách hàng (@reviewCount)</h4>
+            @foreach (var review in reviews)
+            {
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="card-title mb-1">@review.CustomerName</h5>
+                                <div class="rating-stars mb-2">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= review.Rating)
+                                        {
+                                            <i class="fas fa-star text-warning"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="far fa-star text-warning"></i>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                            <small class="text-muted">@review.CreatedDate.ToString("dd/MM/yyyy")</small>
+                        </div>
+                        @if (!string.IsNullOrEmpty(review.Comment))
+                        {
+                            <p class="card-text">@review.Comment</p>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="far fa-star fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Chưa có đánh giá nào cho sản phẩm này.</p>
+        </div>
+    }
+</div>
+<!-- Reviews Section End -->
+
+<style>
+    .rating-input {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+    .rating-input input[type="radio"] {
+        display: none;
+    }
+    .rating-input label {
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: #ddd;
+        transition: color 0.2s;
+    }
+    .rating-input label:hover,
+    .rating-input label:hover ~ label {
+        color: #ffc107;
+    }
+    .rating-input input[type="radio"]:checked ~ label {
+        color: #ffc107;
+    }
+    .rating-stars {
+        font-size: 1rem;
+    }
+</style>
+
+<script>
+    // Highlight stars on hover and click
+    document.querySelectorAll('.rating-input input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const rating = parseInt(this.value);
+            const labels = document.querySelectorAll('.rating-input label');
+            labels.forEach((label, index) => {
+                const starIndex = 5 - index;
+                const icon = label.querySelector('i');
+                if (starIndex <= rating) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                }
+            });
+        });
+    });
+</script>
+
+

@@ -1,0 +1,139 @@
+@model CarServ.MVC.Models.Technician
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Xóa Kỹ thuật viên";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Kỹ thuật viên</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger">
+            <h6 class="m-0 font-weight-bold text-white">Xác nhận xóa kỹ thuật viên</h6>
+        </div>
+        <div class="card-body">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+                </div>
+            }
+
+            <h4 class="text-danger">Bạn có chắc chắn muốn xóa kỹ thuật viên này?</h4>
+            <hr />
+
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.FullName" class="img-thumbnail" style="max-width: 150px; max-height: 150px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px; font-size: 3rem;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    }
+                </div>
+                <div class="col-md-9">
+                    <dl class="row">
+                        <dt class="col-sm-4">Họ và tên:</dt>
+                        <dd class="col-sm-8"><strong>@Model.FullName</strong></dd>
+
+                        <dt class="col-sm-4">Vị trí:</dt>
+                        <dd class="col-sm-8">@(Model.Position ?? "-")</dd>
+
+                        <dt class="col-sm-4">Kinh nghiệm:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.ExperienceYears.HasValue)
+                            {
+                                <text>@Model.ExperienceYears năm</text>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Số điện thoại:</dt>
+                        <dd class="col-sm-8">@(Model.Phone ?? "-")</dd>
+
+                        <dt class="col-sm-4">Email:</dt>
+                        <dd class="col-sm-8">@(Model.Email ?? "-")</dd>
+
+                        <dt class="col-sm-4">Đánh giá:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Rating.HasValue)
+                            {
+                                <text>@Model.Rating.Value.ToString("F1") / 5.0</text>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Chưa có đánh giá</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Trạng thái:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive == true)
+                            {
+                                <span class="badge badge-success">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Không hoạt động</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Số lịch hẹn:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Appointments != null && Model.Appointments.Any())
+                            {
+                                <text>@Model.Appointments.Count() lịch hẹn</text>
+                            }
+                            else
+                            {
+                                <text>0</text>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (Model.Appointments != null && Model.Appointments.Any())
+            {
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <strong>Cảnh báo:</strong> Kỹ thuật viên này có @Model.Appointments.Count() lịch hẹn. Không thể xóa kỹ thuật viên có lịch hẹn liên quan.
+                </div>
+            }
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="TechnicianId" />
+                <div class="form-group">
+                    @if (Model.Appointments != null && Model.Appointments.Any())
+                    {
+                        <button type="submit" class="btn btn-danger" disabled>
+                            <i class="fas fa-trash"></i> Xóa (Không thể xóa)
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Xóa
+                        </button>
+                    }
+                    <a href="@Url.Action("Index", "Technician", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

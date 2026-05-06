@@ -1,0 +1,197 @@
+@model IEnumerable<CarServ.MVC.Models.Service>
+
+@{
+    ViewData["Title"] = "Quản lý Dịch vụ";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Dịch vụ</h1>
+        <a href="@Url.Action("Create", "Service", new { area = "Admin" })" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Thêm Dịch vụ Mới
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm và Lọc</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Tìm kiếm:</label>
+                            <input type="text" name="searchString" class="form-control" value="@ViewData["CurrentFilter"]" placeholder="Tên dịch vụ, mô tả..." />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Danh mục:</label>
+                            <select name="categoryFilter" class="form-control">
+                                <option value="">Tất cả danh mục</option>
+                                @if (ViewBag.Categories != null)
+                                {
+                                    @foreach (var cat in ViewBag.Categories)
+                                    {
+                                        <option value="@cat" selected="@(ViewData["CurrentCategory"]?.ToString() == cat)">@cat</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Trạng thái:</label>
+                            <select name="statusFilter" class="form-control" asp-items="@(new SelectList(new[] { new { Value = "active", Text = "Đang hoạt động" }, new { Value = "inactive", Text = "Không hoạt động" } }, "Value", "Text", (string)ViewData["CurrentStatus"]))">
+                                <option value="">Tất cả trạng thái</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Sắp xếp:</label>
+                            <select name="sortOrder" class="form-control">
+                                <option value="">Mặc định</option>
+                                <option value="SortOrder" selected="@(ViewData["CurrentSort"]?.ToString() == "SortOrder")">Thứ tự tăng dần</option>
+                                <option value="sortorder_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "sortorder_desc")">Thứ tự giảm dần</option>
+                                <option value="Price" selected="@(ViewData["CurrentSort"]?.ToString() == "Price")">Giá tăng dần</option>
+                                <option value="price_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "price_desc")">Giá giảm dần</option>
+                                <option value="name_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "name_desc")">Tên Z-A</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-search"></i> Tìm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Service Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Dịch vụ</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Tên Dịch vụ</th>
+                            <th>Danh mục</th>
+                            <th>Giá</th>
+                            <th>Thời gian (phút)</th>
+                            <th>Nổi bật</th>
+                            <th>Trạng thái</th>
+                            <th>Thứ tự</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.ServiceName" style="width: 60px; height: 60px; object-fit: cover;" class="img-thumbnail" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa có ảnh</span>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@item.ServiceName</strong>
+                                    @if (!string.IsNullOrEmpty(item.ShortDescription))
+                                    {
+                                        <br /><small class="text-muted">@(item.ShortDescription.Length > 50 ? item.ShortDescription.Substring(0, 50) + "..." : item.ShortDescription)</small>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.ServiceCategory))
+                                    {
+                                        <span class="badge badge-info">@item.ServiceCategory</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Price.HasValue)
+                                    {
+                                        <strong>@item.Price.Value.ToString("N0") đ</strong>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>@(item.EstimatedDuration?.ToString() ?? "-")</td>
+                                <td>
+                                    @if (item.IsFeatured)
+                                    {
+                                        <span class="badge badge-warning"><i class="fas fa-star"></i> Nổi bật</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge badge-success">Đang hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Không hoạt động</span>
+                                    }
+                                </td>
+                                <td>@(item.SortOrder ?? 0)</td>
+                                <td>
+                                    <a href="@Url.Action("Details", "Service", new { area = "Admin", id = item.ServiceId })" class="btn btn-info btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", "Service", new { area = "Admin", id = item.ServiceId })" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="@Url.Action("Delete", "Service", new { area = "Admin", id = item.ServiceId })" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "order": [[7, "asc"]]
+            });
+        });
+    </script>
+}
+
+
+

@@ -1,0 +1,330 @@
+@model CarServ.MVC.Models.Testimonial
+
+@{
+    ViewData["Title"] = "Thêm Đánh giá Mới";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Thêm Đánh giá Mới</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Đánh giá</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CustomerId" class="control-label">Khách hàng</label>
+                            <select asp-for="CustomerId" class="form-control" id="CustomerId">
+                                <option value="">-- Chọn khách hàng (tùy chọn) --</option>
+                                @if (ViewBag.CustomerId != null)
+                                {
+                                    @foreach (var customer in (SelectList)ViewBag.CustomerId)
+                                    {
+                                        <option value="@customer.Value">@customer.Text</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="CustomerId" class="text-danger"></span>
+                            <small class="form-text text-muted">Nếu chọn khách hàng, thông tin sẽ được tự động điền</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CustomerName" class="control-label">Tên khách hàng <span class="text-danger">*</span></label>
+                            <input asp-for="CustomerName" class="form-control" id="CustomerName" required />
+                            <span asp-validation-for="CustomerName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CustomerPosition" class="control-label">Chức vụ/Vị trí</label>
+                            <input asp-for="CustomerPosition" class="form-control" />
+                            <span asp-validation-for="CustomerPosition" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Rating" class="control-label">Đánh giá (sao) <span class="text-danger">*</span></label>
+                            <select asp-for="Rating" class="form-control" required>
+                                <option value="">-- Chọn --</option>
+                                @if (ViewBag.RatingList != null)
+                                {
+                                    @foreach (var rating in (int[])ViewBag.RatingList)
+                                    {
+                                        <option value="@rating">@rating sao</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="ServiceType" class="control-label">Loại dịch vụ</label>
+                            <select asp-for="ServiceType" class="form-control">
+                                <option value="">-- Chọn --</option>
+                                @if (ViewBag.ServiceTypeList != null)
+                                {
+                                    @foreach (var serviceType in (string[])ViewBag.ServiceTypeList)
+                                    {
+                                        <option value="@serviceType">@serviceType</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="ServiceType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label asp-for="Content" class="control-label">Nội dung đánh giá <span class="text-danger">*</span></label>
+                            <textarea asp-for="Content" class="form-control" rows="5" required></textarea>
+                            <span asp-validation-for="Content" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Ảnh đại diện khách hàng</label>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#avatarBrowserModal">
+                                <i class="fas fa-images"></i> Chọn ảnh
+                            </button>
+                            <input type="hidden" asp-for="CustomerAvatar" id="selectedAvatarUrl" />
+                            <div id="selectedAvatarPreview" class="mt-3" style="display: none;">
+                                <div class="border p-2 d-inline-block">
+                                    <img id="previewAvatarImg" src="" alt="Preview" style="max-width: 150px; max-height: 150px;" class="img-thumbnail" />
+                                    <br /><small class="text-muted">Ảnh đã chọn: <span id="selectedAvatarName"></span></small>
+                                    <button type="button" class="btn btn-sm btn-danger ml-2" onclick="clearSelectedAvatar()">
+                                        <i class="fas fa-times"></i> Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Ảnh đánh giá</label>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imageBrowserModal">
+                                <i class="fas fa-images"></i> Chọn ảnh
+                            </button>
+                            <input type="hidden" asp-for="ImageUrl" id="selectedImageUrl" />
+                            <div id="selectedImagePreview" class="mt-3" style="display: none;">
+                                <div class="border p-2 d-inline-block">
+                                    <img id="previewImg" src="" alt="Preview" style="max-width: 150px; max-height: 150px;" class="img-thumbnail" />
+                                    <br /><small class="text-muted">Ảnh đã chọn: <span id="selectedImageName"></span></small>
+                                    <button type="button" class="btn btn-sm btn-danger ml-2" onclick="clearSelectedImage()">
+                                        <i class="fas fa-times"></i> Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="SortOrder" class="control-label">Thứ tự hiển thị</label>
+                            <input asp-for="SortOrder" type="number" class="form-control" value="0" />
+                            <span asp-validation-for="SortOrder" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Xuất bản</label>
+                            <div>
+                                <input type="hidden" name="IsPublished" value="false" />
+                                <input type="checkbox" name="IsPublished" value="true" @(Model?.IsPublished == true ? "checked" : "") />
+                                <label class="ml-2">Đánh dấu đã xuất bản</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <a href="@Url.Action("Index", "Testimonial", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Avatar Browser Modal -->
+<div class="modal fade" id="avatarBrowserModal" tabindex="-1" role="dialog" aria-labelledby="avatarBrowserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="avatarBrowserModalLabel">Chọn ảnh đại diện từ thư viện</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="avatarTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">Ảnh</th>
+                                <th>Tên file</th>
+                                <th style="width: 100px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="avatarTableBody">
+                            <tr>
+                                <td colspan="3" class="text-center">Đang tải...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Browser Modal -->
+<div class="modal fade" id="imageBrowserModal" tabindex="-1" role="dialog" aria-labelledby="imageBrowserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageBrowserModalLabel">Chọn ảnh từ thư viện</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="imageTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">Ảnh</th>
+                                <th>Tên file</th>
+                                <th style="width: 100px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="imageTableBody">
+                            <tr>
+                                <td colspan="3" class="text-center">Đang tải...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Load avatar images when modal opens
+        $('#avatarBrowserModal').on('show.bs.modal', function() {
+            loadAvatarImages();
+        });
+
+        // Load images when modal opens
+        $('#imageBrowserModal').on('show.bs.modal', function() {
+            loadImages();
+        });
+
+        function loadAvatarImages() {
+            $.get('@Url.Action("BrowseImages", "Testimonial", new { area = "Admin", type = "avatar" })', function(data) {
+                var tbody = $('#avatarTableBody');
+                tbody.empty();
+                if (data.length === 0) {
+                    tbody.append('<tr><td colspan="3" class="text-center">Không có ảnh nào</td></tr>');
+                } else {
+                    data.forEach(function(image) {
+                        var row = '<tr>' +
+                            '<td><img src="' + image + '" style="width: 60px; height: 60px; object-fit: cover;" class="img-thumbnail" /></td>' +
+                            '<td>' + image.split('/').pop() + '</td>' +
+                            '<td><button type="button" class="btn btn-sm btn-primary" onclick="selectAvatar(\'' + image + '\')">Chọn</button></td>' +
+                            '</tr>';
+                        tbody.append(row);
+                    });
+                }
+            });
+        }
+
+        function loadImages() {
+            $.get('@Url.Action("BrowseImages", "Testimonial", new { area = "Admin", type = "image" })', function(data) {
+                var tbody = $('#imageTableBody');
+                tbody.empty();
+                if (data.length === 0) {
+                    tbody.append('<tr><td colspan="3" class="text-center">Không có ảnh nào</td></tr>');
+                } else {
+                    data.forEach(function(image) {
+                        var row = '<tr>' +
+                            '<td><img src="' + image + '" style="width: 60px; height: 60px; object-fit: cover;" class="img-thumbnail" /></td>' +
+                            '<td>' + image.split('/').pop() + '</td>' +
+                            '<td><button type="button" class="btn btn-sm btn-primary" onclick="selectImage(\'' + image + '\')">Chọn</button></td>' +
+                            '</tr>';
+                        tbody.append(row);
+                    });
+                }
+            });
+        }
+
+        function selectAvatar(imageUrl) {
+            $('#selectedAvatarUrl').val(imageUrl);
+            $('#previewAvatarImg').attr('src', imageUrl);
+            $('#selectedAvatarName').text(imageUrl.split('/').pop());
+            $('#selectedAvatarPreview').show();
+            $('#avatarBrowserModal').modal('hide');
+        }
+
+        function selectImage(imageUrl) {
+            $('#selectedImageUrl').val(imageUrl);
+            $('#previewImg').attr('src', imageUrl);
+            $('#selectedImageName').text(imageUrl.split('/').pop());
+            $('#selectedImagePreview').show();
+            $('#imageBrowserModal').modal('hide');
+        }
+
+        function clearSelectedAvatar() {
+            $('#selectedAvatarUrl').val('');
+            $('#selectedAvatarPreview').hide();
+        }
+
+        function clearSelectedImage() {
+            $('#selectedImageUrl').val('');
+            $('#selectedImagePreview').hide();
+        }
+
+        // Auto-fill customer info when customer is selected
+        $('#CustomerId').change(function() {
+            var customerId = $(this).val();
+            if (customerId) {
+                $.get('@Url.Action("GetCustomerInfo", "Testimonial", new { area = "Admin" })', { id: customerId }, function(data) {
+                    if (data) {
+                        $('#CustomerName').val(data.fullName || '');
+                        if (data.avatar) {
+                            selectAvatar(data.avatar);
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}
+
+

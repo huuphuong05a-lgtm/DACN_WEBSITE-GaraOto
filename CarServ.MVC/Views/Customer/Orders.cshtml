@@ -1,0 +1,129 @@
+@model IEnumerable<CarServ.MVC.Models.Order>
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Đơn Hàng Của Tôi</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Đơn hàng</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Orders Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="bg-light rounded p-4">
+                    <h5 class="mb-3">Menu</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="@Url.Action("Profile", "Customer")" class="text-dark">
+                                <i class="fa fa-user me-2"></i>Thông tin cá nhân
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="@Url.Action("Orders", "Customer")" class="text-primary">
+                                <i class="fa fa-shopping-bag me-2"></i>Đơn hàng
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="@Url.Action("Appointments", "Customer")" class="text-dark">
+                                <i class="fa fa-calendar me-2"></i>Lịch hẹn
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="@Url.Action("Vehicles", "Customer")" class="text-dark">
+                                <i class="fa fa-car me-2"></i>Quản lý xe
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                @if (!Model.Any())
+                {
+                    <div class="bg-light rounded p-5 text-center">
+                        <i class="fa fa-shopping-bag fa-4x text-muted mb-3"></i>
+                        <h4>Bạn chưa có đơn hàng nào</h4>
+                        <p class="text-muted">Hãy mua sắm để xem đơn hàng của bạn tại đây!</p>
+                        <a href="@Url.Action("Index", "Product")" class="btn btn-primary mt-3">
+                            <i class="fa fa-shopping-cart me-2"></i>Mua sắm ngay
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="bg-light rounded p-4">
+                        <h4 class="mb-4">Danh sách đơn hàng (@Model.Count())</h4>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thanh toán</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model)
+                                    {
+                                        <tr>
+                                            <td><strong>@(order.OrderCode ?? "-")</strong></td>
+                                            <td>@(order.OrderDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                                            <td><strong class="text-danger">@((order.FinalAmount ?? 0).ToString("N0")) đ</strong></td>
+                                            <td>
+                                                @{
+                                                    var statusClass = order.Status switch
+                                                    {
+                                                        "Đã giao hàng" => "success",
+                                                        "Đang giao hàng" => "info",
+                                                        "Đang xử lý" => "warning",
+                                                        "Đã hủy" => "danger",
+                                                        _ => "secondary"
+                                                    };
+                                                }
+                                                <span class="badge bg-@statusClass">@(order.Status ?? "Chờ xử lý")</span>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var paymentClass = order.PaymentStatus == "Đã thanh toán" ? "success" : "warning";
+                                                }
+                                                <span class="badge bg-@paymentClass">@(order.PaymentStatus ?? "Chưa thanh toán")</span>
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("OrderDetails", "Customer", new { id = order.OrderId })" class="btn btn-sm btn-primary">
+                                                    <i class="fa fa-eye me-1"></i>Chi tiết
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Orders End -->
+
+

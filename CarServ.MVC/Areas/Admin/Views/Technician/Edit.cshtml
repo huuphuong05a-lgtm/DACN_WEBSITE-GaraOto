@@ -1,0 +1,248 @@
+@model CarServ.MVC.Models.Technician
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Kỹ thuật viên";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chỉnh sửa Kỹ thuật viên</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Kỹ thuật viên</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="TechnicianId" />
+                <input type="hidden" asp-for="CreatedDate" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="FullName" class="control-label">Họ và tên <span class="text-danger">*</span></label>
+                            <input asp-for="FullName" class="form-control" required />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Position" class="control-label">Vị trí</label>
+                            <input asp-for="Position" class="form-control" placeholder="Ví dụ: Thợ máy, Thợ điện..." />
+                            <span asp-validation-for="Position" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="ExperienceYears" class="control-label">Kinh nghiệm (năm)</label>
+                            <input asp-for="ExperienceYears" type="number" class="form-control" min="0" />
+                            <span asp-validation-for="ExperienceYears" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Phone" class="control-label">Số điện thoại</label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Email" class="control-label">Email</label>
+                            <input asp-for="Email" type="email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Rating" class="control-label">Đánh giá (0-5)</label>
+                            <input asp-for="Rating" type="number" class="form-control" min="0" max="5" step="0.1" />
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">Ảnh kỹ thuật viên</label>
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <div class="mb-3">
+                            <div class="border p-2 d-inline-block">
+                                <img src="@Model.ImageUrl" alt="@Model.FullName" id="currentImagePreview" style="max-width: 200px; max-height: 200px;" class="img-thumbnail" />
+                                <br /><small class="text-muted">Ảnh hiện tại</small>
+                            </div>
+                        </div>
+                    }
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imageBrowserModal">
+                        <i class="fas fa-images"></i> Chọn ảnh
+                    </button>
+                    <input type="hidden" asp-for="ImageUrl" id="selectedImageUrl" />
+                    <div id="selectedImagePreview" class="mt-3" style="display: @(string.IsNullOrEmpty(Model.ImageUrl) ? "none" : "block");">
+                        <div class="border p-2 d-inline-block">
+                            <img id="previewImg" src="@Model.ImageUrl" alt="Preview" style="max-width: 200px; max-height: 200px;" class="img-thumbnail" />
+                            <br /><small class="text-muted">Ảnh đã chọn: <span id="selectedImageName">@(Model.ImageUrl != null ? Model.ImageUrl.Split('/').Last() : "")</span></small>
+                            <button type="button" class="btn btn-sm btn-danger ml-2" onclick="clearSelectedImage()">
+                                <i class="fas fa-times"></i> Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Bio" class="control-label">Tiểu sử</label>
+                    <textarea asp-for="Bio" class="form-control" rows="3" placeholder="Giới thiệu về kỹ thuật viên..."></textarea>
+                    <span asp-validation-for="Bio" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Skills" class="control-label">Kỹ năng</label>
+                    <textarea asp-for="Skills" class="form-control" rows="2" placeholder="Ví dụ: Sửa chữa động cơ, Điện tử, Hệ thống phanh..."></textarea>
+                    <span asp-validation-for="Skills" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="TotalReviews" class="control-label">Số lượt đánh giá</label>
+                            <input asp-for="TotalReviews" type="number" class="form-control" min="0" />
+                            <span asp-validation-for="TotalReviews" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-check mt-4">
+                                <input type="checkbox" name="IsActive" class="form-check-input" id="IsActive" value="true" @(Model.IsActive == true ? "checked" : "") />
+                                <input type="hidden" name="IsActive" value="false" />
+                                <label class="form-check-label" for="IsActive">
+                                    Đang hoạt động
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Cập nhật
+                    </button>
+                    <a href="@Url.Action("Index", "Technician", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Image Browser Modal -->
+<div class="modal fade" id="imageBrowserModal" tabindex="-1" role="dialog" aria-labelledby="imageBrowserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageBrowserModalLabel">Chọn ảnh từ thư viện</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="imageTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">Ảnh</th>
+                                <th>Tên file</th>
+                                <th style="width: 150px;">Kích thước</th>
+                                <th style="width: 120px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="imageTableBody">
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    <div class="spinner-border" role="status">
+                                        <span class="sr-only">Đang tải...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            var k = 1024;
+            var sizes = ['Bytes', 'KB', 'MB'];
+            var i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function clearSelectedImage() {
+            $('#selectedImageUrl').val('');
+            $('#ImageUrl').val('');
+            $('#selectedImagePreview').hide();
+            $('#previewImg').attr('src', '');
+            $('#selectedImageName').text('');
+        }
+
+        function selectImage(url, name) {
+            $('#selectedImageUrl').val(url);
+            $('#ImageUrl').val(url);
+            $('#previewImg').attr('src', url);
+            $('#selectedImageName').text(name);
+            $('#selectedImagePreview').show();
+            $('#imageBrowserModal').modal('hide');
+        }
+
+        $(document).ready(function() {
+            $('#imageBrowserModal').on('show.bs.modal', function() {
+                loadImages();
+            });
+
+            function loadImages() {
+                $('#imageTableBody').html('<tr><td colspan="4" class="text-center"><div class="spinner-border" role="status"><span class="sr-only">Đang tải...</span></div></td></tr>');
+                
+                $.ajax({
+                    url: '@Url.Action("BrowseImages", "Technician", new { area = "Admin" })',
+                    type: 'GET',
+                    success: function(images) {
+                        if (images.length === 0) {
+                            $('#imageTableBody').html('<tr><td colspan="4" class="text-center text-muted"><p>Chưa có ảnh nào trong thư viện</p></td></tr>');
+                            return;
+                        }
+
+                        var html = '';
+                        images.forEach(function(image) {
+                            html += '<tr>';
+                            html += '<td><img src="' + image.url + '" alt="' + image.name + '" style="width: 60px; height: 60px; object-fit: cover;" class="img-thumbnail" /></td>';
+                            html += '<td>' + image.name + '</td>';
+                            html += '<td>' + formatFileSize(image.size) + '</td>';
+                            html += '<td><button type="button" class="btn btn-sm btn-primary" onclick="selectImage(\'' + image.url + '\', \'' + image.name + '\')"><i class="fas fa-check"></i> Chọn</button></td>';
+                            html += '</tr>';
+                        });
+                        $('#imageTableBody').html(html);
+                    },
+                    error: function() {
+                        $('#imageTableBody').html('<tr><td colspan="4" class="text-center text-danger"><p>Lỗi khi tải ảnh</p></td></tr>');
+                    }
+                });
+            }
+        });
+    </script>
+}
+
+

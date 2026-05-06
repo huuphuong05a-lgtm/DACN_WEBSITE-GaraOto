@@ -1,0 +1,88 @@
+@model CarServ.MVC.Models.Review
+
+@{
+    ViewData["Title"] = "Xóa Đánh giá";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Đánh giá</h1>
+        <a href="@Url.Action("Index", "ReviewAdmin", new { area = "Admin" })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger text-white">
+            <h6 class="m-0 font-weight-bold">Xác nhận xóa</h6>
+        </div>
+        <div class="card-body">
+            <h5 class="text-danger mb-4">Bạn có chắc chắn muốn xóa đánh giá này?</h5>
+
+            <dl class="row">
+                <dt class="col-sm-3">Khách hàng:</dt>
+                <dd class="col-sm-9">@Model.CustomerName</dd>
+
+                <dt class="col-sm-3">Loại:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.ProductId != null)
+                    {
+                        <span class="badge badge-info">Sản phẩm</span>
+                        @if (Model.Product != null)
+                        {
+                            <span> - @Model.Product.ProductName</span>
+                        }
+                    }
+                    else if (Model.ServiceId != null)
+                    {
+                        <span class="badge badge-success">Dịch vụ</span>
+                        @if (Model.Service != null)
+                        {
+                            <span> - @Model.Service.ServiceName</span>
+                        }
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Đánh giá:</dt>
+                <dd class="col-sm-9">
+                    <div class="rating-stars">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Model.Rating)
+                            {
+                                <i class="fas fa-star text-warning"></i>
+                            }
+                            else
+                            {
+                                <i class="far fa-star text-warning"></i>
+                            }
+                        }
+                    </div>
+                    <span class="ml-2">@Model.Rating / 5 sao</span>
+                </dd>
+
+                @if (!string.IsNullOrEmpty(Model.Comment))
+                {
+                    <dt class="col-sm-3">Nội dung:</dt>
+                    <dd class="col-sm-9">@Model.Comment</dd>
+                }
+
+                <dt class="col-sm-3">Ngày tạo:</dt>
+                <dd class="col-sm-9">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</dd>
+            </dl>
+
+            <form asp-action="Delete" method="post" class="mt-4">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Xác nhận xóa
+                </button>
+                <a href="@Url.Action("Index", "ReviewAdmin", new { area = "Admin" })" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+

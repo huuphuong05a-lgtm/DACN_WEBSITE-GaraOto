@@ -1,0 +1,97 @@
+@model CarServ.MVC.Models.Payment
+
+@{
+    ViewData["Title"] = "Xóa Thanh toán";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Thanh toán</h1>
+        <a href="@Url.Action("Index", "Payment", new { area = "Admin" })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger text-white">
+            <h6 class="m-0 font-weight-bold">Xác nhận xóa</h6>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> Bạn có chắc chắn muốn xóa thanh toán này không?
+            </div>
+
+            <dl class="row">
+                <dt class="col-sm-3">Mã thanh toán:</dt>
+                <dd class="col-sm-9"><strong>@Model.PaymentCode</strong></dd>
+
+                <dt class="col-sm-3">Số tiền:</dt>
+                <dd class="col-sm-9"><strong class="text-danger">@Model.Amount.ToString("N0") đ</strong></dd>
+
+                <dt class="col-sm-3">Phương thức:</dt>
+                <dd class="col-sm-9">@Model.PaymentMethod</dd>
+
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    @{
+                        var statusClass = Model.PaymentStatus switch
+                        {
+                            "Đã thanh toán" => "badge-success",
+                            "Chờ thanh toán" => "badge-warning",
+                            "Thất bại" => "badge-danger",
+                            "Đã hủy" => "badge-secondary",
+                            "Hoàn tiền" => "badge-info",
+                            _ => "badge-secondary"
+                        };
+                    }
+                    <span class="badge @statusClass">@Model.PaymentStatus</span>
+                </dd>
+
+                <dt class="col-sm-3">Khách hàng:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Customer != null)
+                    {
+                        <span>@Model.Customer.FullName (@Model.Customer.Phone)</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Đơn hàng/HĐ:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Order != null)
+                    {
+                        <span class="badge badge-info">@Model.Order.OrderCode</span>
+                    }
+                    else if (Model.Invoice != null)
+                    {
+                        <span class="badge badge-success">@Model.Invoice.InvoiceCode</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Ngày thanh toán:</dt>
+                <dd class="col-sm-9">@Model.PaymentDate.ToString("dd/MM/yyyy HH:mm")</dd>
+            </dl>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="PaymentId" />
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Xác nhận xóa
+                    </button>
+                    <a href="@Url.Action("Index", "Payment", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

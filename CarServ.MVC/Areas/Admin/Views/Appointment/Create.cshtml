@@ -1,0 +1,199 @@
+@model CarServ.MVC.Models.Appointment
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Thêm Lịch hẹn Mới";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Thêm Lịch hẹn Mới</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Lịch hẹn</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CustomerId" class="control-label">Khách hàng</label>
+                            <select asp-for="CustomerId" class="form-control" id="customerSelect">
+                                <option value="">Chọn khách hàng...</option>
+                                @if (ViewBag.Customers != null)
+                                {
+                                    @foreach (SelectListItem customer in ViewBag.Customers)
+                                    {
+                                        <option value="@customer.Value">@customer.Text</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="CustomerId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Hoặc nhập thông tin khách hàng mới</label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input asp-for="CustomerName" class="form-control" placeholder="Tên khách hàng" />
+                                </div>
+                                <div class="col-md-4">
+                                    <input asp-for="CustomerPhone" class="form-control" placeholder="Số điện thoại" />
+                                </div>
+                                <div class="col-md-4">
+                                    <input asp-for="CustomerEmail" class="form-control" placeholder="Email" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ServiceId" class="control-label">Dịch vụ <span class="text-danger">*</span></label>
+                            <select asp-for="ServiceId" class="form-control" id="serviceSelect" required>
+                                <option value="">Chọn dịch vụ...</option>
+                                @if (ViewBag.Services != null)
+                                {
+                                    @foreach (SelectListItem service in ViewBag.Services)
+                                    {
+                                        <option value="@service.Value" data-price="@service.Value" data-duration="@service.Value">@service.Text</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="ServiceId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ServiceType" class="control-label">Loại dịch vụ</label>
+                            <input asp-for="ServiceType" class="form-control" placeholder="Tự động điền từ dịch vụ đã chọn" />
+                            <span asp-validation-for="ServiceType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="AppointmentDate" class="control-label">Ngày giờ hẹn <span class="text-danger">*</span></label>
+                            <input asp-for="AppointmentDate" type="datetime-local" class="form-control" required />
+                            <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="EstimatedDuration" class="control-label">Thời gian ước tính (phút)</label>
+                            <input asp-for="EstimatedDuration" type="number" class="form-control" min="1" />
+                            <span asp-validation-for="EstimatedDuration" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="TotalPrice" class="control-label">Tổng tiền (VNĐ)</label>
+                            <input asp-for="TotalPrice" type="text" class="form-control price-input" placeholder="0" />
+                            <span asp-validation-for="TotalPrice" class="text-danger"></span>
+                            <small class="form-text text-muted">Nhập số nguyên</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="TechnicianId" class="control-label">Kỹ thuật viên</label>
+                            <select asp-for="TechnicianId" class="form-control">
+                                <option value="">Chọn kỹ thuật viên...</option>
+                                @if (ViewBag.Technicians != null)
+                                {
+                                    @foreach (SelectListItem technician in ViewBag.Technicians)
+                                    {
+                                        <option value="@technician.Value">@technician.Text</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="TechnicianId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Status" class="control-label">Trạng thái</label>
+                            <select asp-for="Status" class="form-control">
+                                <option value="Chờ xác nhận">Chờ xác nhận</option>
+                                <option value="Đã xác nhận">Đã xác nhận</option>
+                                <option value="Đang thực hiện">Đang thực hiện</option>
+                                <option value="Hoàn thành">Hoàn thành</option>
+                                <option value="Đã hủy">Đã hủy</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="VehicleInfo" class="control-label">Thông tin xe</label>
+                    <input asp-for="VehicleInfo" class="form-control" placeholder="Ví dụ: Toyota Camry 2020, Biển số: 30A-12345" />
+                    <span asp-validation-for="VehicleInfo" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Notes" class="control-label">Ghi chú</label>
+                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Ghi chú thêm về lịch hẹn..."></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                    <a href="@Url.Action("Index", "Appointment", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Format price inputs - remove commas, dots, and non-numeric characters
+            $('.price-input').on('input', function() {
+                var value = $(this).val();
+                // Remove all non-numeric characters except digits
+                value = value.replace(/[^0-9]/g, '');
+                $(this).val(value);
+            });
+
+            // Format on blur to ensure clean value
+            $('.price-input').on('blur', function() {
+                var value = $(this).val();
+                if (value) {
+                    value = value.replace(/[^0-9]/g, '');
+                    $(this).val(value);
+                }
+            });
+
+            // Auto-fill service info when service is selected
+            $('#serviceSelect').change(function() {
+                var serviceId = $(this).val();
+                if (serviceId) {
+                    // You can make an AJAX call here to get service details
+                    // For now, we'll just update the ServiceType field
+                    var selectedText = $(this).find('option:selected').text();
+                    $('#ServiceType').val(selectedText);
+                }
+            });
+        });
+    </script>
+}
+
+

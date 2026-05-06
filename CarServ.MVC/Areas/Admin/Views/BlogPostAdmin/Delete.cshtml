@@ -1,0 +1,71 @@
+@model CarServ.MVC.Models.BlogPost
+
+@{
+    ViewData["Title"] = "Xóa Bài viết Blog";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Bài viết Blog</h1>
+        <a href="@Url.Action("Index", "BlogPostAdmin", new { area = "Admin" })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger text-white">
+            <h6 class="m-0 font-weight-bold">Xác nhận xóa</h6>
+        </div>
+        <div class="card-body">
+            <h5 class="text-danger mb-4">Bạn có chắc chắn muốn xóa bài viết này?</h5>
+
+            <dl class="row">
+                <dt class="col-sm-3">Tiêu đề:</dt>
+                <dd class="col-sm-9">@Model.Title</dd>
+
+                <dt class="col-sm-3">Slug:</dt>
+                <dd class="col-sm-9"><code>@Model.Slug</code></dd>
+
+                @if (Model.Category != null)
+                {
+                    <dt class="col-sm-3">Chuyên mục:</dt>
+                    <dd class="col-sm-9">@Model.Category.Name</dd>
+                }
+
+                @if (Model.PublishedDate.HasValue)
+                {
+                    <dt class="col-sm-3">Ngày xuất bản:</dt>
+                    <dd class="col-sm-9">@Model.PublishedDate.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+                }
+
+                <dt class="col-sm-3">Lượt xem:</dt>
+                <dd class="col-sm-9">@Model.ViewCount</dd>
+
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.IsPublished)
+                    {
+                        <span class="badge badge-success">Đã xuất bản</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-warning">Chưa xuất bản</span>
+                    }
+                </dd>
+            </dl>
+
+            <form asp-action="Delete" method="post" class="mt-4">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Xác nhận xóa
+                </button>
+                <a href="@Url.Action("Index", "BlogPostAdmin", new { area = "Admin" })" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+

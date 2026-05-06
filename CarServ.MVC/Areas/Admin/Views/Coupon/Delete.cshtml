@@ -1,0 +1,117 @@
+@model CarServ.MVC.Models.Coupon
+
+@{
+    ViewData["Title"] = "Xóa Mã giảm giá";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Mã giảm giá</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger">
+            <h6 class="m-0 font-weight-bold text-white">Xác nhận xóa mã giảm giá</h6>
+        </div>
+        <div class="card-body">
+            <h4 class="text-danger">Bạn có chắc chắn muốn xóa mã giảm giá này?</h4>
+            <hr />
+
+            <dl class="row">
+                <dt class="col-sm-3">Mã giảm giá:</dt>
+                <dd class="col-sm-9"><strong class="text-primary" style="font-size: 1.2em;">@Model.Code</strong></dd>
+
+                <dt class="col-sm-3">Tên:</dt>
+                <dd class="col-sm-9">@(Model.Name ?? "-")</dd>
+
+                <dt class="col-sm-3">Loại giảm giá:</dt>
+                <dd class="col-sm-9">
+                    @if (!string.IsNullOrEmpty(Model.DiscountType))
+                    {
+                        <span class="badge badge-info">@Model.DiscountType</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Giá trị:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.DiscountValue.HasValue)
+                    {
+                        @if (Model.DiscountType == "Percentage")
+                        {
+                            <text>@Model.DiscountValue%</text>
+                        }
+                        else
+                        {
+                            <text>@Model.DiscountValue.Value.ToString("N0") đ</text>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Số lần đã sử dụng:</dt>
+                <dd class="col-sm-9">
+                    <strong>@(Model.UsedCount ?? 0)</strong>
+                    @if (Model.UsageLimit.HasValue)
+                    {
+                        <text> / @Model.UsageLimit</text>
+                    }
+                    else
+                    {
+                        <text> / Không giới hạn</text>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    @{
+                        var isExpired = Model.EndDate.HasValue && Model.EndDate.Value < DateTime.Now;
+                        var isValid = Model.IsActive == true 
+                            && (!Model.StartDate.HasValue || Model.StartDate.Value <= DateTime.Now)
+                            && (!Model.EndDate.HasValue || Model.EndDate.Value >= DateTime.Now);
+                    }
+                    @if (isExpired)
+                    {
+                        <span class="badge badge-danger">Hết hạn</span>
+                    }
+                    else if (isValid)
+                    {
+                        <span class="badge badge-success">Còn hiệu lực</span>
+                    }
+                    else if (Model.IsActive == true)
+                    {
+                        <span class="badge badge-warning">Chưa bắt đầu</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-secondary">Không hoạt động</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Ngày tạo:</dt>
+                <dd class="col-sm-9">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+            </dl>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="CouponId" />
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Xóa
+                    </button>
+                    <a href="@Url.Action("Index", "Coupon", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

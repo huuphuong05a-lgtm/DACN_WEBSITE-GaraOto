@@ -1,0 +1,80 @@
+@model CarServ.MVC.Models.Contact
+
+@{
+    ViewData["Title"] = "Xóa Liên hệ";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Liên hệ</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger">
+            <h6 class="m-0 font-weight-bold text-white">Xác nhận xóa liên hệ</h6>
+        </div>
+        <div class="card-body">
+            <h4 class="text-danger">Bạn có chắc chắn muốn xóa liên hệ này?</h4>
+            <hr />
+
+            <dl class="row">
+                <dt class="col-sm-3">Họ và tên:</dt>
+                <dd class="col-sm-9"><strong>@Model.FullName</strong></dd>
+
+                <dt class="col-sm-3">Email:</dt>
+                <dd class="col-sm-9">@(Model.Email ?? "-")</dd>
+
+                <dt class="col-sm-3">Số điện thoại:</dt>
+                <dd class="col-sm-9">@(Model.Phone ?? "-")</dd>
+
+                <dt class="col-sm-3">Tiêu đề:</dt>
+                <dd class="col-sm-9">@(Model.Subject ?? "-")</dd>
+
+                <dt class="col-sm-3">Nội dung:</dt>
+                <dd class="col-sm-9">
+                    <div class="border p-2 bg-light rounded">
+                        @Model.Message
+                    </div>
+                </dd>
+
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Status == "Chưa đọc")
+                    {
+                        <span class="badge badge-warning">Chưa đọc</span>
+                    }
+                    else if (Model.Status == "Đã đọc")
+                    {
+                        <span class="badge badge-info">Đã đọc</span>
+                    }
+                    else if (Model.Status == "Đã trả lời")
+                    {
+                        <span class="badge badge-success">Đã trả lời</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-secondary">@(Model.Status ?? "-")</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Ngày tạo:</dt>
+                <dd class="col-sm-9">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+            </dl>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="ContactId" />
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Xóa
+                    </button>
+                    <a href="@Url.Action("Index", "Contact", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

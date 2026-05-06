@@ -1,0 +1,195 @@
+@model CarServ.MVC.Models.Product
+
+@{
+    ViewData["Title"] = "Chi tiết Sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Sản phẩm</h1>
+        <div>
+            <a href="@Url.Action("Edit", "Product", new { area = "Admin", id = Model.ProductId })" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Chỉnh sửa
+            </a>
+            <a href="@Url.Action("Index", "Product", new { area = "Admin" })" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Sản phẩm</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.ProductName" class="img-fluid img-thumbnail" />
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted p-5 border">
+                            <i class="fas fa-image fa-3x mb-3"></i>
+                            <p>Chưa có ảnh</p>
+                        </div>
+                    }
+                </div>
+                <div class="col-md-8">
+                    <dl class="row">
+                        <dt class="col-sm-4">Tên Sản phẩm:</dt>
+                        <dd class="col-sm-8"><strong>@Model.ProductName</strong></dd>
+
+                        <dt class="col-sm-4">Slug:</dt>
+                        <dd class="col-sm-8">@(Model.Slug ?? "-")</dd>
+
+                        <dt class="col-sm-4">Danh mục:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Category != null)
+                            {
+                                <span class="badge badge-info">@Model.Category.CategoryName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">SKU:</dt>
+                        <dd class="col-sm-8">@(Model.Sku ?? "-")</dd>
+
+                        <dt class="col-sm-4">Thương hiệu:</dt>
+                        <dd class="col-sm-8">@(Model.Brand ?? "-")</dd>
+
+                        <dt class="col-sm-4">Giá:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.SalePrice.HasValue && Model.SalePrice < Model.Price)
+                            {
+                                <del class="text-muted">@Model.Price?.ToString("N0") đ</del>
+                                <strong class="text-danger ml-2">@Model.SalePrice.Value.ToString("N0") đ</strong>
+                            }
+                            else if (Model.Price.HasValue)
+                            {
+                                <strong>@Model.Price.Value.ToString("N0") đ</strong>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Tồn kho:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.StockQuantity.HasValue)
+                            {
+                                @if (Model.StockQuantity.Value > 0)
+                                {
+                                    <span class="badge badge-success">@Model.StockQuantity</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">Hết hàng</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Bảo hành:</dt>
+                        <dd class="col-sm-8">@(Model.WarrantyMonths.HasValue ? Model.WarrantyMonths.Value + " tháng" : "-")</dd>
+
+                        <dt class="col-sm-4">Trọng lượng:</dt>
+                        <dd class="col-sm-8">@(Model.Weight.HasValue ? Model.Weight.Value + " kg" : "-")</dd>
+
+                        <dt class="col-sm-4">Kích thước:</dt>
+                        <dd class="col-sm-8">@(Model.Dimensions ?? "-")</dd>
+
+                        <dt class="col-sm-4">Trạng thái:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge badge-success">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Không hoạt động</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Nổi bật:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsFeatured)
+                            {
+                                <span class="badge badge-warning"><i class="fas fa-star"></i> Có</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Không</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Sản phẩm mới:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsNew)
+                            {
+                                <span class="badge badge-info">Mới</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Không</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Lượt xem:</dt>
+                        <dd class="col-sm-8">@(Model.ViewCount ?? 0)</dd>
+
+                        <dt class="col-sm-4">Ngày tạo:</dt>
+                        <dd class="col-sm-8">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+
+                        <dt class="col-sm-4">Ngày cập nhật:</dt>
+                        <dd class="col-sm-8">@(Model.UpdatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ShortDescription))
+            {
+                <hr />
+                <h5>Mô tả ngắn:</h5>
+                <p>@Model.ShortDescription</p>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <hr />
+                <h5>Mô tả chi tiết:</h5>
+                <div>@Html.Raw(Model.Description.Replace("\n", "<br />"))</div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.MetaTitle) || !string.IsNullOrEmpty(Model.MetaDescription))
+            {
+                <hr />
+                <h5>SEO:</h5>
+                <dl class="row">
+                    @if (!string.IsNullOrEmpty(Model.MetaTitle))
+                    {
+                        <dt class="col-sm-2">Meta Title:</dt>
+                        <dd class="col-sm-10">@Model.MetaTitle</dd>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.MetaDescription))
+                    {
+                        <dt class="col-sm-2">Meta Description:</dt>
+                        <dd class="col-sm-10">@Model.MetaDescription</dd>
+                    }
+                </dl>
+            }
+        </div>
+    </div>
+</div>
+
+
+

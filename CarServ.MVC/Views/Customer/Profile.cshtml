@@ -1,0 +1,201 @@
+@model CarServ.MVC.Controllers.ProfileViewModel
+@{
+    ViewData["Title"] = "Tài khoản";
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Tài Khoản Của Tôi</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Tài khoản</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Profile Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="bg-light rounded p-4">
+                    <h5 class="mb-3">Menu</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="@Url.Action("Profile", "Customer")" class="text-primary">
+                                <i class="fa fa-user me-2"></i>Thông tin cá nhân
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="@Url.Action("Orders", "Customer")" class="text-dark">
+                                <i class="fa fa-shopping-bag me-2"></i>Đơn hàng
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="@Url.Action("Appointments", "Customer")" class="text-dark">
+                                <i class="fa fa-calendar me-2"></i>Lịch hẹn
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="@Url.Action("Vehicles", "Customer")" class="text-dark">
+                                <i class="fa fa-car me-2"></i>Quản lý xe
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <!-- Profile Information -->
+                <div class="bg-light rounded p-5 mb-4">
+                    <h3 class="mb-4">Thông tin cá nhân</h3>
+
+                    <form asp-action="Profile" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="FullName" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                <input asp-for="FullName" class="form-control" />
+                                <span asp-validation-for="FullName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input asp-for="Email" type="email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <input asp-for="Phone" type="tel" class="form-control" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="DateOfBirth" class="form-label">Ngày sinh</label>
+                                <input asp-for="DateOfBirth" type="date" class="form-control" />
+                                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Gender" class="form-label">Giới tính</label>
+                                <select asp-for="Gender" class="form-select">
+                                    <option value="">-- Chọn --</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                                <span asp-validation-for="Gender" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="Address" class="form-label">Địa chỉ</label>
+                                <input asp-for="Address" class="form-control" placeholder="Số nhà, tên đường" />
+                                <span asp-validation-for="Address" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Ward" class="form-label">Phường/Xã</label>
+                                <input asp-for="Ward" class="form-control" />
+                                <span asp-validation-for="Ward" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="District" class="form-label">Quận/Huyện</label>
+                                <input asp-for="District" class="form-control" />
+                                <span asp-validation-for="District" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="City" class="form-label">Thành phố</label>
+                                <input asp-for="City" class="form-control" />
+                                <span asp-validation-for="City" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-save me-2"></i>Cập nhật thông tin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Change Password -->
+                <div class="bg-light rounded p-5">
+                    <h3 class="mb-4">Đổi mật khẩu</h3>
+
+                    <form asp-action="ChangePassword" method="post" id="changePasswordForm">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="OldPassword" class="form-label">Mật khẩu cũ <span class="text-danger">*</span></label>
+                                <input name="OldPassword" type="password" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="NewPassword" class="form-label">Mật khẩu mới <span class="text-danger">*</span></label>
+                                <input name="NewPassword" type="password" class="form-control" required minlength="6" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="ConfirmPassword" class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                                <input name="ConfirmPassword" type="password" class="form-control" required />
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fa fa-key me-2"></i>Đổi mật khẩu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Profile End -->
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Validate password confirmation
+        document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+            var newPassword = document.querySelector('input[name="NewPassword"]').value;
+            var confirmPassword = document.querySelector('input[name="ConfirmPassword"]').value;
+            
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                alert('Mật khẩu xác nhận không khớp!');
+                return false;
+            }
+        });
+    </script>
+}
+
+

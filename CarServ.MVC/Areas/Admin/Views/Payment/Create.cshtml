@@ -1,0 +1,147 @@
+@model CarServ.MVC.Models.Payment
+
+@{
+    ViewData["Title"] = "Thêm Thanh toán Mới";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Thêm Thanh toán Mới</h1>
+        <a href="@Url.Action("Index", "Payment", new { area = "Admin" })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Thanh toán</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="OrderId" class="control-label">Đơn hàng</label>
+                            <select asp-for="OrderId" class="form-control" asp-items="ViewBag.Orders">
+                                <option value="">-- Chọn đơn hàng (nếu có) --</option>
+                            </select>
+                            <span asp-validation-for="OrderId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="InvoiceId" class="control-label">Hóa đơn</label>
+                            <select asp-for="InvoiceId" class="form-control" asp-items="ViewBag.Invoices">
+                                <option value="">-- Chọn hóa đơn (nếu có) --</option>
+                            </select>
+                            <span asp-validation-for="InvoiceId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CustomerId" class="control-label">Khách hàng</label>
+                            <select asp-for="CustomerId" class="form-control" asp-items="ViewBag.Customers">
+                                <option value="">-- Chọn khách hàng --</option>
+                            </select>
+                            <span asp-validation-for="CustomerId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Amount" class="control-label">Số tiền <span class="text-danger">*</span></label>
+                            <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0" required />
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="PaymentMethod" class="control-label">Phương thức thanh toán <span class="text-danger">*</span></label>
+                            <select asp-for="PaymentMethod" class="form-control" asp-items="ViewBag.PaymentMethodList" required>
+                                <option value="">-- Chọn phương thức --</option>
+                            </select>
+                            <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="PaymentStatus" class="control-label">Trạng thái <span class="text-danger">*</span></label>
+                            <select asp-for="PaymentStatus" class="form-control" asp-items="ViewBag.PaymentStatusList" required>
+                                <option value="">-- Chọn trạng thái --</option>
+                            </select>
+                            <span asp-validation-for="PaymentStatus" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="PaymentDate" class="control-label">Ngày thanh toán <span class="text-danger">*</span></label>
+                            <input asp-for="PaymentDate" class="form-control" type="datetime-local" required />
+                            <span asp-validation-for="PaymentDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CompletedDate" class="control-label">Ngày hoàn thành</label>
+                            <input asp-for="CompletedDate" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="CompletedDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="TransactionCode" class="control-label">Mã giao dịch</label>
+                            <input asp-for="TransactionCode" class="form-control" />
+                            <span asp-validation-for="TransactionCode" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="GatewayName" class="control-label">Payment Gateway</label>
+                            <input asp-for="GatewayName" class="form-control" placeholder="VNPay, Momo, ZaloPay..." />
+                            <span asp-validation-for="GatewayName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="GatewayTransactionId" class="control-label">Gateway Transaction ID</label>
+                    <input asp-for="GatewayTransactionId" class="form-control" />
+                    <span asp-validation-for="GatewayTransactionId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Notes" class="control-label">Ghi chú</label>
+                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                    <a href="@Url.Action("Index", "Payment", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

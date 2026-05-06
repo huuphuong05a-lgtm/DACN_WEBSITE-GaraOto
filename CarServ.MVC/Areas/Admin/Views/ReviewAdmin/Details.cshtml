@@ -1,0 +1,133 @@
+@model CarServ.MVC.Models.Review
+
+@{
+    ViewData["Title"] = "Chi tiết Đánh giá";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Đánh giá</h1>
+        <a href="@Url.Action("Index", "ReviewAdmin", new { area = "Admin" })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Đánh giá</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">ID:</dt>
+                <dd class="col-sm-9">@Model.Id</dd>
+
+                <dt class="col-sm-3">Khách hàng:</dt>
+                <dd class="col-sm-9">@Model.CustomerName</dd>
+
+                <dt class="col-sm-3">Loại:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.ProductId != null)
+                    {
+                        <span class="badge badge-info">Sản phẩm</span>
+                    }
+                    else if (Model.ServiceId != null)
+                    {
+                        <span class="badge badge-success">Dịch vụ</span>
+                    }
+                </dd>
+
+                @if (Model.ProductId != null && Model.Product != null)
+                {
+                    <dt class="col-sm-3">Sản phẩm:</dt>
+                    <dd class="col-sm-9">
+                        <a href="@Url.Action("Details", "Product", new { area = "", id = Model.ProductId })" target="_blank">
+                            @Model.Product.ProductName
+                        </a>
+                    </dd>
+                }
+
+                @if (Model.ServiceId != null && Model.Service != null)
+                {
+                    <dt class="col-sm-3">Dịch vụ:</dt>
+                    <dd class="col-sm-9">
+                        <a href="@Url.Action("Details", "Service", new { area = "", id = Model.ServiceId })" target="_blank">
+                            @Model.Service.ServiceName
+                        </a>
+                    </dd>
+                }
+
+                <dt class="col-sm-3">Đánh giá:</dt>
+                <dd class="col-sm-9">
+                    <div class="rating-stars">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Model.Rating)
+                            {
+                                <i class="fas fa-star text-warning fa-lg"></i>
+                            }
+                            else
+                            {
+                                <i class="far fa-star text-warning fa-lg"></i>
+                            }
+                        }
+                    </div>
+                    <span class="ml-2">@Model.Rating / 5 sao</span>
+                </dd>
+
+                <dt class="col-sm-3">Nội dung:</dt>
+                <dd class="col-sm-9">
+                    @if (!string.IsNullOrEmpty(Model.Comment))
+                    {
+                        <p>@Model.Comment</p>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Không có nhận xét</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Ngày tạo:</dt>
+                <dd class="col-sm-9">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.IsApproved)
+                    {
+                        <span class="badge badge-success">Đã duyệt</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-warning">Chưa duyệt</span>
+                    }
+                </dd>
+            </dl>
+
+            <div class="mt-4">
+                @if (!Model.IsApproved)
+                {
+                    <form asp-action="Approve" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Duyệt đánh giá
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-action="Unapprove" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-times"></i> Hủy duyệt
+                        </button>
+                    </form>
+                }
+                <a href="@Url.Action("Delete", "ReviewAdmin", new { area = "Admin", id = Model.Id })" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Xóa
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+

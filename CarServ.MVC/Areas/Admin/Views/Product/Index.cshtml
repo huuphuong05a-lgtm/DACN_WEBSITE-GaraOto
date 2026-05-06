@@ -1,0 +1,227 @@
+@model IEnumerable<CarServ.MVC.Models.Product>
+
+@{
+    ViewData["Title"] = "Quản lý Sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Sản phẩm</h1>
+        <a href="@Url.Action("Create", "Product", new { area = "Admin" })" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Thêm Sản phẩm Mới
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm và Lọc</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Tìm kiếm:</label>
+                            <input type="text" name="searchString" class="form-control" value="@ViewData["CurrentFilter"]" placeholder="Tên, SKU, thương hiệu..." />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Danh mục:</label>
+                            <select name="categoryFilter" class="form-control">
+                                <option value="">Tất cả danh mục</option>
+                                @if (ViewBag.Categories != null)
+                                {
+                                    @foreach (var cat in ViewBag.Categories)
+                                    {
+                                        <option value="@cat.CategoryId" selected="@(ViewData["CurrentCategory"]?.ToString() == cat.CategoryId.ToString())">@cat.CategoryName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Trạng thái:</label>
+                            <select name="statusFilter" class="form-control" asp-items="@(new SelectList(new[] { new { Value = "active", Text = "Đang hoạt động" }, new { Value = "inactive", Text = "Không hoạt động" } }, "Value", "Text", (string)ViewData["CurrentStatus"]))">
+                                <option value="">Tất cả trạng thái</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Sắp xếp:</label>
+                            <select name="sortOrder" class="form-control">
+                                <option value="">Mới nhất</option>
+                                <option value="Price" selected="@(ViewData["CurrentSort"]?.ToString() == "Price")">Giá tăng dần</option>
+                                <option value="price_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "price_desc")">Giá giảm dần</option>
+                                <option value="name_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "name_desc")">Tên Z-A</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-search"></i> Tìm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Sản phẩm</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Tên Sản phẩm</th>
+                            <th>Danh mục</th>
+                            <th>SKU</th>
+                            <th>Giá</th>
+                            <th>Tồn kho</th>
+                            <th>Nổi bật</th>
+                            <th>Mới</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.ProductName" style="width: 60px; height: 60px; object-fit: cover;" class="img-thumbnail" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa có ảnh</span>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@item.ProductName</strong>
+                                    @if (!string.IsNullOrEmpty(item.ShortDescription))
+                                    {
+                                        <br /><small class="text-muted">@(item.ShortDescription.Length > 50 ? item.ShortDescription.Substring(0, 50) + "..." : item.ShortDescription)</small>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Category != null)
+                                    {
+                                        <span class="badge badge-info">@item.Category.CategoryName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>@(item.Sku ?? "-")</td>
+                                <td>
+                                    @if (item.SalePrice.HasValue && item.SalePrice < item.Price)
+                                    {
+                                        <del class="text-muted">@item.Price?.ToString("N0") đ</del><br />
+                                        <strong class="text-danger">@item.SalePrice.Value.ToString("N0") đ</strong>
+                                    }
+                                    else if (item.Price.HasValue)
+                                    {
+                                        <strong>@item.Price.Value.ToString("N0") đ</strong>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.StockQuantity.HasValue)
+                                    {
+                                        @if (item.StockQuantity.Value > 0)
+                                        {
+                                            <span class="badge badge-success">@item.StockQuantity</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-danger">Hết hàng</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsFeatured)
+                                    {
+                                        <span class="badge badge-warning"><i class="fas fa-star"></i></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsNew)
+                                    {
+                                        <span class="badge badge-info">Mới</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge badge-success">Đang hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Không hoạt động</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("Details", "Product", new { area = "Admin", id = item.ProductId })" class="btn btn-info btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", "Product", new { area = "Admin", id = item.ProductId })" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="@Url.Action("Delete", "Product", new { area = "Admin", id = item.ProductId })" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "order": [[0, "desc"]]
+            });
+        });
+    </script>
+}
+
+
+

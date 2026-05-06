@@ -1,0 +1,151 @@
+@model CarServ.MVC.Models.Payment
+
+@{
+    ViewData["Title"] = "Chi tiết Thanh toán";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Thanh toán</h1>
+        <div>
+            <a href="@Url.Action("Edit", "Payment", new { area = "Admin", id = Model.PaymentId })" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Chỉnh sửa
+            </a>
+            <a href="@Url.Action("Index", "Payment", new { area = "Admin" })" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Payment Information -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Thanh toán</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Mã thanh toán:</dt>
+                <dd class="col-sm-9"><strong>@Model.PaymentCode</strong></dd>
+
+                <dt class="col-sm-3">Số tiền:</dt>
+                <dd class="col-sm-9"><strong class="text-danger">@Model.Amount.ToString("N0") đ</strong></dd>
+
+                <dt class="col-sm-3">Phương thức thanh toán:</dt>
+                <dd class="col-sm-9">@Model.PaymentMethod</dd>
+
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    @{
+                        var statusClass = Model.PaymentStatus switch
+                        {
+                            "Đã thanh toán" => "badge-success",
+                            "Chờ thanh toán" => "badge-warning",
+                            "Thất bại" => "badge-danger",
+                            "Đã hủy" => "badge-secondary",
+                            "Hoàn tiền" => "badge-info",
+                            _ => "badge-secondary"
+                        };
+                    }
+                    <span class="badge @statusClass">@Model.PaymentStatus</span>
+                </dd>
+
+                <dt class="col-sm-3">Ngày thanh toán:</dt>
+                <dd class="col-sm-9">@Model.PaymentDate.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                @if (Model.CompletedDate.HasValue)
+                {
+                    <dt class="col-sm-3">Ngày hoàn thành:</dt>
+                    <dd class="col-sm-9">@Model.CompletedDate.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+                }
+
+                <dt class="col-sm-3">Mã giao dịch:</dt>
+                <dd class="col-sm-9">@(Model.TransactionCode ?? "-")</dd>
+
+                @if (!string.IsNullOrEmpty(Model.GatewayName))
+                {
+                    <dt class="col-sm-3">Payment Gateway:</dt>
+                    <dd class="col-sm-9">@Model.GatewayName</dd>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.GatewayTransactionId))
+                {
+                    <dt class="col-sm-3">Gateway Transaction ID:</dt>
+                    <dd class="col-sm-9">@Model.GatewayTransactionId</dd>
+                }
+
+                <dt class="col-sm-3">Khách hàng:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Customer != null)
+                    {
+                        <a href="@Url.Action("Details", "Customer", new { area = "Admin", id = Model.Customer.CustomerId })">
+                            @Model.Customer.FullName (@Model.Customer.Phone)
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Đơn hàng:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Order != null)
+                    {
+                        <a href="@Url.Action("Details", "Order", new { area = "Admin", id = Model.Order.OrderId })">
+                            <span class="badge badge-info">@Model.Order.OrderCode</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Hóa đơn:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Invoice != null)
+                    {
+                        <a href="@Url.Action("Details", "Invoice", new { area = "Admin", id = Model.Invoice.InvoiceId })">
+                            <span class="badge badge-success">@Model.Invoice.InvoiceCode</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <dt class="col-sm-3">Ghi chú:</dt>
+                    <dd class="col-sm-9">@Model.Notes</dd>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.GatewayResponse))
+                {
+                    <dt class="col-sm-3">Gateway Response:</dt>
+                    <dd class="col-sm-9">
+                        <pre class="bg-light p-2 rounded">@Model.GatewayResponse</pre>
+                    </dd>
+                }
+
+                <dt class="col-sm-3">Ngày tạo:</dt>
+                <dd class="col-sm-9">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                @if (Model.UpdatedDate.HasValue)
+                {
+                    <dt class="col-sm-3">Ngày cập nhật:</dt>
+                    <dd class="col-sm-9">@Model.UpdatedDate.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.CreatedBy))
+                {
+                    <dt class="col-sm-3">Người tạo:</dt>
+                    <dd class="col-sm-9">@Model.CreatedBy</dd>
+                }
+            </dl>
+        </div>
+    </div>
+</div>
+

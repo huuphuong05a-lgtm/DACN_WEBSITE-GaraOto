@@ -1,0 +1,121 @@
+@model CarServ.MVC.Models.BlogPost
+
+@{
+    ViewData["Title"] = "Chi tiết Bài viết Blog";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Bài viết Blog</h1>
+        <a href="@Url.Action("Index", "BlogPostAdmin", new { area = "Admin" })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Bài viết</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">ID:</dt>
+                <dd class="col-sm-9">@Model.Id</dd>
+
+                <dt class="col-sm-3">Tiêu đề:</dt>
+                <dd class="col-sm-9">@Model.Title</dd>
+
+                <dt class="col-sm-3">Slug:</dt>
+                <dd class="col-sm-9"><code>@Model.Slug</code></dd>
+
+                @if (!string.IsNullOrEmpty(Model.ShortDescription))
+                {
+                    <dt class="col-sm-3">Mô tả ngắn:</dt>
+                    <dd class="col-sm-9">@Model.ShortDescription</dd>
+                }
+
+                @if (Model.Category != null)
+                {
+                    <dt class="col-sm-3">Chuyên mục:</dt>
+                    <dd class="col-sm-9">@Model.Category.Name</dd>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Thumbnail))
+                {
+                    <dt class="col-sm-3">Ảnh đại diện:</dt>
+                    <dd class="col-sm-9">
+                        <img src="@Model.Thumbnail" alt="@Model.Title" style="max-width: 300px; max-height: 200px;" class="img-thumbnail" />
+                        <br />
+                        <small class="text-muted">@Model.Thumbnail</small>
+                    </dd>
+                }
+
+                <dt class="col-sm-3">Ngày xuất bản:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.PublishedDate.HasValue)
+                    {
+                        @Model.PublishedDate.Value.ToString("dd/MM/yyyy HH:mm")
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa xuất bản</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Lượt xem:</dt>
+                <dd class="col-sm-9">@Model.ViewCount</dd>
+
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.IsPublished)
+                    {
+                        <span class="badge badge-success">Đã xuất bản</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-warning">Chưa xuất bản</span>
+                    }
+                </dd>
+
+                @if (!string.IsNullOrEmpty(Model.SeoTitle))
+                {
+                    <dt class="col-sm-3">SEO Title:</dt>
+                    <dd class="col-sm-9">@Model.SeoTitle</dd>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.SeoDescription))
+                {
+                    <dt class="col-sm-3">SEO Description:</dt>
+                    <dd class="col-sm-9">@Model.SeoDescription</dd>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Content))
+                {
+                    <dt class="col-sm-3">Nội dung:</dt>
+                    <dd class="col-sm-9">
+                        <div class="border p-3 bg-light" style="max-height: 400px; overflow-y: auto;">
+                            @Html.Raw(Model.Content)
+                        </div>
+                    </dd>
+                }
+            </dl>
+
+            <div class="mt-4">
+                <a href="@Url.Action("Edit", "BlogPostAdmin", new { area = "Admin", id = Model.Id })" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Sửa
+                </a>
+                <a href="@Url.Action("Delete", "BlogPostAdmin", new { area = "Admin", id = Model.Id })" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Xóa
+                </a>
+                @if (Model.IsPublished)
+                {
+                    <a href="@Url.Action("Detail", "Blog", new { slug = Model.Slug })" target="_blank" class="btn btn-info">
+                        <i class="fas fa-external-link-alt"></i> Xem trên website
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+

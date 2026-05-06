@@ -1,0 +1,92 @@
+@model CarServ.MVC.Models.Appointment
+
+@{
+    ViewData["Title"] = "Xóa Lịch hẹn";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa Lịch hẹn</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger">
+            <h6 class="m-0 font-weight-bold text-white">Xác nhận xóa</h6>
+        </div>
+        <div class="card-body">
+            <h4 class="text-danger">Bạn có chắc chắn muốn xóa lịch hẹn này?</h4>
+            
+            <hr />
+            
+            <dl class="row">
+                <dt class="col-sm-4">Mã lịch hẹn:</dt>
+                <dd class="col-sm-8"><strong>@(Model.AppointmentCode ?? "-")</strong></dd>
+
+                <dt class="col-sm-4">Khách hàng:</dt>
+                <dd class="col-sm-8">
+                    @if (Model.Customer != null)
+                    {
+                        <span>@Model.Customer.FullName</span>
+                    }
+                    else if (!string.IsNullOrEmpty(Model.CustomerName))
+                    {
+                        <span>@Model.CustomerName</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-4">Dịch vụ:</dt>
+                <dd class="col-sm-8">
+                    @if (Model.Service != null)
+                    {
+                        <span>@Model.Service.ServiceName</span>
+                    }
+                    else if (!string.IsNullOrEmpty(Model.ServiceType))
+                    {
+                        <span>@Model.ServiceType</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-4">Ngày giờ hẹn:</dt>
+                <dd class="col-sm-8">@Model.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                <dt class="col-sm-4">Trạng thái:</dt>
+                <dd class="col-sm-8">
+                    @if (!string.IsNullOrEmpty(Model.Status))
+                    {
+                        <span class="badge badge-info">@Model.Status</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </dd>
+            </dl>
+
+            <div class="alert alert-warning mt-3">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Cảnh báo:</strong> Hành động này không thể hoàn tác.
+            </div>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="AppointmentId" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Xóa
+                </button>
+                <a href="@Url.Action("Index", "Appointment", new { area = "Admin" })" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+

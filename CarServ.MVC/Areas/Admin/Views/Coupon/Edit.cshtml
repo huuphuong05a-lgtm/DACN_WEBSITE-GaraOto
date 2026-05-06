@@ -1,0 +1,194 @@
+@model CarServ.MVC.Models.Coupon
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Mã giảm giá";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chỉnh sửa Mã giảm giá</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin Mã giảm giá</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="CouponId" />
+                <input type="hidden" asp-for="CreatedDate" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Code" class="control-label">Mã giảm giá <span class="text-danger">*</span></label>
+                            <input asp-for="Code" class="form-control" required placeholder="Ví dụ: SALE2024, GIAM50K..." />
+                            <span asp-validation-for="Code" class="text-danger"></span>
+                            <small class="form-text text-muted">Mã phải là duy nhất, không được trùng với mã đã có</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Name" class="control-label">Tên mã giảm giá</label>
+                            <input asp-for="Name" class="form-control" placeholder="Ví dụ: Giảm giá 50K cho đơn hàng đầu tiên" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label">Mô tả</label>
+                    <textarea asp-for="Description" class="form-control" rows="2" placeholder="Mô tả về mã giảm giá..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="DiscountType" class="control-label">Loại giảm giá <span class="text-danger">*</span></label>
+                            <select asp-for="DiscountType" class="form-control" id="discountType" required>
+                                <option value="">Chọn loại...</option>
+                                @if (ViewBag.DiscountTypeList != null)
+                                {
+                                    @foreach (var type in ViewBag.DiscountTypeList)
+                                    {
+                                        <option value="@type" selected="@(Model.DiscountType == type)">@type</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="DiscountType" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="DiscountValue" class="control-label">Giá trị giảm giá <span class="text-danger">*</span></label>
+                            <input asp-for="DiscountValue" type="text" class="form-control price-input" placeholder="0" required id="discountValue" />
+                            <span asp-validation-for="DiscountValue" class="text-danger"></span>
+                            <small class="form-text text-muted" id="discountHint">
+                                @if (Model.DiscountType == "Percentage")
+                                {
+                                    <text>Nhập số phần trăm (ví dụ: 10 = 10%)</text>
+                                }
+                                else if (Model.DiscountType == "Fixed")
+                                {
+                                    <text>Nhập số tiền giảm (VNĐ)</text>
+                                }
+                                else
+                                {
+                                    <text>Nhập số phần trăm hoặc số tiền</text>
+                                }
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="MinimumOrder" class="control-label">Đơn hàng tối thiểu (VNĐ)</label>
+                            <input asp-for="MinimumOrder" type="text" class="form-control price-input" placeholder="0" />
+                            <span asp-validation-for="MinimumOrder" class="text-danger"></span>
+                            <small class="form-text text-muted">Áp dụng cho đơn hàng từ số tiền này</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="MaximumDiscount" class="control-label">Giảm tối đa (VNĐ)</label>
+                            <input asp-for="MaximumDiscount" type="text" class="form-control price-input" placeholder="0" />
+                            <span asp-validation-for="MaximumDiscount" class="text-danger"></span>
+                            <small class="form-text text-muted">Giới hạn số tiền giảm tối đa</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="UsageLimit" class="control-label">Giới hạn sử dụng</label>
+                            <input asp-for="UsageLimit" type="number" class="form-control" min="1" />
+                            <span asp-validation-for="UsageLimit" class="text-danger"></span>
+                            <small class="form-text text-muted">Để trống = không giới hạn</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="UsedCount" class="control-label">Số lần đã sử dụng</label>
+                            <input asp-for="UsedCount" type="number" class="form-control" min="0" readonly />
+                            <span asp-validation-for="UsedCount" class="text-danger"></span>
+                            <small class="form-text text-muted">Chỉ đọc, tự động cập nhật</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="StartDate" class="control-label">Ngày bắt đầu</label>
+                            <input asp-for="StartDate" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="EndDate" class="control-label">Ngày kết thúc</label>
+                            <input asp-for="EndDate" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" name="IsActive" class="form-check-input" id="IsActive" value="true" @(Model.IsActive == true ? "checked" : "") />
+                        <input type="hidden" name="IsActive" value="false" />
+                        <label class="form-check-label" for="IsActive">
+                            Đang hoạt động
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Cập nhật
+                    </button>
+                    <a href="@Url.Action("Index", "Coupon", new { area = "Admin" })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Format price inputs - remove commas, dots, and non-numeric characters
+            $('.price-input').on('input', function() {
+                var value = $(this).val();
+                // Remove all non-numeric characters except digits
+                value = value.replace(/[^0-9]/g, '');
+                $(this).val(value);
+            });
+
+            // Format on blur to ensure clean value
+            $('.price-input').on('blur', function() {
+                var value = $(this).val();
+                if (value) {
+                    value = value.replace(/[^0-9]/g, '');
+                    $(this).val(value);
+                }
+            });
+
+            $('#discountType').change(function() {
+                var type = $(this).val();
+                if (type === 'Percentage') {
+                    $('#discountHint').text('Nhập số phần trăm (ví dụ: 10 = 10%)');
+                } else if (type === 'Fixed') {
+                    $('#discountHint').text('Nhập số tiền giảm (VNĐ)');
+                } else {
+                    $('#discountHint').text('Nhập số phần trăm hoặc số tiền');
+                }
+            });
+        });
+    </script>
+}
+
+

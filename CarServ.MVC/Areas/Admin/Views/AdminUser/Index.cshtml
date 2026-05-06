@@ -1,0 +1,118 @@
+@model IEnumerable<CarServ.MVC.Models.AdminUser>
+@{
+    ViewData["Title"] = "Quản lý Quản trị viên";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Quản lý Quản trị viên</h1>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Quản trị viên</h6>
+            <a href="@Url.Action("Create", "AdminUser", new { area = "Admin" })" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Thêm mới
+            </a>
+        </div>
+        <div class="card-body">
+            <!-- Search and Filter -->
+            <form asp-action="Index" method="get" class="mb-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <input type="text" name="searchString" class="form-control" placeholder="Tìm kiếm (Username, Tên, Email)..." value="@ViewData["CurrentFilter"]" />
+                    </div>
+                    <div class="col-md-3">
+                        <select name="roleFilter" class="form-control">
+                            <option value="">Tất cả vai trò</option>
+                            <option value="Admin" selected="@(ViewData["CurrentRole"]?.ToString() == "Admin")">Admin</option>
+                            <option value="Staff" selected="@(ViewData["CurrentRole"]?.ToString() == "Staff")">Staff</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="statusFilter" class="form-control">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="active" selected="@(ViewData["CurrentStatus"]?.ToString() == "active")">Đang hoạt động</option>
+                            <option value="inactive" selected="@(ViewData["CurrentStatus"]?.ToString() == "inactive")">Đã khóa</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Tên đầy đủ</th>
+                            <th>Vai trò</th>
+                            <th>Email</th>
+                            <th>Số điện thoại</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Lần đăng nhập cuối</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>@item.Username</td>
+                                <td>@(item.FullName ?? "-")</td>
+                                <td>
+                                    <span class="badge badge-@(item.Role == "Admin" ? "danger" : "info")">
+                                        @item.Role
+                                    </span>
+                                </td>
+                                <td>@(item.Email ?? "-")</td>
+                                <td>@(item.Phone ?? "-")</td>
+                                <td>
+                                    @if (item.IsActive == true)
+                                    {
+                                        <span class="badge badge-success">Đang hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Đã khóa</span>
+                                    }
+                                </td>
+                                <td>@(item.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                                <td>@(item.LastLogin?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa đăng nhập")</td>
+                                <td>
+                                    <a href="@Url.Action("Edit", "AdminUser", new { area = "Admin", id = item.Id })" 
+                                       class="btn btn-warning btn-sm" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="@Url.Action("Delete", "AdminUser", new { area = "Admin", id = item.Id })" 
+                                       class="btn btn-danger btn-sm" title="Xóa"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản này?');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+

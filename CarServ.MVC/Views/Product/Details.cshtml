@@ -1,0 +1,231 @@
+@model CarServ.MVC.Models.Product
+
+@{
+    ViewData["Title"] = Model.ProductName;
+    var relatedProducts = ViewData["RelatedProducts"] as List<CarServ.MVC.Models.Product> ?? new List<CarServ.MVC.Models.Product>();
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center pb-5">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">@Model.ProductName</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang Chủ</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Product")">Sản Phẩm</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">@Model.ProductName</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Product Details Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-6">
+                <div class="mb-4">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img class="img-fluid rounded w-100" src="@Model.ImageUrl" alt="@Model.ProductName" style="height: 500px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <img class="img-fluid rounded w-100" src="~/img/product-1.jpg" alt="@Model.ProductName" style="height: 500px; object-fit: cover;">
+                    }
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <h2 class="mb-4">@Model.ProductName</h2>
+                
+                @if (Model.Category != null)
+                {
+                    <div class="mb-3">
+                        <span class="badge bg-primary">@Model.Category.CategoryName</span>
+                    </div>
+                }
+
+                <div class="mb-4">
+                    @if (Model.SalePrice.HasValue && Model.SalePrice < Model.Price)
+                    {
+                        <h3 class="text-primary mb-2">@Model.SalePrice.Value.ToString("N0") đ</h3>
+                        <h5 class="text-muted text-decoration-line-through mb-0">@Model.Price.Value.ToString("N0") đ</h5>
+                    }
+                    else if (Model.Price.HasValue)
+                    {
+                        <h3 class="text-primary mb-0">@Model.Price.Value.ToString("N0") đ</h3>
+                    }
+                    else
+                    {
+                        <h3 class="text-primary mb-0">Liên hệ</h3>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="mb-4">
+                        <h4>Mô tả sản phẩm</h4>
+                        @Html.Raw(Model.Description.Replace("\n", "<br>"))
+                    </div>
+                }
+
+                <div class="row mb-4">
+                    @if (!string.IsNullOrEmpty(Model.Brand))
+                    {
+                        <div class="col-md-6 mb-3">
+                            <strong>Thương hiệu:</strong> @Model.Brand
+                        </div>
+                    }
+                    @if (Model.StockQuantity.HasValue)
+                    {
+                        <div class="col-md-6 mb-3">
+                            <strong>Tồn kho:</strong> @Model.StockQuantity
+                        </div>
+                    }
+                    @if (Model.WarrantyMonths.HasValue)
+                    {
+                        <div class="col-md-6 mb-3">
+                            <strong>Bảo hành:</strong> @Model.WarrantyMonths tháng
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Sku))
+                    {
+                        <div class="col-md-6 mb-3">
+                            <strong>Mã SKU:</strong> @Model.Sku
+                        </div>
+                    }
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button type="button" class="btn btn-primary btn-lg px-5" onclick="addToCart(@Model.ProductId, 1)">
+                        <i class="fa fa-shopping-cart me-2"></i>Thêm Vào Giỏ
+                    </button>
+                    <button class="btn btn-outline-primary btn-lg px-5">
+                        <i class="fa fa-heart me-2"></i>Yêu Thích
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        @await Html.PartialAsync("_ProductReviews", Model)
+
+        <!-- Related Products -->
+        @if (relatedProducts.Any())
+        {
+            <div class="row g-4 mt-5">
+                <div class="col-12">
+                    <h3 class="mb-4">Sản Phẩm Liên Quan</h3>
+                </div>
+                @foreach (var product in relatedProducts)
+                {
+                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="product-item bg-light d-flex flex-column overflow-hidden h-100">
+                            <div class="position-relative overflow-hidden">
+                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                {
+                                    <img class="img-fluid" src="@product.ImageUrl" alt="@product.ProductName" style="width: 100%; height: 200px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <img class="img-fluid" src="~/img/product-1.jpg" alt="@product.ProductName" style="width: 100%; height: 200px; object-fit: cover;">
+                                }
+                            </div>
+                            <div class="text-center p-4 pt-0 flex-grow-1 d-flex flex-column">
+                                <h5 class="mb-3">@product.ProductName</h5>
+                                <div class="mt-auto">
+                                    <a class="btn btn-sm btn-primary rounded py-2 px-4" href="@(string.IsNullOrEmpty(product.Slug) ? Url.Action("Details", "Product", new { id = product.ProductId }) : Url.Action("Details", "Product", new { slug = product.Slug }))">
+                                        Xem Chi Tiết <i class="fa fa-arrow-right ms-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+<!-- Product Details End -->
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        var isAuthenticated = @((User.Identity?.IsAuthenticated ?? false).ToString().ToLower());
+        
+        function addToCart(productId, quantity) {
+            // Check if user is authenticated
+            if (!isAuthenticated) {
+                var message = 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.\n\nBạn có muốn đăng nhập ngay không?';
+                if (confirm(message)) {
+                    // Get current URL for returnUrl
+                    var currentUrl = window.location.pathname + window.location.search;
+                    var loginUrl = '@Url.Action("Login", "Account")' + '?returnUrl=' + encodeURIComponent(currentUrl);
+                    window.location.href = loginUrl;
+                }
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("AddToCart", "Cart")',
+                type: 'POST',
+                data: {
+                    productId: productId,
+                    quantity: quantity
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Show success message
+                        alert(response.message);
+                        // Update cart count in header
+                        updateCartCount();
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    // Handle 401 Unauthorized (not logged in)
+                    if (xhr.status === 401 || xhr.status === 0) {
+                        var message = 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.\n\nBạn có muốn đăng nhập ngay không?';
+                        if (confirm(message)) {
+                            // Get current URL for returnUrl
+                            var currentUrl = window.location.pathname + window.location.search;
+                            var loginUrl = '@Url.Action("Login", "Account")' + '?returnUrl=' + encodeURIComponent(currentUrl);
+                            window.location.href = loginUrl;
+                        }
+                    } else {
+                        alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                    }
+                }
+            });
+        }
+
+        function updateCartCount() {
+            $.ajax({
+                url: '@Url.Action("GetCartCount", "Cart")',
+                type: 'GET',
+                success: function(response) {
+                    var cartCount = $('#cart-count');
+                    if (cartCount.length) {
+                        cartCount.text(response.count);
+                        if (response.count > 0) {
+                            cartCount.show();
+                        } else {
+                            cartCount.hide();
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update cart count on page load
+        $(document).ready(function() {
+            updateCartCount();
+        });
+    </script>
+}
+
