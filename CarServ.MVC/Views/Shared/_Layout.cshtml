@@ -1,23 +1,21 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="utf-8">
-    <title>@ViewData["Title"] - CarServ - Gara Ô Tô Chuyên Nghiệp</title>
+    <title>@ViewData["Title"] - NHP-AUTO</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="gara ô tô, sửa chữa xe, bảo dưỡng ô tô, dịch vụ ô tô chuyên nghiệp" name="keywords">
+    <meta content="NHP-AUTO — Trung tâm sửa chữa và chăm sóc ô tô chuyên nghiệp hàng đầu Việt Nam." name="description">
 
-    <!-- SEO -->
-    <meta content="gara ô tô, sửa chữa xe hơi, bảo dưỡng xe, dịch vụ ô tô" name="keywords">
-    <meta content="Gara ô tô CarServ cung cấp dịch vụ sửa chữa, bảo dưỡng xe hơi chuyên nghiệp" name="description">
-
-    <!-- Favicon -->
     <link href="~/img/favicon.ico" rel="icon">
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
 
     <!-- Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- Libraries -->
@@ -25,164 +23,215 @@
     <link href="~/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
     <link href="~/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
 
-    <!-- Bootstrap -->
+    <!-- Bootstrap + Theme -->
     <link href="~/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Main Template CSS -->
     <link href="~/css/style.css" rel="stylesheet">
-
-    <!-- ⭐ MUST HAVE: Chatbot Messenger CSS (SITE.CSS) -->
     <link href="~/css/site.css" rel="stylesheet">
 </head>
-
-<body style="position: relative;">
+<body>
 
     <!-- Spinner -->
     <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
-        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+        <div class="spinner-border text-primary" style="width: 2.5rem; height: 2.5rem;"></div>
     </div>
 
     <!-- Topbar -->
-    <div class="container-fluid bg-light p-0">
-        <div class="row gx-0 d-none d-lg-flex">
-            <div class="col-lg-7 px-5 text-start">
-
-                <div class="h-100 d-inline-flex align-items-center py-3 me-4">
-                    <i class="fa fa-map-marker-alt text-primary me-2"></i>
-                    <small>123 Đường ABC, Quận 1, TP.HCM</small>
-                </div>
-
-                <div class="h-100 d-inline-flex align-items-center py-3">
-                    <i class="far fa-clock text-primary me-2"></i>
-                    <small>Thứ 2 - Thứ 6 : 07.00 - 21.00</small>
-                </div>
-
+    <div class="container-fluid d-none d-lg-block" style="background: #f8f9fa; border-bottom: 1px solid #f0f0f0; padding: 6px 0; font-size: 12px; font-weight: 500;">
+        <div class="container d-flex justify-content-between align-items-center" style="max-width: 1280px;">
+            <div class="d-flex align-items-center gap-4 text-muted">
+                <span><i class="fa fa-map-marker-alt me-2" style="color: #E11D2E;"></i>Số 1 Lê Duẩn, TP Vinh, Nghệ An</span>
+                <span><i class="far fa-clock me-2" style="color: #E11D2E;"></i>T2 – T6: 07:00 – 21:00</span>
             </div>
-
-            <div class="col-lg-5 px-5 text-end">
-                <div class="h-100 d-inline-flex align-items-center py-3 me-4">
-                    <i class="fa fa-phone-alt text-primary me-2"></i>
-                    <small>+84 123 456 789</small>
+            <div class="d-flex align-items-center gap-4">
+                <span class="text-dark fw-bold"><i class="fa fa-phone-alt me-2" style="color: #E11D2E;"></i>+84 357 062 771</span>
+                <div class="d-flex gap-2">
+                    <a class="text-muted" href="#" style="transition: color 0.2s;" onmouseover="this.style.color='#E11D2E'" onmouseout="this.style.color='inherit'"><i class="fab fa-facebook-f"></i></a>
+                    <a class="text-muted" href="#" style="transition: color 0.2s;" onmouseover="this.style.color='#E11D2E'" onmouseout="this.style.color='inherit'"><i class="fab fa-instagram"></i></a>
+                    <a class="text-muted" href="#" style="transition: color 0.2s;" onmouseover="this.style.color='#E11D2E'" onmouseout="this.style.color='inherit'"><i class="fab fa-youtube"></i></a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
+    <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top px-lg-0">
+        <div class="container align-items-center" style="max-width: 1280px;">
+            <a href="/" class="navbar-brand d-flex align-items-center py-3">
+                <i class="fa fa-car text-primary me-2" style="font-size: 1.4rem;"></i>
+                <span style="font-family:'Montserrat',sans-serif; font-weight:900; font-size:1.4rem; color:#111827; letter-spacing: 1px; text-transform: uppercase;">NHP-AUTO</span>
+            </a>
 
-        <a href="/" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
-            <h2 class="m-0 text-primary"><i class="fa fa-car me-3"></i>CarServ</h2>
-        </a>
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" style="font-size: 1.2rem; padding: 0;">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        <button class="navbar-toggler me-4" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                @await Component.InvokeAsync("MenuTop")
 
-        <div class="collapse navbar-collapse" id="navbarCollapse">
+                <!-- Actions (Desktop) -->
+                <div class="d-none d-lg-flex align-items-center gap-3 ms-auto nav-actions">
+                    <a href="@Url.Action("Index", "Cart")" class="d-flex align-items-center justify-content-center position-relative text-dark" style="width: 42px; height: 42px; background: #f8f9fa; border-radius: 4px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#f8f9fa'">
+                        <i class="fa fa-shopping-cart" style="font-size:16px;"></i>
+                        <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge bg-primary border border-white" style="font-size:10px; border-radius: 4px; display:none; padding: 4px 6px;">0</span>
+                    </a>
 
-            @await Component.InvokeAsync("MenuTop")
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        var userName = User.Identity.Name ?? "";
+                        var shortName = userName.Contains(" ") ? userName.Substring(userName.LastIndexOf(" ") + 1) : userName;
+                        if (string.IsNullOrEmpty(shortName)) shortName = "Tài khoản";
 
-            <!-- Desktop Menu -->
-            <div class="d-none d-lg-flex align-items-center">
-                <a href="@Url.Action("Index", "Cart")" class="btn btn-outline-primary py-4 px-lg-4 position-relative me-2">
-                    <i class="fa fa-shopping-cart"></i>
-                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none;">0</span>
-                </a>
+                        <div class="dropdown">
+                            <button class="btn btn-light d-flex align-items-center" style="height: 42px; padding: 0 16px 0 8px; border: 1px solid #f0f0f0; border-radius: 4px; background: #f8f9fa; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#f8f9fa'" type="button" data-bs-toggle="dropdown">
+                                <div class="d-flex align-items-center justify-content-center bg-white text-primary rounded-circle shadow-sm me-2" style="width: 28px; height: 28px;">
+                                    <i class="fa fa-user" style="font-size:12px;"></i>
+                                </div>
+                                <span style="font-size:13px; font-weight: 600; color: #111827; letter-spacing: 0.3px;">@shortName</span>
+                                <i class="fa fa-angle-down ms-2 text-muted" style="font-size: 12px;"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end m-0" style="min-width:220px;">
+                                <li><a class="dropdown-item py-2" href="@Url.Action("Profile", "Customer")"><i class="fa fa-user me-3 text-muted" style="font-size:12px; width: 14px; text-align: center;"></i>Tài khoản</a></li>
+                                <li><a class="dropdown-item py-2" href="@Url.Action("Orders", "Customer")"><i class="fa fa-shopping-bag me-3 text-muted" style="font-size:12px; width: 14px; text-align: center;"></i>Đơn hàng</a></li>
+                                <li><a class="dropdown-item py-2" href="@Url.Action("Appointments", "Customer")"><i class="fa fa-calendar me-3 text-muted" style="font-size:12px; width: 14px; text-align: center;"></i>Lịch hẹn</a></li>
+                                <li><a class="dropdown-item py-2" href="@Url.Action("Vehicles", "Customer")"><i class="fa fa-car me-3 text-muted" style="font-size:12px; width: 14px; text-align: center;"></i>Quản lý xe</a></li>
+                                <li><hr class="dropdown-divider my-2"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post">
+                                        <button type="submit" class="dropdown-item py-2 text-danger"><i class="fa fa-sign-out-alt me-3" style="font-size:12px; width: 14px; text-align: center;"></i>Đăng xuất</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Login", "Account")" class="btn btn-outline-dark d-flex align-items-center" style="font-size:12px; padding: 10px 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px; border-width: 2px;">Đăng nhập</a>
+                    }
 
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    <!-- User Dropdown -->
-                    <div class="dropdown me-2">
-                        <button class="btn btn-outline-secondary py-4 px-lg-4 dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-user me-2"></i>@User.Identity.Name
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="@Url.Action("Profile", "Customer")"><i class="fa fa-user me-2"></i>Tài khoản</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Orders", "Customer")"><i class="fa fa-shopping-bag me-2"></i>Đơn hàng</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Appointments", "Customer")"><i class="fa fa-calendar me-2"></i>Lịch hẹn</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Vehicles", "Customer")"><i class="fa fa-car me-2"></i>Quản lý xe</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="fa fa-sign-out-alt me-2"></i>Đăng xuất
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
+                    <a href="@Url.Action("Index", "Booking")" class="btn btn-primary d-flex align-items-center" style="font-size:12px; padding: 11px 28px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px;">
+                        Đặt lịch <i class="fa fa-arrow-right ms-2" style="font-size:11px;"></i>
+                    </a>
+                </div>
+
+                <!-- Actions (Mobile) -->
+                <div class="d-lg-none py-3 d-flex flex-column gap-2">
+                    <div class="d-flex gap-2">
+                        <a href="@Url.Action("Index", "Cart")" class="btn btn-light rounded-pill flex-fill py-2" style="font-size:13px;">
+                            <i class="fa fa-shopping-cart me-2 text-primary"></i>Giỏ hàng
+                            <span id="cart-count-mobile" class="badge rounded-pill bg-danger ms-1" style="font-size:10px;display:none;">0</span>
+                        </a>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            var userName = User.Identity.Name ?? "";
+                            var shortName = userName.Contains(" ") ? userName.Substring(userName.LastIndexOf(" ") + 1) : userName;
+                            if (string.IsNullOrEmpty(shortName)) shortName = "Tài khoản";
+
+                            <div class="dropdown flex-fill">
+                                <button class="btn btn-light rounded-pill w-100 py-2 d-flex align-items-center justify-content-center" style="font-size:13px;" type="button" data-bs-toggle="dropdown">
+                                    <div class="d-flex align-items-center justify-content-center bg-white text-primary rounded-circle shadow-sm me-2" style="width: 24px; height: 24px;">
+                                        <i class="fa fa-user" style="font-size:10px;"></i>
+                                    </div>
+                                    <span class="fw-bold" style="color: #111827;">@shortName</span>
+                                    <i class="fa fa-angle-down ms-2 text-muted"></i>
+                                </button>
+                                <ul class="dropdown-menu w-100 border-0 shadow py-2" style="border-radius:12px;">
+                                    <li><a class="dropdown-item py-2" href="@Url.Action("Profile", "Customer")"><i class="fa fa-user me-2 text-primary"></i>Tài khoản</a></li>
+                                    <li><a class="dropdown-item py-2" href="@Url.Action("Orders", "Customer")"><i class="fa fa-shopping-bag me-2 text-primary"></i>Đơn hàng</a></li>
+                                    <li><a class="dropdown-item py-2" href="@Url.Action("Appointments", "Customer")"><i class="fa fa-calendar me-2 text-primary"></i>Lịch hẹn</a></li>
+                                    <li><a class="dropdown-item py-2" href="@Url.Action("Vehicles", "Customer")"><i class="fa fa-car me-2 text-primary"></i>Quản lý xe</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post">
+                                            <button type="submit" class="dropdown-item py-2 text-danger"><i class="fa fa-sign-out-alt me-2"></i>Đăng xuất</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Login", "Account")" class="btn btn-outline-dark rounded-pill flex-fill py-2" style="font-size:13px;">Đăng nhập</a>
+                        }
                     </div>
-                }
-                else
-                {
-                    <a href="@Url.Action("Login", "Account")" class="btn btn-outline-secondary py-4 px-lg-4 me-2">
-                        <i class="fa fa-sign-in-alt me-2"></i>Đăng nhập
+                    <a href="@Url.Action("Index", "Booking")" class="btn btn-primary rounded-pill w-100 py-2" style="font-size:13px;">
+                        <i class="fa fa-calendar-check me-2"></i>Đặt lịch ngay
                     </a>
-                }
-
-                <a href="@Url.Action("Index", "Booking")" class="btn btn-primary py-4 px-lg-5">
-                    Đặt lịch<i class="fa fa-arrow-right ms-3"></i>
-                </a>
+                </div>
             </div>
-
-            <!-- Mobile Menu -->
-            <div class="d-lg-none mt-3">
-                <a href="@Url.Action("Index", "Cart")" class="btn btn-outline-primary w-100 mb-2 position-relative">
-                    <i class="fa fa-shopping-cart me-2"></i>Giỏ hàng
-                    <span id="cart-count-mobile" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none;">0</span>
-                </a>
-
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    <div class="dropdown mb-2">
-                        <button class="btn btn-outline-secondary w-100 dropdown-toggle" type="button" id="userDropdownMobile" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-user me-2"></i>@User.Identity.Name
-                        </button>
-                        <ul class="dropdown-menu w-100" aria-labelledby="userDropdownMobile">
-                            <li><a class="dropdown-item" href="@Url.Action("Profile", "Customer")"><i class="fa fa-user me-2"></i>Tài khoản</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Orders", "Customer")"><i class="fa fa-shopping-bag me-2"></i>Đơn hàng</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Appointments", "Customer")"><i class="fa fa-calendar me-2"></i>Lịch hẹn</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Vehicles", "Customer")"><i class="fa fa-car me-2"></i>Quản lý xe</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="fa fa-sign-out-alt me-2"></i>Đăng xuất
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
-                }
-                else
-                {
-                    <a href="@Url.Action("Login", "Account")" class="btn btn-outline-secondary w-100 mb-2">
-                        <i class="fa fa-sign-in-alt me-2"></i>Đăng nhập
-                    </a>
-                    <a href="@Url.Action("Register", "Account")" class="btn btn-outline-primary w-100 mb-2">
-                        <i class="fa fa-user-plus me-2"></i>Đăng ký
-                    </a>
-                }
-
-                <a href="@Url.Action("Index", "Booking")" class="btn btn-primary w-100">
-                    <i class="fa fa-calendar me-2"></i>Đặt lịch
-                </a>
-            </div>
-
         </div>
     </nav>
 
-    @RenderBody()
+    <!-- Main -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 pt-4">
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-lg-4 col-md-6">
+                    <div class="mb-4 d-flex align-items-center">
+                        <i class="fa fa-car text-primary me-2" style="font-size: 1.2rem;"></i>
+                        <span style="font-family:'Montserrat',sans-serif; font-weight:800; font-size:1.3rem; color:#fff; letter-spacing:-0.5px;">NHP-AUTO</span>
+                    </div>
+                    <p class="mb-4 pe-lg-4">Hệ thống trung tâm sửa chữa và chăm sóc ô tô chuyên nghiệp hàng đầu Việt Nam. Chất lượng làm nên thương hiệu.</p>
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-social" href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-social" href="#"><i class="fab fa-instagram"></i></a>
+                        <a class="btn btn-social" href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-uppercase mb-4">Dịch Vụ</h6>
+                    <a class="footer-link" href="#">Bảo Dưỡng Động Cơ</a>
+                    <a class="footer-link" href="#">Chẩn Đoán Điện Tử</a>
+                    <a class="footer-link" href="#">Thay Lốp & Phanh</a>
+                    <a class="footer-link" href="#">Spa & Đồng Sơn</a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-uppercase mb-4">Liên Hệ</h6>
+                    <p class="mb-3 d-flex align-items-start"><i class="fa fa-map-marker-alt text-primary mt-1 me-3"></i>182 Lê Duẩn, TP Vinh, Nghệ An</p>
+                    <p class="mb-3 d-flex align-items-center"><i class="fa fa-phone-alt text-primary me-3"></i>+84 357 062 771</p>
+                    <p class="mb-3 d-flex align-items-center"><i class="fa fa-envelope text-primary me-3"></i>carservnhp@gmail.com</p>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-uppercase mb-4">Giờ Làm Việc</h6>
+                    <div class="d-flex justify-content-between mb-3 pb-3" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span class="text-white">Thứ 2 - Thứ 6</span>
+                        <span>07:00 - 21:00</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-white">Thứ 7 - CN</span>
+                        <span>08:00 - 17:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="copyright mt-3">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                        &copy; 2024 <a href="/">NHP-AUTO</a>. All Rights Reserved.
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <div class="footer-menu">
+                            <a href="/">Trang Chủ</a>
+                            <a href="@Url.Action("Index", "Service")">Dịch Vụ</a>
+                            <a href="@Url.Action("Index", "Contact")">Liên Hệ</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <!-- Back To Top -->
-    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top">
-        <i class="bi bi-arrow-up"></i>
-    </a>
+    <a href="#" class="btn btn-primary back-to-top rounded-circle" style="width:40px;height:40px;font-size:14px;"><i class="bi bi-arrow-up"></i></a>
 
-    <!-- JS Libraries -->
+    <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script src="~/lib/wow/wow.min.js"></script>
     <script src="~/lib/easing/easing.min.js"></script>
     <script src="~/lib/waypoints/waypoints.min.js"></script>
@@ -191,58 +240,41 @@
     <script src="~/lib/tempusdominus/js/moment.min.js"></script>
     <script src="~/lib/tempusdominus/js/moment-timezone.min.js"></script>
     <script src="~/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
-
     <script src="~/js/main.js"></script>
 
-    @*@await RenderSectionAsync("Scripts", required: false)*@
-
-    <!-- ================================
-         CHAT WIDGET BUTTON + UI
-    ================================= -->
     @await RenderSectionAsync("Scripts", required: false)
 
-    <button id="chat-toggle-btn" class="chat-btn-toggle">💬</button>
-
-    <div id="chat-window" class="chat-box-container">
+    <!-- Chat Widget -->
+    <button id="chat-toggle-btn" class="chat-btn-toggle shadow">💬</button>
+    <div id="chat-window" class="chat-box-container shadow-lg">
         <div class="chat-box-header">
-            <span><i class="fas fa-robot me-2"></i>Trợ lý CarServ</span>
+            <span><i class="fas fa-robot me-2"></i>Trợ lý NHP-AUTO</span>
             <span id="chat-close-btn" class="chat-box-close">✖</span>
         </div>
-
         <div id="chat-messages" class="chat-msg-list">
             <div class="chat-bubble-row bot">
-                <div class="chat-bubble">
+                <div class="chat-bubble shadow-sm">
                     Xin chào! 👋<br>
-                    Tôi là trợ lý ảo CarServ.<br>
-                    - Bạn cần tra cứu giá dịch vụ?<br>
-                    - Muốn đặt lịch hẹn ngay?<br>
-                    - Hay cần gặp nhân viên hỗ trợ?<br>
-                    Cứ nhắn tin cho tôi nhé!
+                    Tôi là trợ lý ảo NHP-AUTO.<br>
+                    Bạn cần hỗ trợ gì hôm nay?
                 </div>
             </div>
         </div>
-
         <div class="chat-box-footer">
-            <input type="file" id="chat-image-upload" accept="image/*" style="display: none;" onchange="previewImage()">
-
+            <input type="file" id="chat-image-upload" accept="image/*" style="display:none;" onchange="previewImage()">
             <button class="chat-btn-icon" onclick="document.getElementById('chat-image-upload').click()" title="Gửi ảnh">
                 <i class="fas fa-camera"></i>
             </button>
-
             <input id="chat-input" class="chat-box-input" placeholder="Nhập tin nhắn..." autocomplete="off">
-
             <button id="chat-send-btn" class="chat-btn-send"><i class="fas fa-paper-plane"></i></button>
         </div>
-
-        <div id="image-preview-container" style="display: none; padding: 10px; background: #f9f9f9; border-top: 1px solid #eee;">
-            <div style="position: relative; display: inline-block;">
-                <img id="image-preview" src="" style="max-height: 60px; border-radius: 8px; border: 1px solid #ddd;">
-                <span onclick="clearImage()" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; font-size: 12px; cursor: pointer;">&times;</span>
+        <div id="image-preview-container" style="display:none; padding:8px; background:#f9f9f9; border-top:1px solid #eee;">
+            <div style="position:relative; display:inline-block;">
+                <img id="image-preview" src="" style="max-height:50px; border-radius:6px; border:1px solid #ddd;">
+                <span onclick="clearImage()" style="position:absolute; top:-4px; right:-4px; background:#e11d2e; color:white; border-radius:50%; width:16px; height:16px; text-align:center; font-size:10px; line-height:16px; cursor:pointer;">&times;</span>
             </div>
         </div>
     </div>
-    
     <script src="/js/chat-widget.js"></script>
-
 </body>
 </html>

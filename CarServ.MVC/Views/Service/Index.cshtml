@@ -1,40 +1,43 @@
-@model IEnumerable<CarServ.MVC.Models.Service>
+﻿@model IEnumerable<CarServ.MVC.Models.Service>
 
 @{
     ViewData["Title"] = "Dịch Vụ";
 }
 
-<!-- Page Header Start -->
-<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+<!-- Page Header -->
+<div class="container-fluid page-header p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
     <div class="container-fluid page-header-inner py-5">
-        <div class="container text-center pb-5">
-            <h1 class="display-3 text-white mb-3 animated slideInDown">Dịch Vụ Của Chúng Tôi</h1>
+        <div class="container text-center py-4">
+            <p class="text-white-50 text-uppercase mb-2" style="font-size: 12px; letter-spacing: 4px; font-weight: 600;">NHP-AUTO</p>
+            <h1 class="text-white mb-3" style="font-family:'Montserrat',sans-serif; font-weight:800; font-size:clamp(1.6rem,3.5vw,2.2rem);">Dịch Vụ Của Chúng Tôi</h1>
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb justify-content-center text-uppercase">
-                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang Chủ</a></li>
+                <ol class="breadcrumb justify-content-center mb-0" style="font-size: 13px;">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")" class="text-white-50 text-decoration-none">Trang Chủ</a></li>
                     <li class="breadcrumb-item text-white active" aria-current="page">Dịch Vụ</li>
                 </ol>
             </nav>
         </div>
     </div>
 </div>
-<!-- Page Header End -->
 
 <!-- Service Start -->
 <div class="container-xxl py-5">
     <div class="container">
-        <!-- Search and Filter -->
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <form asp-action="Index" method="get" class="d-flex">
-                    <input type="text" name="searchString" class="form-control me-2" placeholder="Tìm kiếm dịch vụ..." value="@ViewData["CurrentFilter"]">
-                    <button type="submit" class="btn btn-primary">Tìm Kiếm</button>
+        <!-- Search & Filter -->
+        <div class="row mb-4 g-3 align-items-center">
+            <div class="col-md-7">
+                <form asp-action="Index" method="get" class="d-flex gap-2">
+                    <div class="position-relative flex-fill">
+                        <i class="fa fa-search position-absolute text-muted" style="left: 14px; top: 50%; transform: translateY(-50%); font-size: 13px;"></i>
+                        <input type="text" name="searchString" class="form-control" placeholder="Tìm kiếm dịch vụ..." value="@ViewData["CurrentFilter"]" style="padding-left: 38px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4" style="font-size: 13px;">Tìm</button>
                 </form>
             </div>
-            <div class="col-md-4">
-                <form asp-action="Index" method="get" class="d-flex">
+            <div class="col-md-3 ms-auto">
+                <form asp-action="Index" method="get">
                     <input type="hidden" name="searchString" value="@ViewData["CurrentFilter"]">
-                    <select name="categoryFilter" class="form-select" onchange="this.form.submit()">
+                    <select name="categoryFilter" class="form-select" onchange="this.form.submit()" style="font-size: 13px;">
                         <option value="">Tất cả danh mục</option>
                         @foreach (var category in (List<string>)ViewData["Categories"])
                         {
@@ -45,13 +48,11 @@
             </div>
         </div>
 
-        <!-- Services Count -->
+        <!-- Count -->
         @if (Model != null && Model.Any())
         {
-            <div class="row mb-4">
-                <div class="col-12">
-                    <p class="text-muted">Hiển thị <strong>@Model.Count()</strong> dịch vụ</p>
-                </div>
+            <div class="mb-4">
+                <p class="text-muted mb-0" style="font-size: 13px;">Hiển thị <strong class="text-dark">@Model.Count()</strong> dịch vụ</p>
             </div>
         }
 
@@ -62,64 +63,74 @@
                 @foreach (var service in Model)
                 {
                     <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                        <div class="service-item bg-light d-flex flex-column overflow-hidden h-100">
+                        <div class="service-item bg-white d-flex flex-column h-100" style="border-radius: 14px; overflow: hidden; border: 1px solid #f0f0f0;">
+                            <!-- Image -->
                             <div class="position-relative overflow-hidden">
                                 @if (!string.IsNullOrEmpty(service.ImageUrl))
                                 {
-                                    <img class="img-fluid" src="@service.ImageUrl" alt="@service.ServiceName" style="width: 100%; height: 250px; object-fit: cover;">
+                                    <img class="img-fluid w-100" src="@service.ImageUrl" alt="@service.ServiceName" style="height: 220px; object-fit: cover;">
                                 }
                                 else
                                 {
-                                    <img class="img-fluid" src="~/img/service-1.jpg" alt="@service.ServiceName" style="width: 100%; height: 250px; object-fit: cover;">
+                                    <img class="img-fluid w-100" src="~/img/service-1.jpg" alt="@service.ServiceName" style="height: 220px; object-fit: cover;">
                                 }
                                 @if (service.IsFeatured)
                                 {
-                                    <div class="position-absolute top-0 start-0 bg-warning text-white px-3 py-1 m-2 rounded">
-                                        <small><i class="fa fa-star"></i> Nổi bật</small>
+                                    <div class="position-absolute top-0 start-0 m-3">
+                                        <span class="badge rounded-pill text-white px-3 py-1" style="font-size: 11px; font-weight: 600; background: rgba(225,29,46,0.9); backdrop-filter: blur(4px);">
+                                            <i class="fa fa-star me-1" style="font-size: 9px;"></i>Nổi bật
+                                        </span>
                                     </div>
                                 }
                                 <div class="service-overlay position-absolute start-0 top-0 w-100 h-100">
-                                    <a class="btn btn-lg btn-primary btn-lg-square rounded-circle m-1" href="@(string.IsNullOrEmpty(service.Slug) ? Url.Action("Details", "Service", new { id = service.ServiceId }) : Url.Action("Details", "Service", new { slug = service.Slug }))">
-                                        <i class="fa fa-link"></i>
+                                    <a class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center" href="@(string.IsNullOrEmpty(service.Slug) ? Url.Action("Details", "Service", new { id = service.ServiceId }) : Url.Action("Details", "Service", new { slug = service.Slug }))" style="width: 40px; height: 40px;">
+                                        <i class="fa fa-arrow-right" style="font-size: 13px;"></i>
                                     </a>
                                 </div>
                             </div>
-                            <div class="text-center p-4 pt-0 flex-grow-1 d-flex flex-column">
-                                <div class="d-inline-block bg-primary text-white rounded-pill mb-3 px-3 py-1">
+
+                            <!-- Content -->
+                            <div class="p-4 flex-grow-1 d-flex flex-column">
+                                <!-- Category Badge -->
+                                <div class="mb-2">
                                     @if (!string.IsNullOrEmpty(service.ServiceCategory))
                                     {
-                                        <small>@service.ServiceCategory</small>
+                                        <span class="badge rounded-pill px-3 py-1" style="font-size: 11px; font-weight: 500; background: rgba(225,29,46,0.08); color: #E11D2E;">@service.ServiceCategory</span>
                                     }
                                     else
                                     {
-                                        <small>Dịch Vụ</small>
+                                        <span class="badge rounded-pill px-3 py-1" style="font-size: 11px; font-weight: 500; background: rgba(225,29,46,0.08); color: #E11D2E;">Dịch Vụ</span>
                                     }
                                 </div>
-                                <h5 class="mb-3">@service.ServiceName</h5>
+
+                                <!-- Title -->
+                                <h6 class="fw-bold text-dark mb-2" style="font-size: 15px; line-height: 1.4;">@service.ServiceName</h6>
+
+                                <!-- Description -->
                                 @if (!string.IsNullOrEmpty(service.ShortDescription))
                                 {
-                                    <p class="mb-3 flex-grow-1">@service.ShortDescription</p>
+                                    <p class="text-muted mb-3 flex-grow-1" style="font-size: 13px; line-height: 1.6;">@service.ShortDescription</p>
                                 }
                                 else if (!string.IsNullOrEmpty(service.Description))
                                 {
-                                    <p class="mb-3 flex-grow-1">@(service.Description.Length > 100 ? service.Description.Substring(0, 100) + "..." : service.Description)</p>
+                                    <p class="text-muted mb-3 flex-grow-1" style="font-size: 13px; line-height: 1.6;">@(service.Description.Length > 100 ? service.Description.Substring(0, 100) + "..." : service.Description)</p>
                                 }
-                                <div class="d-flex flex-column gap-2 mt-auto">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        @if (service.Price.HasValue)
-                                        {
-                                            <h5 class="text-primary mb-0">@service.Price.Value.ToString("N0") đ</h5>
-                                        }
-                                        else
-                                        {
-                                            <h5 class="text-primary mb-0">Liên hệ</h5>
-                                        }
-                                    </div>
+
+                                <!-- Price + Actions -->
+                                <div class="d-flex align-items-center justify-content-between mt-auto pt-3" style="border-top: 1px solid #f3f4f6;">
+                                    @if (service.Price.HasValue)
+                                    {
+                                        <span class="text-primary fw-bold" style="font-size: 15px;">@service.Price.Value.ToString("N0") đ</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-primary fw-bold" style="font-size: 14px;">Liên hệ</span>
+                                    }
                                     <div class="d-flex gap-2">
-                                    <a class="btn btn-sm btn-primary rounded py-2 px-3 flex-fill" href="@(string.IsNullOrEmpty(service.Slug) ? Url.Action("Details", "Service", new { id = service.ServiceId }) : Url.Action("Details", "Service", new { slug = service.Slug }))">
-                                        Xem Chi Tiết <i class="fa fa-arrow-right ms-2"></i>
-                                    </a>
-                                        <a class="btn btn-sm btn-success rounded py-2 px-3" href="@Url.Action("Index", "Booking", new { serviceId = service.ServiceId })" title="Đặt lịch ngay">
+                                        <a class="btn btn-primary rounded-pill px-3 py-1" href="@(string.IsNullOrEmpty(service.Slug) ? Url.Action("Details", "Service", new { id = service.ServiceId }) : Url.Action("Details", "Service", new { slug = service.Slug }))" style="font-size: 12px;">
+                                            Chi Tiết <i class="fa fa-arrow-right ms-1" style="font-size: 10px;"></i>
+                                        </a>
+                                        <a class="btn btn-outline-dark rounded-pill px-3 py-1" href="@Url.Action("Index", "Booking", new { serviceId = service.ServiceId })" title="Đặt lịch" style="font-size: 12px;">
                                             <i class="fa fa-calendar-check"></i>
                                         </a>
                                     </div>
@@ -131,12 +142,14 @@
             }
             else
             {
-                <div class="col-12 text-center">
-                    <p class="text-muted">Không tìm thấy dịch vụ nào.</p>
+                <div class="col-12 text-center py-5">
+                    <div class="d-flex flex-column align-items-center">
+                        <i class="fa fa-search fa-2x text-muted mb-3"></i>
+                        <p class="text-muted mb-0" style="font-size: 14px;">Không tìm thấy dịch vụ nào.</p>
+                    </div>
                 </div>
             }
         </div>
     </div>
 </div>
 <!-- Service End -->
-

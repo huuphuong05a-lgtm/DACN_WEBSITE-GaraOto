@@ -16,12 +16,12 @@
     new WOW().init();
 
 
-    // Sticky Navbar
+    // Sticky Navbar + scroll class
     $(window).scroll(function () {
         if ($(this).scrollTop() > 300) {
-            $('.sticky-top').css('top', '0px');
+            $('.sticky-top').css('top', '0px').addClass('scrolled');
         } else {
-            $('.sticky-top').css('top', '-100px');
+            $('.sticky-top').css('top', '-100px').removeClass('scrolled');
         }
     });
     

@@ -1,17 +1,15 @@
-﻿@model List<CarServ.MVC.Models.Menu>
+@model List<CarServ.MVC.Models.Menu>
 
-<ul class="navbar-nav ms-auto p-4 p-lg-0">
-
+<ul class="navbar-nav ms-lg-5 me-auto">
     @foreach (var item in Model)
     {
         if (item.Children.Any())
         {
             <li class="nav-item dropdown">
                 <a href="@item.MenuUrl" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                    <i class="@item.IconClass"></i> @item.MenuName
+                    @item.MenuName
                 </a>
-
-                <div class="dropdown-menu fade-down m-0">
+                <div class="dropdown-menu border-0 shadow-lg m-0" style="border-radius: 12px;">
                     @foreach (var child in item.Children)
                     {
                         <a class="dropdown-item" href="@child.MenuUrl">@child.MenuName</a>
@@ -22,11 +20,8 @@
         else
         {
             <li class="nav-item">
-                <a class="nav-link" href="@item.MenuUrl">
-                    <i class="@item.IconClass"></i> @item.MenuName
-                </a>
+                <a class="nav-link" href="@item.MenuUrl">@item.MenuName</a>
             </li>
         }
     }
-
 </ul>

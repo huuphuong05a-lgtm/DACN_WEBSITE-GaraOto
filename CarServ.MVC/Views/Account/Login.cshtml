@@ -1,99 +1,84 @@
-@model CarServ.MVC.Controllers.LoginViewModel
+﻿@model CarServ.MVC.Controllers.LoginViewModel
 @{
-    ViewData["Title"] = "Đăng nhập";
-    var returnUrl = ViewData["ReturnUrl"] as string;
+    ViewData["Title"] = "Đăng Nhập";
 }
 
-<!-- Page Header Start -->
-<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
-    <div class="container-fluid page-header-inner py-5">
-        <div class="container text-center">
-            <h1 class="display-3 text-white mb-3 animated slideInDown">Đăng Nhập</h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb justify-content-center text-uppercase">
-                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
-                    <li class="breadcrumb-item text-white active" aria-current="page">Đăng nhập</li>
-                </ol>
-            </nav>
+<!-- Login -->
+<div class="min-vh-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #111827 0%, #1F2937 100%); padding: 40px 16px;">
+    <div class="w-100" style="max-width: 420px;">
+        <!-- Logo -->
+        <div class="text-center mb-4">
+            <a href="/" class="text-decoration-none">
+                <i class="fa fa-car text-primary me-2" style="font-size: 1.1rem;"></i>
+                <span style="font-family:'Montserrat',sans-serif; font-weight:800; font-size:1.3rem; color:#fff;">NHP-AUTO</span>
+            </a>
         </div>
-    </div>
-</div>
-<!-- Page Header End -->
 
-<!-- Login Start -->
-<div class="container-xxl py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-6">
-                <div class="wow fadeInUp" data-wow-delay="0.1s">
-                    <div class="bg-light rounded p-5">
-                        <h2 class="mb-4">Đăng nhập tài khoản</h2>
+        <!-- Card -->
+        <div class="bg-white p-4 p-md-5" style="border-radius: 16px;">
+            <h4 class="fw-bold text-dark mb-1" style="font-size: 1.15rem;">Đăng Nhập</h4>
+            <p class="text-muted mb-4" style="font-size: 13px;">Chào mừng bạn quay trở lại.</p>
 
-                        @if (TempData["SuccessMessage"] != null)
-                        {
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                @TempData["SuccessMessage"]
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        }
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show mb-3" role="alert" style="border-radius: 10px; font-size: 13px;">
+                    <i class="fa fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size: 10px;"></button>
+                </div>
+            }
 
-                        @if (TempData["ErrorMessage"] != null)
-                        {
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                @TempData["ErrorMessage"]
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert" style="border-radius: 10px; font-size: 13px;">
+                    <i class="fa fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size: 10px;"></button>
+                </div>
+            }
 
-                        <form asp-action="Login" method="post">
-                            <input type="hidden" name="returnUrl" value="@returnUrl" />
-                            
-                            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+            <form asp-action="Login" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 13px;"></div>
 
-                            <div class="mb-3">
-                                <label asp-for="Email" class="form-label">Email <span class="text-danger">*</span></label>
-                                <input asp-for="Email" type="email" class="form-control" placeholder="example@email.com" />
-                                <span asp-validation-for="Email" class="text-danger"></span>
-                            </div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" type="email" class="form-control" placeholder="you@example.com" autofocus>
+                    <span asp-validation-for="Email" class="text-danger" style="font-size: 12px;"></span>
+                </div>
 
-                            <div class="mb-3">
-                                <label asp-for="Password" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
-                                <input asp-for="Password" type="password" class="form-control" placeholder="Nhập mật khẩu" />
-                                <span asp-validation-for="Password" class="text-danger"></span>
-                            </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label asp-for="Password" class="form-label mb-0">Mật khẩu</label>
+                        <a href="#" class="text-muted text-decoration-none" style="font-size: 12px;">Quên mật khẩu?</a>
+                    </div>
+                    <input asp-for="Password" type="password" class="form-control mt-1" placeholder="••••••••">
+                    <span asp-validation-for="Password" class="text-danger" style="font-size: 12px;"></span>
+                </div>
 
-                            <div class="mb-3 form-check">
-                                <input asp-for="RememberMe" type="checkbox" class="form-check-input" id="rememberMe" />
-                                <label class="form-check-label" for="rememberMe">
-                                    Ghi nhớ đăng nhập
-                                </label>
-                            </div>
-
-                            <div class="mb-3">
-                                <button type="submit" class="btn btn-primary w-100 py-3">
-                                    <i class="fa fa-sign-in-alt me-2"></i>Đăng nhập
-                                </button>
-                            </div>
-
-                            <div class="text-center">
-                                <p class="mb-2">
-                                    <a href="#" class="text-primary">Quên mật khẩu?</a>
-                                </p>
-                                <p class="mb-0">Chưa có tài khoản? 
-                                    <a asp-action="Register" class="text-primary">Đăng ký ngay</a>
-                                </p>
-                            </div>
-                        </form>
+                <div class="mb-4">
+                    <div class="form-check">
+                        <input asp-for="RememberMe" class="form-check-input" type="checkbox">
+                        <label asp-for="RememberMe" class="form-check-label text-muted" style="font-size: 13px;">Ghi nhớ đăng nhập</label>
                     </div>
                 </div>
-            </div>
+
+                <button type="submit" class="btn btn-primary rounded-pill w-100 py-2 mb-3" style="font-size: 14px;">
+                    Đăng Nhập
+                </button>
+
+                <p class="text-center text-muted mb-0" style="font-size: 13px;">
+                    Chưa có tài khoản? <a asp-action="Register" class="text-primary fw-bold text-decoration-none">Đăng ký ngay</a>
+                </p>
+            </form>
+        </div>
+
+        <!-- Back -->
+        <div class="text-center mt-3">
+            <a href="/" class="text-white-50 text-decoration-none" style="font-size: 13px;">
+                <i class="fa fa-arrow-left me-1" style="font-size: 11px;"></i>Về trang chủ
+            </a>
         </div>
     </div>
 </div>
-<!-- Login End -->
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
-
-
