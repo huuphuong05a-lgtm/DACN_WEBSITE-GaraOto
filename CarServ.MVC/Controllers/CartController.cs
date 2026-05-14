@@ -254,17 +254,6 @@ namespace CarServ.MVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Validate stock
-            foreach (var item in cartItems)
-            {
-                if (item.Product != null && item.Product.StockQuantity.HasValue 
-                    && item.Quantity > item.Product.StockQuantity)
-                {
-                    TempData["ErrorMessage"] = $"Sản phẩm '{item.Product.ProductName}' không đủ tồn kho.";
-                    return RedirectToAction(nameof(Checkout));
-                }
-            }
-
             // Calculate totals
             decimal subtotal = 0;
             foreach (var item in cartItems)
@@ -276,15 +265,47 @@ namespace CarServ.MVC.Controllers
                 }
             }
 
+            // Validate ModelState - if invalid, re-render checkout with cart data
+            if (!ModelState.IsValid)
+            {
+                ViewData["Subtotal"] = subtotal;
+                ViewData["ShippingFee"] = 0m;
+                ViewData["TotalAmount"] = subtotal;
+                ViewData["CartItems"] = cartItems;
+                return View("Checkout", model);
+            }
+
+            // Validate stock
+            foreach (var item in cartItems)
+            {
+                if (item.Product != null && item.Product.StockQuantity.HasValue 
+                    && item.Quantity > item.Product.StockQuantity)
+                {
+                    TempData["ErrorMessage"] = $"Sản phẩm '{item.Product.ProductName}' không đủ tồn kho.";
+                    return RedirectToAction(nameof(Checkout));
+                }
+            }
+
+            // Since [Authorize] is required, customerId should always have a value
+            if (!customerId.HasValue)
+            {
+                TempData["ErrorMessage"] = "Vui lòng đăng nhập để đặt hàng.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Determine payment method (case-insensitive check)
+            var paymentMethod = model.PaymentMethod?.Trim() ?? AppConstants.PaymentMethod.COD;
+            var isOnlinePayment = paymentMethod.Equals(AppConstants.PaymentMethod.VNPay, StringComparison.OrdinalIgnoreCase);
+
             // Create order
             var order = new Order
             {
                 CustomerId = customerId,
                 OrderDate = DateTime.Now,
-                Status = "Pending",
-                PaymentStatus = "Unpaid",
+                Status = AppConstants.OrderStatus.Pending,
+                PaymentStatus = isOnlinePayment ? AppConstants.PaymentStatus.OnlinePending : AppConstants.PaymentStatus.Unpaid,
                 ShippingAddress = model.ShippingAddress,
-                PaymentMethod = model.PaymentMethod,
+                PaymentMethod = paymentMethod,
                 CustomerNotes = model.Notes,
                 ShippingFee = 0,
                 DiscountAmount = 0,
@@ -331,21 +352,13 @@ namespace CarServ.MVC.Controllers
             _context.Carts.RemoveRange(cartItems);
             await _context.SaveChangesAsync();
 
-            // Since [Authorize] is required, customerId should always have a value
-            if (!customerId.HasValue)
-            {
-                TempData["ErrorMessage"] = "Vui lòng đăng nhập để đặt hàng.";
-                return RedirectToAction("Login", "Account");
-            }
-
-            // If online payment (VNPay or Momo), redirect to payment gateway (payment record will be created there)
-            var paymentMethod = model.PaymentMethod ?? "COD";
-            if (paymentMethod == "VNPay" || paymentMethod == "Momo")
+            // If online payment (VNPay), redirect to payment gateway
+            if (isOnlinePayment)
             {
                 return RedirectToAction("CreatePaymentUrl", "Payment", new { orderId = order.OrderId, paymentMethod = paymentMethod });
             }
 
-            // Create payment record for offline payment methods
+            // Create payment record for offline payment methods (COD)
             var paymentCount = await _context.Payments.CountAsync() + 1;
             var payment = new Payment
             {
@@ -354,7 +367,7 @@ namespace CarServ.MVC.Controllers
                 CustomerId = order.CustomerId,
                 Amount = subtotal,
                 PaymentMethod = paymentMethod,
-                PaymentStatus = "Chờ thanh toán",
+                PaymentStatus = AppConstants.PaymentStatus.Pending,
                 PaymentDate = DateTime.Now,
                 CreatedDate = DateTime.Now,
                 UpdatedDate = DateTime.Now

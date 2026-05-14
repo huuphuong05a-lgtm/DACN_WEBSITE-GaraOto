@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -387,7 +387,7 @@ public partial class CarServContext : DbContext
             entity.Property(e => e.PaymentMethod).HasMaxLength(50);
             entity.Property(e => e.PaymentStatus)
                 .HasMaxLength(50)
-                .HasDefaultValue("Chưa thanh toán");
+                .HasDefaultValue(AppConstants.PaymentStatus.Unpaid);
             entity.Property(e => e.ServiceHistoryId).HasColumnName("ServiceHistoryID");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
@@ -477,7 +477,7 @@ public partial class CarServContext : DbContext
             entity.Property(e => e.PaymentMethod).HasMaxLength(50);
             entity.Property(e => e.PaymentStatus)
                 .HasMaxLength(50)
-                .HasDefaultValue("Chưa thanh toán");
+                .HasDefaultValue(AppConstants.PaymentStatus.Unpaid);
             entity.Property(e => e.ShippingAddress).HasMaxLength(500);
             entity.Property(e => e.ShippingCity).HasMaxLength(50);
             entity.Property(e => e.ShippingDistrict).HasMaxLength(50);
@@ -487,7 +487,7 @@ public partial class CarServContext : DbContext
             entity.Property(e => e.ShippingWard).HasMaxLength(50);
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
-                .HasDefaultValue("Chờ xử lý");
+                .HasDefaultValue(AppConstants.OrderStatus.Pending);
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.TransactionCode).HasMaxLength(100);
             entity.Property(e => e.UpdatedDate)

@@ -36,6 +36,11 @@
     window.previewImage = function () {
         const file = imgUploadInput.files[0];
         if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            addBubble("Ảnh quá lớn. Vui lòng chọn ảnh dưới 2MB.", "bot error");
+            imgUploadInput.value = "";
+            return;
+        }
 
         const reader = new FileReader();
         reader.onloadend = function () {
@@ -60,7 +65,7 @@
         if (!msg && !currentBase64) return;
 
         // --- HIỂN THỊ PHÍA USER ---
-        let userHtml = msg;
+        let userHtml = escapeHtml(msg);
         if (currentBase64) {
             userHtml += `<br><img src="${currentBase64}" style="max-width:150px; border-radius:8px; margin-top:5px; border:1px solid #ddd;">`;
         }
@@ -93,7 +98,7 @@
             // Hiển thị câu trả lời từ Bot
             let modelName = data.model || "System";
             let badgeHtml = `<div class="ai-source-badge">${modelName}</div>`;
-            addBubble(data.reply + badgeHtml, "bot");
+            addBubble((data.reply || "Dạ hệ thống chưa có phản hồi, mình thử lại giúp em nhé.") + badgeHtml, "bot");
 
         } catch (err) {
             document.getElementById(loadingId)?.remove();
@@ -115,6 +120,15 @@
         msgList.appendChild(row);
         msgList.scrollTop = msgList.scrollHeight;
         return row.id;
+    }
+
+    function escapeHtml(value) {
+        return value
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
     }
 
     // 7. Sự kiện Gửi

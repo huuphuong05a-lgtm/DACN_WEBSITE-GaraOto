@@ -122,7 +122,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 .ToListAsync();
 
             ViewData["Payments"] = payments;
-            ViewData["TotalPaid"] = payments.Where(p => p.PaymentStatus == "Đã thanh toán").Sum(p => p.Amount);
+            ViewData["TotalPaid"] = payments.Where(p => p.PaymentStatus == AppConstants.PaymentStatus.Paid).Sum(p => p.Amount);
 
             return View(order);
         }
@@ -155,15 +155,15 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             }).ToList();
 
             // Status options
-            var statusList = new[] { "Chờ xử lý", "Đang xử lý", "Đang giao hàng", "Đã giao hàng", "Đã hủy", "Hoàn trả" };
+            var statusList = new[] { AppConstants.OrderStatus.Pending, AppConstants.OrderStatus.Processing, AppConstants.OrderStatus.Shipping, AppConstants.OrderStatus.Delivered, "Đã hủy", AppConstants.OrderStatus.Returned };
             ViewBag.StatusList = statusList;
 
             // Payment status options
-            var paymentStatusList = new[] { "Chưa thanh toán", "Đã thanh toán", "Thanh toán một phần", "Hoàn tiền" };
+            var paymentStatusList = new[] { AppConstants.PaymentStatus.Unpaid, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Partial, AppConstants.PaymentStatus.Refunded };
             ViewBag.PaymentStatusList = paymentStatusList;
 
             // Payment method options
-            var paymentMethodList = new[] { "Tiền mặt", "Chuyển khoản", "Thẻ tín dụng", "Ví điện tử", "COD" };
+            var paymentMethodList = new[] { AppConstants.PaymentMethod.Cash, AppConstants.PaymentMethod.BankTransfer, AppConstants.PaymentMethod.CreditCard, AppConstants.PaymentMethod.EWallet, AppConstants.PaymentMethod.COD };
             ViewBag.PaymentMethodList = paymentMethodList;
 
             return View();
@@ -183,12 +183,12 @@ namespace CarServ.MVC.Areas.Admin.Controllers
 
                 if (string.IsNullOrEmpty(order.Status))
                 {
-                    order.Status = "Chờ xử lý";
+                    order.Status = AppConstants.OrderStatus.Pending;
                 }
 
                 if (string.IsNullOrEmpty(order.PaymentStatus))
                 {
-                    order.PaymentStatus = "Chưa thanh toán";
+                    order.PaymentStatus = AppConstants.PaymentStatus.Unpaid;
                 }
 
                 _context.Add(order);
@@ -219,13 +219,13 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 Text = $"{p.ProductName} - {p.Price?.ToString("N0")} đ" 
             }).ToList();
 
-            var statusList = new[] { "Chờ xử lý", "Đang xử lý", "Đang giao hàng", "Đã giao hàng", "Đã hủy", "Hoàn trả" };
+            var statusList = new[] { AppConstants.OrderStatus.Pending, AppConstants.OrderStatus.Processing, AppConstants.OrderStatus.Shipping, AppConstants.OrderStatus.Delivered, "Đã hủy", AppConstants.OrderStatus.Returned };
             ViewBag.StatusList = statusList;
 
-            var paymentStatusList = new[] { "Chưa thanh toán", "Đã thanh toán", "Thanh toán một phần", "Hoàn tiền" };
+            var paymentStatusList = new[] { AppConstants.PaymentStatus.Unpaid, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Partial, AppConstants.PaymentStatus.Refunded };
             ViewBag.PaymentStatusList = paymentStatusList;
 
-            var paymentMethodList = new[] { "Tiền mặt", "Chuyển khoản", "Thẻ tín dụng", "Ví điện tử", "COD" };
+            var paymentMethodList = new[] { AppConstants.PaymentMethod.Cash, AppConstants.PaymentMethod.BankTransfer, AppConstants.PaymentMethod.CreditCard, AppConstants.PaymentMethod.EWallet, AppConstants.PaymentMethod.COD };
             ViewBag.PaymentMethodList = paymentMethodList;
 
             return View(order);
@@ -261,15 +261,15 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             }).ToList();
 
             // Status options
-            var statusList = new[] { "Chờ xử lý", "Đang xử lý", "Đang giao hàng", "Đã giao hàng", "Đã hủy", "Hoàn trả" };
+            var statusList = new[] { AppConstants.OrderStatus.Pending, AppConstants.OrderStatus.Processing, AppConstants.OrderStatus.Shipping, AppConstants.OrderStatus.Delivered, "Đã hủy", AppConstants.OrderStatus.Returned };
             ViewBag.StatusList = statusList;
 
             // Payment status options
-            var paymentStatusList = new[] { "Chưa thanh toán", "Đã thanh toán", "Thanh toán một phần", "Hoàn tiền" };
+            var paymentStatusList = new[] { AppConstants.PaymentStatus.Unpaid, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Partial, AppConstants.PaymentStatus.Refunded };
             ViewBag.PaymentStatusList = paymentStatusList;
 
             // Payment method options
-            var paymentMethodList = new[] { "Tiền mặt", "Chuyển khoản", "Thẻ tín dụng", "Ví điện tử", "COD" };
+            var paymentMethodList = new[] { AppConstants.PaymentMethod.Cash, AppConstants.PaymentMethod.BankTransfer, AppConstants.PaymentMethod.CreditCard, AppConstants.PaymentMethod.EWallet, AppConstants.PaymentMethod.COD };
             ViewBag.PaymentMethodList = paymentMethodList;
 
             return View(order);
@@ -343,13 +343,13 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 Text = $"{c.FullName} - {c.Phone}" 
             }).ToList();
 
-            var statusList = new[] { "Chờ xử lý", "Đang xử lý", "Đang giao hàng", "Đã giao hàng", "Đã hủy", "Hoàn trả" };
+            var statusList = new[] { AppConstants.OrderStatus.Pending, AppConstants.OrderStatus.Processing, AppConstants.OrderStatus.Shipping, AppConstants.OrderStatus.Delivered, "Đã hủy", AppConstants.OrderStatus.Returned };
             ViewBag.StatusList = statusList;
 
-            var paymentStatusList = new[] { "Chưa thanh toán", "Đã thanh toán", "Thanh toán một phần", "Hoàn tiền" };
+            var paymentStatusList = new[] { AppConstants.PaymentStatus.Unpaid, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Partial, AppConstants.PaymentStatus.Refunded };
             ViewBag.PaymentStatusList = paymentStatusList;
 
-            var paymentMethodList = new[] { "Tiền mặt", "Chuyển khoản", "Thẻ tín dụng", "Ví điện tử", "COD" };
+            var paymentMethodList = new[] { AppConstants.PaymentMethod.Cash, AppConstants.PaymentMethod.BankTransfer, AppConstants.PaymentMethod.CreditCard, AppConstants.PaymentMethod.EWallet, AppConstants.PaymentMethod.COD };
             ViewBag.PaymentMethodList = paymentMethodList;
 
             return View(order);

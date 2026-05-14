@@ -85,11 +85,8 @@ namespace CarServ.MVC.Controllers
                         _logger.LogInformation("VNPay URL created: {PaymentUrl}", paymentUrl);
                         break;
                     case "momo":
-                        _logger.LogInformation("Creating Momo payment URL");
-                        paymentUrl = _paymentGatewayService.CreateMomoPaymentUrl(
-                            orderId, amount, orderInfo, returnUrl, ipAddress);
-                        _logger.LogInformation("Momo URL created: {PaymentUrl}", paymentUrl);
-                        break;
+                        _logger.LogWarning("Momo payment is not enabled yet.");
+                        return RedirectToAction("PaymentResult", new { success = false, message = "Momo hiện chưa được hỗ trợ. Vui lòng chọn VNPay hoặc COD." });
                     default:
                         _logger.LogWarning("Unsupported payment method: {PaymentMethod}", paymentMethod);
                         return RedirectToAction("PaymentResult", new { success = false, message = "Phương thức thanh toán không được hỗ trợ." });
@@ -97,7 +94,7 @@ namespace CarServ.MVC.Controllers
 
                 // Check if payment record already exists (avoid duplicate)
                 var existingPayment = await _context.Payments
-                    .FirstOrDefaultAsync(p => p.OrderId == orderId && p.GatewayName == paymentMethod && p.PaymentStatus == "Chờ thanh toán");
+                    .FirstOrDefaultAsync(p => p.OrderId == orderId && p.GatewayName == paymentMethod && p.PaymentStatus == AppConstants.PaymentStatus.Pending);
 
                 Payment payment;
                 if (existingPayment != null)
@@ -116,7 +113,7 @@ namespace CarServ.MVC.Controllers
                         CustomerId = order.CustomerId,
                         Amount = amount,
                         PaymentMethod = paymentMethod,
-                        PaymentStatus = "Chờ thanh toán",
+                        PaymentStatus = AppConstants.PaymentStatus.Pending,
                         PaymentDate = DateTime.Now,
                         GatewayName = paymentMethod,
                         CreatedDate = DateTime.Now,
@@ -256,7 +253,7 @@ namespace CarServ.MVC.Controllers
             // Update payment status
             if (vnpResponseCode == "00" && vnpTransactionStatus == "00")
             {
-                payment.PaymentStatus = "Đã thanh toán";
+                payment.PaymentStatus = AppConstants.PaymentStatus.Paid;
                 payment.CompletedDate = DateTime.Now;
                 var transactionNo = Request.Query.ContainsKey("vnp_TransactionNo") 
                     ? Request.Query["vnp_TransactionNo"].ToString() 
@@ -266,7 +263,7 @@ namespace CarServ.MVC.Controllers
                 payment.GatewayResponse = string.Join("&", vnpParams.Select(p => $"{p.Key}={p.Value}"));
 
                 // Update order
-                order.PaymentStatus = "Đã thanh toán";
+                order.PaymentStatus = AppConstants.PaymentStatus.Paid;
                 order.PaymentDate = DateTime.Now;
                 order.TransactionCode = payment.TransactionCode;
 
@@ -276,7 +273,7 @@ namespace CarServ.MVC.Controllers
             }
             else
             {
-                payment.PaymentStatus = "Thất bại";
+                payment.PaymentStatus = AppConstants.PaymentStatus.Failed;
                 payment.GatewayResponse = $"ResponseCode: {vnpResponseCode}, TransactionStatus: {vnpTransactionStatus}";
                 await _context.SaveChangesAsync();
 
@@ -314,13 +311,13 @@ namespace CarServ.MVC.Controllers
 
             if (resultCode == "0")
             {
-                payment.PaymentStatus = "Đã thanh toán";
+                payment.PaymentStatus = AppConstants.PaymentStatus.Paid;
                 payment.CompletedDate = DateTime.Now;
                 var transId = Request.Query["transId"].ToString();
                 payment.TransactionCode = !string.IsNullOrEmpty(transId) ? transId : null;
                 payment.GatewayTransactionId = !string.IsNullOrEmpty(transId) ? transId : null;
 
-                order.PaymentStatus = "Đã thanh toán";
+                order.PaymentStatus = AppConstants.PaymentStatus.Paid;
                 order.PaymentDate = DateTime.Now;
                 order.TransactionCode = payment.TransactionCode;
 
@@ -330,7 +327,7 @@ namespace CarServ.MVC.Controllers
             }
             else
             {
-                payment.PaymentStatus = "Thất bại";
+                payment.PaymentStatus = AppConstants.PaymentStatus.Failed;
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction("PaymentResult", new { success = false, message = "Thanh toán thất bại." });
@@ -374,7 +371,7 @@ namespace CarServ.MVC.Controllers
 
                     if (payment != null && Request.Form["vnp_ResponseCode"].ToString() == "00")
                     {
-                        payment.PaymentStatus = "Đã thanh toán";
+                        payment.PaymentStatus = AppConstants.PaymentStatus.Paid;
                         payment.CompletedDate = DateTime.Now;
                         var transactionNo = Request.Form.ContainsKey("vnp_TransactionNo") 
                             ? Request.Form["vnp_TransactionNo"].ToString() 
@@ -429,15 +426,12 @@ namespace CarServ.MVC.Controllers
                 var returnUrl = $"{Request.Scheme}://{Request.Host}/payment/paymentcallback";
                 var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
 
-                string paymentUrl;
-                if (paymentMethod == "VNPay")
+                if (!paymentMethod.Equals(AppConstants.PaymentMethod.VNPay, StringComparison.OrdinalIgnoreCase))
                 {
-                    paymentUrl = _paymentGatewayService.CreateVNPayPaymentUrl(orderId, amount, orderInfo, returnUrl, ipAddress);
+                    return Content("Only VNPay test payment is enabled. Momo is hidden until the gateway integration is completed.");
                 }
-                else
-                {
-                    paymentUrl = _paymentGatewayService.CreateMomoPaymentUrl(orderId, amount, orderInfo, returnUrl, ipAddress);
-                }
+
+                var paymentUrl = _paymentGatewayService.CreateVNPayPaymentUrl(orderId, amount, orderInfo, returnUrl, ipAddress);
 
                 return Content($"<h2>Payment URL Test</h2>" +
                     $"<p><strong>Order ID:</strong> {orderId}</p>" +

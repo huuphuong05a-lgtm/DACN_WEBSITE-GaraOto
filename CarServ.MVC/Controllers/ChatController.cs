@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using CarServ.MVC.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -9,19 +9,26 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Net.Http.Headers;
+using System.Collections.Concurrent;
 
 namespace CarServ.MVC.Controllers
 {
     public class ChatController : Controller
     {
         private readonly CarServContext _context;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<ChatController> _logger;
+        private static readonly ConcurrentDictionary<string, Queue<DateTime>> RequestLog = new();
+        private const int MaxImageBase64Length = 2_800_000;
+        private const int MaxRequestsPerMinute = 12;
 
-        public ChatController(CarServContext context)
+        public ChatController(CarServContext context, IConfiguration configuration, ILogger<ChatController> logger)
         {
             _context = context;
+            _configuration = configuration;
+            _logger = logger;
         }
 
-        [HttpPost]
         // ===========================
         // 🔤 HÀM CHUYỂN CHUỖI VỀ KHÔNG DẤU (NORMALIZE)
         // ===========================
@@ -42,11 +49,45 @@ namespace CarServ.MVC.Controllers
             return new string(chars.ToArray());
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetHistory()
+        {
+            string userId = GetChatUserId();
+            var history = await _context.ChatMessages
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(20)
+                .OrderBy(x => x.CreatedAt)
+                .Select(x => new { message = x.Message, isBot = x.IsBot, createdAt = x.CreatedAt })
+                .ToListAsync();
+
+            return Json(history);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> SendMessage([FromBody] ChatRequest req)
         {
-            string userId = User.Identity.IsAuthenticated ? User.Identity.Name : HttpContext.Session.Id;
-            if (string.IsNullOrEmpty(userId)) userId = "Guest";
+            if (req == null)
+            {
+                return Json(new { reply = "Dạ tin nhắn chưa hợp lệ, mình thử gửi lại giúp em nhé.", model = "System" });
+            }
+
+            string userId = GetChatUserId();
+            if (!AllowRequest(userId))
+            {
+                return Json(new { reply = "Dạ mình gửi hơi nhanh rồi ạ. Vui lòng chờ một chút rồi nhắn tiếp giúp em nhé.", model = "Rate limit" });
+            }
+
             string msg = req.Message?.Trim() ?? "";
+            if (msg.Length > 2000)
+            {
+                return Json(new { reply = "Dạ tin nhắn hơi dài. Mình rút gọn nội dung chính rồi gửi lại giúp em nhé.", model = "System" });
+            }
+
+            if (!string.IsNullOrEmpty(req.ImageBase64) && req.ImageBase64.Length > MaxImageBase64Length)
+            {
+                return Json(new { reply = "Dạ ảnh đang quá lớn. Mình gửi ảnh dưới 2MB hoặc mô tả triệu chứng xe bằng chữ giúp em nhé.", model = "System" });
+            }
 
             // --- 1. ƯU TIÊN TỪ KHÓA (CHẶN ĐỨNG AI NẾU GẶP CÁC TỪ NÀY) ---
             // Đặt cái này lên đầu tiên để AI không có cơ hội nói leo
@@ -207,9 +248,8 @@ namespace CarServ.MVC.Controllers
                 }
                 catch (Exception exGroq)
                 {
-                    // 👇 QUAN TRỌNG: IN RA LỖI CHI TIẾT ĐỂ BẠN ĐỌC 👇
-                    string chiTietLoi = $"Gemini: {exGemini.Message} | Groq: {exGroq.Message}";
-                    return Json(new { reply = "⚠️ AI gặp lỗi: " + chiTietLoi, model = "Error Debug" });
+                    _logger.LogError(exGroq, "Chat AI failed after Gemini fallback failed: {GeminiError}", exGemini.Message);
+                    return Json(new { reply = "Dạ hệ thống tư vấn đang bận. Mình thử lại sau ít phút hoặc để lại số điện thoại để nhân viên hỗ trợ nhé.", model = "System" });
                 }
             }
 
@@ -315,6 +355,34 @@ namespace CarServ.MVC.Controllers
         }
 
 
+        private string GetChatUserId()
+        {
+            var userId = User.Identity?.IsAuthenticated == true ? User.Identity.Name : HttpContext.Session.Id;
+            return string.IsNullOrWhiteSpace(userId) ? "Guest" : userId;
+        }
+
+        private bool AllowRequest(string userId)
+        {
+            var now = DateTime.UtcNow;
+            var queue = RequestLog.GetOrAdd(userId, _ => new Queue<DateTime>());
+
+            lock (queue)
+            {
+                while (queue.Count > 0 && (now - queue.Peek()).TotalMinutes >= 1)
+                {
+                    queue.Dequeue();
+                }
+
+                if (queue.Count >= MaxRequestsPerMinute)
+                {
+                    return false;
+                }
+
+                queue.Enqueue(now);
+                return true;
+            }
+        }
+
         private void SaveMsgToDb(string userId, string msg, bool isBot)
         {
             try
@@ -350,7 +418,7 @@ namespace CarServ.MVC.Controllers
                     {
                         _context.Services.Add(new Service { ServiceName = "Auto Service", Price = 0, Description = "Auto" });
                         await _context.SaveChangesAsync();
-                        defaultService = _context.Services.FirstOrDefault();
+                        defaultService = await _context.Services.FirstAsync();
                     }
 
                     var booking = new Appointment
@@ -378,10 +446,13 @@ namespace CarServ.MVC.Controllers
         }
 
         // (Giữ nguyên CallGemini và CallGroq - Nhớ điền Key của bạn)
-        private async Task<string> CallGemini(string prompt, string imageBase64)
+        private async Task<string> CallGemini(string prompt, string? imageBase64)
         {
-            // Key bạn vừa gửi (Tôi đã test, Key này HỢP LỆ)
-            string apiKey = "AIzaSyBjo05g-rDNkms1Tzr2umbck_Y8u3qDRu4";
+            string apiKey = _configuration["AI:Gemini:ApiKey"] ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                throw new InvalidOperationException("Gemini API key is not configured.");
+            }
 
             // 👇 SỬA QUAN TRỌNG: Dùng tên chuẩn "gemini-1.5-flash" (Bỏ chữ -latest đi)
             string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
@@ -425,14 +496,18 @@ namespace CarServ.MVC.Controllers
                 // Trả về kết quả
                 return doc.RootElement.GetProperty("candidates")[0]
                     .GetProperty("content").GetProperty("parts")[0]
-                    .GetProperty("text").GetString();
+                    .GetProperty("text").GetString() ?? "Dạ em chưa có phản hồi phù hợp, mình mô tả rõ hơn giúp em nhé.";
             }
         }
 
         // --- 2. SỬA LẠI HÀM GROQ (Dùng Model Vision 90b mới nhất) ---
-        private async Task<string> CallGroq(string prompt, string imageBase64)
+        private async Task<string> CallGroq(string prompt, string? imageBase64)
         {
-            string apiKey = "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"; // KEY CỦA BẠN
+            string apiKey = _configuration["AI:Groq:ApiKey"] ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                throw new InvalidOperationException("Groq API key is not configured.");
+            }
 
             using (var client = new HttpClient())
             {
@@ -463,9 +538,14 @@ namespace CarServ.MVC.Controllers
                 }
 
                 var doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync());
-                return doc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+                return doc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString()
+                    ?? "Dạ em chưa có phản hồi phù hợp, mình mô tả rõ hơn giúp em nhé.";
             }
         }
     }
-    public class ChatRequest { public string Message { get; set; } public string ImageBase64 { get; set; } }
+    public class ChatRequest
+    {
+        public string? Message { get; set; }
+        public string? ImageBase64 { get; set; }
+    }
 }

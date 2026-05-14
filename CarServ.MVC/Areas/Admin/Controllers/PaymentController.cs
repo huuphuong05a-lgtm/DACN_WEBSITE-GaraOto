@@ -173,11 +173,11 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             }).ToList();
 
             // Payment status options
-            var paymentStatusList = new[] { "Chờ thanh toán", "Đã thanh toán", "Thất bại", "Đã hủy", "Hoàn tiền" };
+            var paymentStatusList = new[] { AppConstants.PaymentStatus.Pending, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Failed, "Đã hủy", AppConstants.PaymentStatus.Refunded };
             ViewBag.PaymentStatusList = paymentStatusList;
 
             // Payment method options
-            var paymentMethodList = new[] { "Tiền mặt", "Chuyển khoản", "Thẻ tín dụng", "Ví điện tử", "VNPay", "Momo", "ZaloPay", "COD" };
+            var paymentMethodList = new[] { AppConstants.PaymentMethod.Cash, AppConstants.PaymentMethod.BankTransfer, AppConstants.PaymentMethod.CreditCard, AppConstants.PaymentMethod.EWallet, AppConstants.PaymentMethod.VNPay, AppConstants.PaymentMethod.COD };
             ViewBag.PaymentMethodList = paymentMethodList;
 
             return View();
@@ -199,7 +199,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
 
                 if (string.IsNullOrEmpty(payment.PaymentStatus))
                 {
-                    payment.PaymentStatus = "Chờ thanh toán";
+                    payment.PaymentStatus = AppConstants.PaymentStatus.Pending;
                 }
 
                 _context.Add(payment);
@@ -213,16 +213,16 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                     {
                         // Calculate total paid amount
                         var totalPaid = await _context.Payments
-                            .Where(p => p.OrderId == payment.OrderId && p.PaymentStatus == "Đã thanh toán")
+                            .Where(p => p.OrderId == payment.OrderId && p.PaymentStatus == AppConstants.PaymentStatus.Paid)
                             .SumAsync(p => p.Amount);
 
                         if (totalPaid >= (order.FinalAmount ?? 0))
                         {
-                            order.PaymentStatus = "Đã thanh toán";
+                            order.PaymentStatus = AppConstants.PaymentStatus.Paid;
                         }
                         else if (totalPaid > 0)
                         {
-                            order.PaymentStatus = "Thanh toán một phần";
+                            order.PaymentStatus = AppConstants.PaymentStatus.Partial;
                         }
 
                         order.PaymentDate = payment.PaymentDate;
@@ -238,16 +238,16 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                     if (invoice != null)
                     {
                         var totalPaid = await _context.Payments
-                            .Where(p => p.InvoiceId == payment.InvoiceId && p.PaymentStatus == "Đã thanh toán")
+                            .Where(p => p.InvoiceId == payment.InvoiceId && p.PaymentStatus == AppConstants.PaymentStatus.Paid)
                             .SumAsync(p => p.Amount);
 
                         if (totalPaid >= invoice.TotalAmount)
                         {
-                            invoice.PaymentStatus = "Đã thanh toán";
+                            invoice.PaymentStatus = AppConstants.PaymentStatus.Paid;
                         }
                         else if (totalPaid > 0)
                         {
-                            invoice.PaymentStatus = "Thanh toán một phần";
+                            invoice.PaymentStatus = AppConstants.PaymentStatus.Partial;
                         }
 
                         invoice.PaymentDate = payment.PaymentDate;
@@ -294,10 +294,10 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 Text = $"{i.InvoiceCode} - {i.TotalAmount.ToString("N0")} đ"
             }).ToList();
 
-            var paymentStatusList = new[] { "Chờ thanh toán", "Đã thanh toán", "Thất bại", "Đã hủy", "Hoàn tiền" };
+            var paymentStatusList = new[] { AppConstants.PaymentStatus.Pending, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Failed, "Đã hủy", AppConstants.PaymentStatus.Refunded };
             ViewBag.PaymentStatusList = paymentStatusList;
 
-            var paymentMethodList = new[] { "Tiền mặt", "Chuyển khoản", "Thẻ tín dụng", "Ví điện tử", "VNPay", "Momo", "ZaloPay", "COD" };
+            var paymentMethodList = new[] { AppConstants.PaymentMethod.Cash, AppConstants.PaymentMethod.BankTransfer, AppConstants.PaymentMethod.CreditCard, AppConstants.PaymentMethod.EWallet, AppConstants.PaymentMethod.VNPay, AppConstants.PaymentMethod.COD };
             ViewBag.PaymentMethodList = paymentMethodList;
 
             return View(payment);
@@ -353,10 +353,10 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 Text = $"{i.InvoiceCode} - {i.TotalAmount.ToString("N0")} đ"
             }).ToList();
 
-            var paymentStatusList = new[] { "Chờ thanh toán", "Đã thanh toán", "Thất bại", "Đã hủy", "Hoàn tiền" };
+            var paymentStatusList = new[] { AppConstants.PaymentStatus.Pending, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Failed, "Đã hủy", AppConstants.PaymentStatus.Refunded };
             ViewBag.PaymentStatusList = paymentStatusList;
 
-            var paymentMethodList = new[] { "Tiền mặt", "Chuyển khoản", "Thẻ tín dụng", "Ví điện tử", "VNPay", "Momo", "ZaloPay", "COD" };
+            var paymentMethodList = new[] { AppConstants.PaymentMethod.Cash, AppConstants.PaymentMethod.BankTransfer, AppConstants.PaymentMethod.CreditCard, AppConstants.PaymentMethod.EWallet, AppConstants.PaymentMethod.VNPay, AppConstants.PaymentMethod.COD };
             ViewBag.PaymentMethodList = paymentMethodList;
 
             return View(payment);
@@ -378,7 +378,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 {
                     payment.UpdatedDate = DateTime.Now;
 
-                    if (payment.PaymentStatus == "Đã thanh toán" && payment.CompletedDate == null)
+                    if (payment.PaymentStatus == AppConstants.PaymentStatus.Paid && payment.CompletedDate == null)
                     {
                         payment.CompletedDate = DateTime.Now;
                     }
@@ -393,20 +393,20 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                         if (order != null)
                         {
                             var totalPaid = await _context.Payments
-                                .Where(p => p.OrderId == payment.OrderId && p.PaymentStatus == "Đã thanh toán")
+                                .Where(p => p.OrderId == payment.OrderId && p.PaymentStatus == AppConstants.PaymentStatus.Paid)
                                 .SumAsync(p => p.Amount);
 
                             if (totalPaid >= (order.FinalAmount ?? 0))
                             {
-                                order.PaymentStatus = "Đã thanh toán";
+                                order.PaymentStatus = AppConstants.PaymentStatus.Paid;
                             }
                             else if (totalPaid > 0)
                             {
-                                order.PaymentStatus = "Thanh toán một phần";
+                                order.PaymentStatus = AppConstants.PaymentStatus.Partial;
                             }
                             else
                             {
-                                order.PaymentStatus = "Chưa thanh toán";
+                                order.PaymentStatus = AppConstants.PaymentStatus.Unpaid;
                             }
 
                             await _context.SaveChangesAsync();
@@ -419,20 +419,20 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                         if (invoice != null)
                         {
                             var totalPaid = await _context.Payments
-                                .Where(p => p.InvoiceId == payment.InvoiceId && p.PaymentStatus == "Đã thanh toán")
+                                .Where(p => p.InvoiceId == payment.InvoiceId && p.PaymentStatus == AppConstants.PaymentStatus.Paid)
                                 .SumAsync(p => p.Amount);
 
                             if (totalPaid >= invoice.TotalAmount)
                             {
-                                invoice.PaymentStatus = "Đã thanh toán";
+                                invoice.PaymentStatus = AppConstants.PaymentStatus.Paid;
                             }
                             else if (totalPaid > 0)
                             {
-                                invoice.PaymentStatus = "Thanh toán một phần";
+                                invoice.PaymentStatus = AppConstants.PaymentStatus.Partial;
                             }
                             else
                             {
-                                invoice.PaymentStatus = "Chưa thanh toán";
+                                invoice.PaymentStatus = AppConstants.PaymentStatus.Unpaid;
                             }
 
                             await _context.SaveChangesAsync();
@@ -489,10 +489,10 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 Text = $"{i.InvoiceCode} - {i.TotalAmount.ToString("N0")} đ"
             }).ToList();
 
-            var paymentStatusList = new[] { "Chờ thanh toán", "Đã thanh toán", "Thất bại", "Đã hủy", "Hoàn tiền" };
+            var paymentStatusList = new[] { AppConstants.PaymentStatus.Pending, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Failed, "Đã hủy", AppConstants.PaymentStatus.Refunded };
             ViewBag.PaymentStatusList = paymentStatusList;
 
-            var paymentMethodList = new[] { "Tiền mặt", "Chuyển khoản", "Thẻ tín dụng", "Ví điện tử", "VNPay", "Momo", "ZaloPay", "COD" };
+            var paymentMethodList = new[] { AppConstants.PaymentMethod.Cash, AppConstants.PaymentMethod.BankTransfer, AppConstants.PaymentMethod.CreditCard, AppConstants.PaymentMethod.EWallet, AppConstants.PaymentMethod.VNPay, AppConstants.PaymentMethod.COD };
             ViewBag.PaymentMethodList = paymentMethodList;
 
             return View(payment);
@@ -541,20 +541,20 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                     if (order != null)
                     {
                         var totalPaid = await _context.Payments
-                            .Where(p => p.OrderId == orderId && p.PaymentStatus == "Đã thanh toán")
+                            .Where(p => p.OrderId == orderId && p.PaymentStatus == AppConstants.PaymentStatus.Paid)
                             .SumAsync(p => p.Amount);
 
                         if (totalPaid >= (order.FinalAmount ?? 0))
                         {
-                            order.PaymentStatus = "Đã thanh toán";
+                            order.PaymentStatus = AppConstants.PaymentStatus.Paid;
                         }
                         else if (totalPaid > 0)
                         {
-                            order.PaymentStatus = "Thanh toán một phần";
+                            order.PaymentStatus = AppConstants.PaymentStatus.Partial;
                         }
                         else
                         {
-                            order.PaymentStatus = "Chưa thanh toán";
+                            order.PaymentStatus = AppConstants.PaymentStatus.Unpaid;
                         }
 
                         await _context.SaveChangesAsync();
@@ -567,20 +567,20 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                     if (invoice != null)
                     {
                         var totalPaid = await _context.Payments
-                            .Where(p => p.InvoiceId == invoiceId && p.PaymentStatus == "Đã thanh toán")
+                            .Where(p => p.InvoiceId == invoiceId && p.PaymentStatus == AppConstants.PaymentStatus.Paid)
                             .SumAsync(p => p.Amount);
 
                         if (totalPaid >= invoice.TotalAmount)
                         {
-                            invoice.PaymentStatus = "Đã thanh toán";
+                            invoice.PaymentStatus = AppConstants.PaymentStatus.Paid;
                         }
                         else if (totalPaid > 0)
                         {
-                            invoice.PaymentStatus = "Thanh toán một phần";
+                            invoice.PaymentStatus = AppConstants.PaymentStatus.Partial;
                         }
                         else
                         {
-                            invoice.PaymentStatus = "Chưa thanh toán";
+                            invoice.PaymentStatus = AppConstants.PaymentStatus.Unpaid;
                         }
 
                         await _context.SaveChangesAsync();
