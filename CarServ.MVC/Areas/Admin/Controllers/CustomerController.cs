@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 using CarServ.MVC.Models;
 
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace CarServ.MVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(AuthenticationSchemes = "AdminAuth")]
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOrStaff)]
     public class CustomerController : Controller
     {
         private readonly CarServContext _context;
@@ -61,10 +62,14 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                     customers = customers.OrderBy(c => c.CreatedDate);
                     break;
                 case "date_desc":
-                    customers = customers.OrderByDescending(c => c.CreatedDate);
+                    customers = customers
+                        .OrderByDescending(c => c.CreatedDate)
+                        .ThenByDescending(c => c.CustomerId);
                     break;
                 default:
-                    customers = customers.OrderByDescending(c => c.CreatedDate);
+                    customers = customers
+                        .OrderByDescending(c => c.UpdatedDate ?? c.CreatedDate)
+                        .ThenByDescending(c => c.CustomerId);
                     break;
             }
 
@@ -83,6 +88,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             var customer = await _context.Customers
                 .Include(c => c.Orders)
                 .Include(c => c.Appointments)
+                .Include(c => c.Invoices)
                 .FirstOrDefaultAsync(m => m.CustomerId == id);
 
             if (customer == null)
@@ -90,6 +96,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 return NotFound();
             }
 
+            await SetDeleteRelatedCountsAsync(customer.CustomerId);
             return View(customer);
         }
 
@@ -239,28 +246,72 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             var customer = await _context.Customers
                 .Include(c => c.Orders)
                 .Include(c => c.Appointments)
+                .Include(c => c.Invoices)
                 .FirstOrDefaultAsync(c => c.CustomerId == id);
 
             if (customer != null)
             {
-                // Check if customer has orders or appointments
-                if (customer.Orders != null && customer.Orders.Any())
+                var blockers = await GetDeleteBlockersAsync(id);
+                if (blockers.Any())
                 {
-                    TempData["ErrorMessage"] = "Không thể xóa khách hàng này vì đã có đơn hàng liên quan.";
+                    TempData["ErrorMessage"] = "Không thể xóa khách hàng này vì đã có dữ liệu liên quan: "
+                        + string.Join(", ", blockers)
+                        + ". Bạn nên khóa tài khoản thay vì xóa để giữ lịch sử nghiệp vụ.";
                     return RedirectToAction(nameof(Delete), new { id = id });
                 }
 
-                if (customer.Appointments != null && customer.Appointments.Any())
+                try
                 {
-                    TempData["ErrorMessage"] = "Không thể xóa khách hàng này vì đã có lịch hẹn liên quan.";
+                    _context.Customers.Remove(customer);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException ex) when (ex.InnerException is SqlException)
+                {
+                    TempData["ErrorMessage"] = "Không thể xóa khách hàng này vì còn dữ liệu liên quan trong hệ thống. Bạn nên khóa tài khoản thay vì xóa.";
                     return RedirectToAction(nameof(Delete), new { id = id });
                 }
-
-                _context.Customers.Remove(customer);
-                await _context.SaveChangesAsync();
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private async Task SetDeleteRelatedCountsAsync(int customerId)
+        {
+            ViewBag.OrderCount = await _context.Orders.CountAsync(o => o.CustomerId == customerId);
+            ViewBag.AppointmentCount = await _context.Appointments.CountAsync(a => a.CustomerId == customerId);
+            ViewBag.InvoiceCount = await _context.Invoices.CountAsync(i => i.CustomerId == customerId);
+            ViewBag.PaymentCount = await _context.Payments.CountAsync(p => p.CustomerId == customerId);
+            ViewBag.VehicleCount = await _context.Vehicles.CountAsync(v => v.CustomerId == customerId);
+            ViewBag.CartCount = await _context.Carts.CountAsync(c => c.CustomerId == customerId);
+            ViewBag.TestimonialCount = await _context.Testimonials.CountAsync(t => t.CustomerId == customerId);
+        }
+
+        private async Task<List<string>> GetDeleteBlockersAsync(int customerId)
+        {
+            var blockers = new List<string>();
+
+            var orderCount = await _context.Orders.CountAsync(o => o.CustomerId == customerId);
+            if (orderCount > 0) blockers.Add($"{orderCount} đơn hàng");
+
+            var appointmentCount = await _context.Appointments.CountAsync(a => a.CustomerId == customerId);
+            if (appointmentCount > 0) blockers.Add($"{appointmentCount} lịch hẹn");
+
+            var invoiceCount = await _context.Invoices.CountAsync(i => i.CustomerId == customerId);
+            if (invoiceCount > 0) blockers.Add($"{invoiceCount} hóa đơn");
+
+            var paymentCount = await _context.Payments.CountAsync(p => p.CustomerId == customerId);
+            if (paymentCount > 0) blockers.Add($"{paymentCount} thanh toán");
+
+            var vehicleCount = await _context.Vehicles.CountAsync(v => v.CustomerId == customerId);
+            if (vehicleCount > 0) blockers.Add($"{vehicleCount} xe");
+
+            var cartCount = await _context.Carts.CountAsync(c => c.CustomerId == customerId);
+            if (cartCount > 0) blockers.Add($"{cartCount} sản phẩm trong giỏ");
+
+            var testimonialCount = await _context.Testimonials.CountAsync(t => t.CustomerId == customerId);
+            if (testimonialCount > 0) blockers.Add($"{testimonialCount} đánh giá");
+
+            return blockers;
         }
 
         private bool CustomerExists(int id)

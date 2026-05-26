@@ -30,7 +30,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label>Trạng thái:</label>
-                            <select name="statusFilter" class="form-control" asp-items="@(new SelectList(new[] { new { Value = "active", Text = "Đang hoạt động" }, new { Value = "inactive", Text = "Không hoạt động" } }, "Value", "Text", (string)ViewData["CurrentStatus"]))">
+                            <select name="statusFilter" class="form-control" asp-items="@(new SelectList(new[] { new { Value = "active", Text = "Đang hoạt động" }, new { Value = "inactive", Text = "Không hoạt động" } }, "Value", "Text", ViewData["CurrentStatus"]?.ToString()))">
                                 <option value="">Tất cả trạng thái</option>
                             </select>
                         </div>
@@ -155,6 +155,7 @@
         });
     </script>
 }
+
 
 
 

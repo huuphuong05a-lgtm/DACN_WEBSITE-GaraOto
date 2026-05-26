@@ -427,6 +427,7 @@ namespace CarServ.MVC.Controllers
                         CustomerPhone = sdt,
                         CustomerEmail = email,
                         AppointmentDate = date,
+
                         ServiceId = defaultService.ServiceId,
                         VehicleInfo = "Chatbot Booking",
                         Notes = note
@@ -455,7 +456,7 @@ namespace CarServ.MVC.Controllers
             }
 
             // 👇 SỬA QUAN TRỌNG: Dùng tên chuẩn "gemini-1.5-flash" (Bỏ chữ -latest đi)
-            string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
+            string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}";
 
             var parts = new List<object> { new { text = prompt } };
 

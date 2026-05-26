@@ -1,0 +1,133 @@
+@model CarServ.MVC.Models.ViewModels.AdminProfileViewModel
+@{
+    ViewData["Title"] = "Thông tin tài khoản";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Thông tin tài khoản</h1>
+        <a href="@Url.Action("Index", "Home", new { area = "Admin" })" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-body text-center">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
+                         style="width: 96px; height: 96px; font-size: 36px;">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h5 class="font-weight-bold mb-1">@(Model.FullName ?? Model.Username)</h5>
+                    <div class="text-muted mb-3">@Model.Username</div>
+                    <span class="badge badge-@(Model.Role == AppConstants.AdminRole.Admin ? "danger" : Model.Role == AppConstants.AdminRole.Technician ? "warning" : "info") px-3 py-2">
+                        @AppConstants.AdminRole.GetDisplayName(Model.Role)
+                    </span>
+                    <hr />
+                    <div class="text-left small">
+                        <p class="mb-2">
+                            <strong>Trạng thái:</strong>
+                            @if (Model.IsActive == true)
+                            {
+                                <span class="text-success">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="text-danger">Đã khóa</span>
+                            }
+                        </p>
+                        <p class="mb-2"><strong>Ngày tạo:</strong> @(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</p>
+                        <p class="mb-0"><strong>Lần đăng nhập cuối:</strong> @(Model.LastLogin?.ToString("dd/MM/yyyy HH:mm") ?? "-")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Cập nhật thông tin</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Profile" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Tên đăng nhập</label>
+                                <input asp-for="Username" class="form-control" readonly />
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Vai trò</label>
+                                <input value="@AppConstants.AdminRole.GetDisplayName(Model.Role)" class="form-control" readonly />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label asp-for="FullName"></label>
+                                <input asp-for="FullName" class="form-control" />
+                                <span asp-validation-for="FullName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label asp-for="Phone"></label>
+                                <input asp-for="Phone" class="form-control" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Email"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <hr />
+                        <h6 class="font-weight-bold text-gray-800 mb-3">Đổi mật khẩu</h6>
+                        <p class="text-muted small">Bỏ trống phần này nếu bạn chỉ muốn cập nhật thông tin cá nhân.</p>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label asp-for="CurrentPassword"></label>
+                                <input asp-for="CurrentPassword" class="form-control" />
+                                <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label asp-for="NewPassword"></label>
+                                <input asp-for="NewPassword" class="form-control" />
+                                <span asp-validation-for="NewPassword" class="text-danger"></span>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label asp-for="ConfirmNewPassword"></label>
+                                <input asp-for="ConfirmNewPassword" class="form-control" />
+                                <span asp-validation-for="ConfirmNewPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Lưu thay đổi
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

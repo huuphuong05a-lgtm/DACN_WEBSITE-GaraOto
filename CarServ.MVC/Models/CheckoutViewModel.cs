@@ -27,6 +27,8 @@ namespace CarServ.MVC.Models
 
         [Display(Name = "Ghi chú")]
         public string? Notes { get; set; }
+
+        public List<int> SelectedCartIds { get; set; } = new();
     }
 }
 

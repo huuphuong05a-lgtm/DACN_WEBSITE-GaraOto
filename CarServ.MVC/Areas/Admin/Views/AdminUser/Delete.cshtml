@@ -27,8 +27,8 @@
 
                 <dt class="col-sm-3">Vai trò:</dt>
                 <dd class="col-sm-9">
-                    <span class="badge badge-@(Model.Role == "Admin" ? "danger" : "info")">
-                        @Model.Role
+                    <span class="badge badge-@(Model.Role == "Admin" ? "danger" : Model.Role == "Technician" ? "warning" : "info")">
+                        @AppConstants.AdminRole.GetDisplayName(Model.Role)
                     </span>
                 </dd>
 

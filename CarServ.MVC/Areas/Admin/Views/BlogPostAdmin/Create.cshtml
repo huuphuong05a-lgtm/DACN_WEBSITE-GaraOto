@@ -50,17 +50,40 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="control-label">Ảnh đại diện</label>
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imageBrowserModal">
-                                <i class="fas fa-images"></i> Chọn ảnh
-                            </button>
                             <input type="hidden" asp-for="Thumbnail" id="selectedImageUrl" />
-                            <div id="selectedImagePreview" class="mt-3" style="display: none;">
-                                <div class="border p-2 d-inline-block">
-                                    <img id="previewImg" src="" alt="Preview" style="max-width: 200px; max-height: 200px;" class="img-thumbnail" />
-                                    <br /><small class="text-muted">Ảnh đã chọn: <span id="selectedImageName"></span></small>
-                                    <button type="button" class="btn btn-sm btn-danger ml-2" onclick="clearSelectedImage()">
-                                        <i class="fas fa-times"></i> Xóa
-                                    </button>
+                            <div class="admin-image-picker">
+                                <div class="admin-image-picker__header">
+                                    <div>
+                                        <span class="admin-image-picker__title">Ảnh đại diện bài viết</span>
+                                        <span class="admin-image-picker__hint">Ảnh ngang, rõ chủ đề giúp bài viết nổi bật hơn.</span>
+                                    </div>
+                                    <div class="admin-image-picker__actions">
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imageBrowserModal">
+                                            <i class="fas fa-images"></i> Chọn ảnh
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" onclick="clearSelectedImage()">
+                                            <i class="fas fa-times"></i> Bỏ ảnh
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="emptyImagePreview" class="admin-image-empty">
+                                    <i class="fas fa-newspaper"></i>
+                                    <strong>Chưa chọn ảnh bài viết</strong>
+                                    <span>Ảnh đã chọn sẽ được xem trước tại đây.</span>
+                                </div>
+
+                                <div id="selectedImagePreview" class="admin-image-preview" style="display: none;">
+                                    <img id="previewImg" src="" alt="Ảnh bài viết đã chọn" />
+                                    <div class="admin-image-preview__footer">
+                                        <div class="admin-image-file">
+                                            <strong>Ảnh đã chọn</strong>
+                                            <span id="selectedImageName"></span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="clearSelectedImage()">
+                                            <i class="fas fa-trash-alt"></i> Xóa
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <span asp-validation-for="Thumbnail" class="text-danger"></span>
@@ -332,6 +355,7 @@
                 $('#selectedImageUrl').val(url);
                 $('#previewImg').attr('src', url);
                 $('#selectedImageName').text(name);
+                $('#emptyImagePreview').hide();
                 $('#selectedImagePreview').show();
                 $('#imageBrowserModal').modal('hide');
             };
@@ -341,6 +365,7 @@
                 $('#previewImg').attr('src', '');
                 $('#selectedImageName').text('');
                 $('#selectedImagePreview').hide();
+                $('#emptyImagePreview').show();
             };
 
             window.deleteImage = function(url, name) {

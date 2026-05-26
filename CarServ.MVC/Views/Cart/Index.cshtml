@@ -43,17 +43,22 @@
 
         @if (Model != null && Model.Any())
         {
+            <form asp-action="Checkout" method="get" id="cart-buy-form">
+            <input type="hidden" name="fromCartSelection" value="true" />
             <div class="row">
                 <div class="col-lg-8">
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table table-bordered cart-table">
                             <thead class="bg-light">
                                 <tr>
-                                    <th>Sản phẩm</th>
-                                    <th>Giá</th>
-                                    <th>Số lượng</th>
-                                    <th>Tổng tiền</th>
-                                    <th>Thao tác</th>
+                                    <th style="width: 48px;">
+                                        <input type="checkbox" class="form-check-input cart-select-all" id="cart-select-all" checked>
+                                    </th>
+                                    <th class="col-product">Sản phẩm</th>
+                                    <th class="col-price">Giá</th>
+                                    <th class="col-quantity">Số lượng</th>
+                                    <th class="col-total">Tổng tiền</th>
+                                    <th class="col-action">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -64,26 +69,29 @@
                                         var price = item.Product.SalePrice ?? item.Product.Price ?? 0;
                                         var itemTotal = price * (item.Quantity ?? 1);
                                         <tr data-cart-id="@item.CartId">
-                                            <td>
-                                                <div class="d-flex align-items-center">
+                                            <td class="text-center align-middle">
+                                                <input type="checkbox" class="form-check-input cart-item-select" name="selectedCartIds" value="@item.CartId" data-total="@itemTotal" data-quantity="@(item.Quantity ?? 1)" checked>
+                                            </td>
+                                            <td class="col-product">
+                                                <div class="cart-product-cell">
                                                     @if (!string.IsNullOrEmpty(item.Product.ImageUrl))
                                                     {
-                                                        <img src="@item.Product.ImageUrl" alt="@item.Product.ProductName" class="img-thumbnail me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                                                        <img src="@item.Product.ImageUrl" alt="@item.Product.ProductName" class="cart-product-img">
                                                     }
                                                     else
                                                     {
-                                                        <img src="~/img/product-1.jpg" alt="@item.Product.ProductName" class="img-thumbnail me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                                                        <img src="~/img/product-1.jpg" alt="@item.Product.ProductName" class="cart-product-img">
                                                     }
                                                     <div>
-                                                        <h6 class="mb-0">@item.Product.ProductName</h6>
+                                                        <h6 class="cart-product-name">@item.Product.ProductName</h6>
                                                         @if (!string.IsNullOrEmpty(item.Product.Sku))
                                                         {
-                                                            <small class="text-muted">SKU: @item.Product.Sku</small>
+                                                            <small class="cart-product-sku">SKU: @item.Product.Sku</small>
                                                         }
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td class="col-price">
                                                 @if (item.Product.SalePrice.HasValue && item.Product.SalePrice < item.Product.Price)
                                                 {
                                                     <span class="text-primary fw-bold">@item.Product.SalePrice.Value.ToString("N0") đ</span>
@@ -99,18 +107,18 @@
                                                     <span class="text-muted">Liên hệ</span>
                                                 }
                                             </td>
-                                            <td>
-                                                <div class="input-group" style="width: 120px;">
-                                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="updateQuantity(@item.CartId, @((item.Quantity ?? 1) - 1))">-</button>
-                                                    <input type="number" class="form-control form-control-sm text-center" value="@(item.Quantity ?? 1)" min="1" max="@(item.Product.StockQuantity ?? 999)" id="quantity-@item.CartId" onchange="updateQuantity(@item.CartId, parseInt(this.value))">
-                                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="updateQuantity(@item.CartId, @((item.Quantity ?? 1) + 1))">+</button>
+                                            <td class="col-quantity">
+                                                <div class="quantity-group cart-quantity-control">
+                                                    <button class="quantity-btn" type="button" onclick="changeQuantity(@item.CartId, -1)" aria-label="Giảm số lượng">-</button>
+                                                    <input type="number" class="quantity-input cart-quantity-input" value="@(item.Quantity ?? 1)" min="1" max="@(item.Product.StockQuantity ?? 999)" id="quantity-@item.CartId" onchange="updateQuantity(@item.CartId, parseInt(this.value) || 1)">
+                                                    <button class="quantity-btn" type="button" onclick="changeQuantity(@item.CartId, 1)" aria-label="Tăng số lượng">+</button>
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td class="col-total">
                                                 <span class="fw-bold text-primary item-total" data-item-total="@itemTotal">@itemTotal.ToString("N0") đ</span>
                                             </td>
-                                            <td>
-                                                <button class="btn btn-danger btn-sm" onclick="removeFromCart(@item.CartId)" title="Xóa">
+                                            <td class="col-action">
+                                                <button type="button" class="cart-remove-btn" onclick="removeFromCart(@item.CartId)" title="Xóa">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
                                             </td>
@@ -129,27 +137,27 @@
                 </div>
 
                 <div class="col-lg-4">
-                    <div class="bg-light rounded p-4">
-                        <h4 class="mb-4">Tóm Tắt Đơn Hàng</h4>
-                        <div class="d-flex justify-content-between mb-3">
+                    <div class="order-summary-box">
+                        <h4 class="cart-summary-title">Tóm Tắt Đơn Hàng</h4>
+                        <div class="summary-row">
                             <span>Tổng sản phẩm:</span>
-                            <strong>@totalItems</strong>
+                            <strong id="cart-selected-count">@totalItems</strong>
                         </div>
-                        <div class="d-flex justify-content-between mb-3">
+                        <div class="summary-row">
                             <span>Phí vận chuyển:</span>
-                            <strong>0 đ</strong>
+                            <strong class="text-success">Miễn phí</strong>
                         </div>
-                        <hr>
-                        <div class="d-flex justify-content-between mb-4">
-                            <h5>Tổng tiền:</h5>
-                            <h5 class="text-primary" id="cart-total">@totalAmount.ToString("N0") đ</h5>
+                        <div class="summary-total-row">
+                            <span class="summary-total-label">Tổng tiền:</span>
+                            <span class="summary-total-price" id="cart-total">@totalAmount.ToString("N0") đ</span>
                         </div>
-                        <a href="@Url.Action("Checkout", "Cart")" class="btn btn-primary w-100 py-3">
-                            <i class="fa fa-shopping-cart me-2"></i>Thanh Toán
-                        </a>
+                        <button type="submit" class="btn-checkout" id="cart-buy-button">
+                            <i class="fa fa-shopping-cart"></i>Mua Hàng
+                        </button>
                     </div>
                 </div>
             </div>
+            </form>
         }
         else
         {
@@ -167,7 +175,20 @@
 <!-- Cart End -->
 
 @section Scripts {
+    @Html.AntiForgeryToken()
     <script>
+        const antiForgeryToken = $('input[name="__RequestVerificationToken"]').val();
+
+        function changeQuantity(cartId, delta) {
+            var input = $('#quantity-' + cartId);
+            var current = parseInt(input.val(), 10) || 1;
+            var min = parseInt(input.attr('min'), 10) || 1;
+            var max = parseInt(input.attr('max'), 10) || 999;
+            var next = Math.min(Math.max(current + delta, min), max);
+
+            updateQuantity(cartId, next);
+        }
+
         function updateQuantity(cartId, quantity) {
             if (quantity < 1) {
                 quantity = 1;
@@ -177,6 +198,7 @@
                 url: '@Url.Action("UpdateQuantity", "Cart")',
                 type: 'POST',
                 data: {
+                    __RequestVerificationToken: antiForgeryToken,
                     cartId: cartId,
                     quantity: quantity
                 },
@@ -184,18 +206,19 @@
                     if (response.success) {
                         // Update item total
                         var row = $('tr[data-cart-id="' + cartId + '"]');
-                        var price = parseFloat(row.find('td:nth-child(2) .text-primary').text().replace(/[^\d]/g, ''));
+                        var price = parseFloat(row.find('td:nth-child(3) .text-primary').text().replace(/[^\d]/g, ''));
                         if (isNaN(price)) {
-                            price = parseFloat(row.find('td:nth-child(2) .text-muted').text().replace(/[^\d]/g, ''));
+                            price = parseFloat(row.find('td:nth-child(3) .text-muted').text().replace(/[^\d]/g, ''));
                         }
                         var itemTotal = price * quantity;
                         row.find('.item-total').text(itemTotal.toLocaleString('vi-VN') + ' đ').attr('data-item-total', itemTotal);
+                        row.find('.cart-item-select').attr('data-total', itemTotal).attr('data-quantity', quantity);
                         
                         // Update quantity input
                         $('#quantity-' + cartId).val(quantity);
                         
-                        // Update cart total
-                        $('#cart-total').text(response.totalAmount.toLocaleString('vi-VN') + ' đ');
+                        // Update selected cart summary
+                        updateSelectedCartSummary();
                         
                         // Update cart count in header
                         updateCartCount();
@@ -218,6 +241,7 @@
                 url: '@Url.Action("RemoveFromCart", "Cart")',
                 type: 'POST',
                 data: {
+                    __RequestVerificationToken: antiForgeryToken,
                     cartId: cartId
                 },
                 success: function(response) {
@@ -251,6 +275,40 @@
                 }
             });
         }
+
+        function updateSelectedCartSummary() {
+            var selectedTotal = 0;
+            var selectedCount = 0;
+            var selectedItems = $('.cart-item-select:checked');
+
+            selectedItems.each(function () {
+                selectedTotal += parseFloat($(this).attr('data-total')) || 0;
+                selectedCount += parseInt($(this).attr('data-quantity'), 10) || 0;
+            });
+
+            $('#cart-selected-count').text(selectedCount);
+            $('#cart-total').text(selectedTotal.toLocaleString('vi-VN') + ' đ');
+            $('#cart-buy-button').prop('disabled', selectedItems.length === 0);
+
+            var allItems = $('.cart-item-select');
+            $('#cart-select-all').prop('checked', allItems.length > 0 && selectedItems.length === allItems.length);
+        }
+
+        $(document).on('change', '.cart-item-select', updateSelectedCartSummary);
+
+        $('#cart-select-all').on('change', function () {
+            $('.cart-item-select').prop('checked', this.checked);
+            updateSelectedCartSummary();
+        });
+
+        $('#cart-buy-form').on('submit', function (e) {
+            if ($('.cart-item-select:checked').length === 0) {
+                e.preventDefault();
+                alert('Vui lòng chọn ít nhất một sản phẩm để mua hàng.');
+            }
+        });
+
+        $(document).ready(updateSelectedCartSummary);
     </script>
 }
 

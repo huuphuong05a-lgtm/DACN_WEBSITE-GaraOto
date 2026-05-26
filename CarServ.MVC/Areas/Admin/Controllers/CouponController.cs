@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace CarServ.MVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(AuthenticationSchemes = "AdminAuth")]
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOnly)]
     public class CouponController : Controller
     {
         private readonly CarServContext _context;

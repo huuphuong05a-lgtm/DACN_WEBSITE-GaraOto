@@ -14,11 +14,13 @@ namespace CarServ.MVC.Controllers
     {
         private readonly CarServContext _context;
         private readonly ILogger<CustomerController> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public CustomerController(CarServContext context, ILogger<CustomerController> logger)
+        public CustomerController(CarServContext context, ILogger<CustomerController> logger, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _logger = logger;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // Helper method to get current customer ID
@@ -68,6 +70,7 @@ namespace CarServ.MVC.Controllers
         {
             if (!ModelState.IsValid)
             {
+                TempData["ErrorMessage"] = "Thông tin chưa hợp lệ. Vui lòng kiểm tra lại các ô bị báo lỗi.";
                 return View(model);
             }
 
@@ -83,6 +86,7 @@ namespace CarServ.MVC.Controllers
             if (customer.Email != model.Email && await _context.Customers.AnyAsync(c => c.Email == model.Email))
             {
                 ModelState.AddModelError("Email", "Email này đã được sử dụng.");
+                TempData["ErrorMessage"] = "Email này đã được sử dụng.";
                 return View(model);
             }
 
@@ -91,6 +95,7 @@ namespace CarServ.MVC.Controllers
                 && await _context.Customers.AnyAsync(c => c.Phone == model.Phone))
             {
                 ModelState.AddModelError("Phone", "Số điện thoại này đã được sử dụng.");
+                TempData["ErrorMessage"] = "Số điện thoại này đã được sử dụng.";
                 return View(model);
             }
 
@@ -104,9 +109,30 @@ namespace CarServ.MVC.Controllers
             customer.Ward = model.Ward;
             customer.DateOfBirth = model.DateOfBirth;
             customer.Gender = model.Gender;
+            if (model.AvatarFile != null && model.AvatarFile.Length > 0)
+            {
+                var uploadedAvatar = await SaveCustomerAvatarAsync(model.AvatarFile, customer.CustomerId);
+                if (uploadedAvatar == null)
+                {
+                    model.Avatar = customer.Avatar ?? "";
+                    TempData["ErrorMessage"] = "Ảnh đại diện chưa hợp lệ. Vui lòng chọn ảnh JPG, PNG hoặc WEBP dưới 2MB.";
+                    return View(model);
+                }
+
+                DeleteOldLocalCustomerAvatar(customer.Avatar);
+                customer.Avatar = uploadedAvatar;
+                model.Avatar = uploadedAvatar;
+            }
+
             customer.UpdatedDate = DateTime.Now;
 
             await _context.SaveChangesAsync();
+            _logger.LogInformation(
+                "Customer profile updated. CustomerId={CustomerId}, Email={Email}, Address={Address}, Avatar={Avatar}",
+                customer.CustomerId,
+                customer.Email,
+                customer.Address,
+                customer.Avatar);
 
             // Cập nhật Claims
             var claims = new List<Claim>
@@ -228,13 +254,14 @@ namespace CarServ.MVC.Controllers
             }
 
             // Chỉ cho phép hủy nếu chưa hoàn thành
-            if (appointment.Status == "Hoàn thành" || appointment.Status == "Đã hủy")
+            if (appointment.Status == AppConstants.AppointmentStatus.Completed
+                || appointment.Status == AppConstants.AppointmentStatus.Canceled)
             {
                 TempData["ErrorMessage"] = "Không thể hủy lịch hẹn này.";
                 return RedirectToAction(nameof(Appointments));
             }
 
-            appointment.Status = "Đã hủy";
+            appointment.Status = AppConstants.AppointmentStatus.Canceled;
             appointment.UpdatedDate = DateTime.Now;
             await _context.SaveChangesAsync();
 
@@ -249,6 +276,11 @@ namespace CarServ.MVC.Controllers
             var vehicles = await _context.Vehicles
                 .Include(v => v.Brand)
                 .Include(v => v.Model)
+                .Include(v => v.Appointments)
+                    .ThenInclude(a => a.Service)
+                .Include(v => v.ServiceHistories)
+                    .ThenInclude(h => h.Service)
+                .Include(v => v.Invoices)
                 .Where(v => v.CustomerId == customerId)
                 .OrderByDescending(v => v.CreatedDate)
                 .ToListAsync();
@@ -260,6 +292,36 @@ namespace CarServ.MVC.Controllers
                 .ToListAsync();
 
             return View(vehicles);
+        }
+
+        public async Task<IActionResult> VehicleDetails(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var customerId = GetCurrentCustomerId();
+            var vehicle = await _context.Vehicles
+                .Include(v => v.Brand)
+                .Include(v => v.Model)
+                .Include(v => v.Appointments)
+                    .ThenInclude(a => a.Service)
+                .Include(v => v.Appointments)
+                    .ThenInclude(a => a.Technician)
+                .Include(v => v.ServiceHistories)
+                    .ThenInclude(h => h.Service)
+                .Include(v => v.ServiceHistories)
+                    .ThenInclude(h => h.Technician)
+                .Include(v => v.Invoices)
+                .FirstOrDefaultAsync(v => v.VehicleId == id && v.CustomerId == customerId);
+
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            return View(vehicle);
         }
 
         // GET: Customer/AddVehicle
@@ -450,7 +512,9 @@ namespace CarServ.MVC.Controllers
 
             // Kiểm tra xem xe có đang được sử dụng trong lịch hẹn không
             var hasAppointments = await _context.Appointments
-                .AnyAsync(a => a.VehicleId == id && a.Status != "Đã hủy" && a.Status != "Hoàn thành");
+                .AnyAsync(a => a.VehicleId == id
+                    && a.Status != AppConstants.AppointmentStatus.Canceled
+                    && a.Status != AppConstants.AppointmentStatus.Completed);
 
             if (hasAppointments)
             {
@@ -476,6 +540,53 @@ namespace CarServ.MVC.Controllers
                 .ToListAsync();
 
             return Json(models);
+        }
+
+        private async Task<string?> SaveCustomerAvatarAsync(IFormFile avatarFile, int customerId)
+        {
+            const long maxFileSize = 2 * 1024 * 1024;
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            var extension = Path.GetExtension(avatarFile.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                ModelState.AddModelError(nameof(ProfileViewModel.AvatarFile), "Chỉ hỗ trợ ảnh .jpg, .jpeg, .png hoặc .webp.");
+                return null;
+            }
+
+            if (avatarFile.Length > maxFileSize)
+            {
+                ModelState.AddModelError(nameof(ProfileViewModel.AvatarFile), "Ảnh đại diện không được vượt quá 2MB.");
+                return null;
+            }
+
+            var uploadFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "customer-avatars");
+            Directory.CreateDirectory(uploadFolder);
+
+            var fileName = $"customer-{customerId}-{Guid.NewGuid():N}{extension}";
+            var filePath = Path.Combine(uploadFolder, fileName);
+
+            await using var stream = new FileStream(filePath, FileMode.Create);
+            await avatarFile.CopyToAsync(stream);
+
+            return $"/uploads/customer-avatars/{fileName}";
+        }
+
+        private void DeleteOldLocalCustomerAvatar(string? avatarPath)
+        {
+            if (string.IsNullOrWhiteSpace(avatarPath)
+                || !avatarPath.StartsWith("/uploads/customer-avatars/", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            var relativePath = avatarPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+            var fullPath = Path.Combine(_webHostEnvironment.WebRootPath, relativePath);
+
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
         }
     }
 
@@ -517,7 +628,10 @@ namespace CarServ.MVC.Controllers
         public string Gender { get; set; } = string.Empty;
 
         [System.ComponentModel.DataAnnotations.Display(Name = "Ảnh đại diện")]
-        public string Avatar { get; set; } = string.Empty;
+        public string? Avatar { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Display(Name = "Chọn ảnh đại diện")]
+        public IFormFile? AvatarFile { get; set; }
     }
 
     public class ChangePasswordViewModel

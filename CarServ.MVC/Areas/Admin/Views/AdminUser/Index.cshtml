@@ -34,8 +34,15 @@
                     <div class="col-md-3">
                         <select name="roleFilter" class="form-control">
                             <option value="">Tất cả vai trò</option>
-                            <option value="Admin" selected="@(ViewData["CurrentRole"]?.ToString() == "Admin")">Admin</option>
-                            <option value="Staff" selected="@(ViewData["CurrentRole"]?.ToString() == "Staff")">Staff</option>
+                            <option value="@AppConstants.AdminRole.Admin" selected="@(ViewData["CurrentRole"]?.ToString() == AppConstants.AdminRole.Admin)">
+                                @AppConstants.AdminRole.GetDisplayName(AppConstants.AdminRole.Admin)
+                            </option>
+                            <option value="@AppConstants.AdminRole.Staff" selected="@(ViewData["CurrentRole"]?.ToString() == AppConstants.AdminRole.Staff)">
+                                @AppConstants.AdminRole.GetDisplayName(AppConstants.AdminRole.Staff)
+                            </option>
+                            <option value="@AppConstants.AdminRole.Technician" selected="@(ViewData["CurrentRole"]?.ToString() == AppConstants.AdminRole.Technician)">
+                                @AppConstants.AdminRole.GetDisplayName(AppConstants.AdminRole.Technician)
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -77,8 +84,8 @@
                                 <td>@item.Username</td>
                                 <td>@(item.FullName ?? "-")</td>
                                 <td>
-                                    <span class="badge badge-@(item.Role == "Admin" ? "danger" : "info")">
-                                        @item.Role
+                                    <span class="badge badge-@(item.Role == "Admin" ? "danger" : item.Role == "Technician" ? "warning" : "info")">
+                                        @AppConstants.AdminRole.GetDisplayName(item.Role)
                                     </span>
                                 </td>
                                 <td>@(item.Email ?? "-")</td>

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +7,7 @@ using CarServ.MVC.Models;
 namespace CarServ.MVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(AuthenticationSchemes = "AdminAuth")]
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOrStaff)]
     public class PaymentController : Controller
     {
         private readonly CarServContext _context;
@@ -157,7 +157,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             ViewBag.Orders = orders.Select(o => new SelectListItem
             {
                 Value = o.OrderId.ToString(),
-                Text = $"{o.OrderCode} - {o.FinalAmount?.ToString("N0")} đ"
+                Text = $"{o.OrderCode} - {o.FinalAmount?.ToString("N0")} Ä‘"
             }).ToList();
 
             // Get invoices
@@ -169,11 +169,11 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             ViewBag.Invoices = invoices.Select(i => new SelectListItem
             {
                 Value = i.InvoiceId.ToString(),
-                Text = $"{i.InvoiceCode} - {i.TotalAmount.ToString("N0")} đ"
+                Text = $"{i.InvoiceCode} - {i.TotalAmount.ToString("N0")} Ä‘"
             }).ToList();
 
             // Payment status options
-            var paymentStatusList = new[] { AppConstants.PaymentStatus.Pending, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Failed, "Đã hủy", AppConstants.PaymentStatus.Refunded };
+            var paymentStatusList = new[] { AppConstants.PaymentStatus.Pending, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Failed, AppConstants.PaymentStatus.Canceled, AppConstants.PaymentStatus.Refunded };
             ViewBag.PaymentStatusList = paymentStatusList;
 
             // Payment method options
@@ -256,7 +256,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                     }
                 }
 
-                TempData["SuccessMessage"] = $"Đã tạo thanh toán thành công! Mã thanh toán: {payment.PaymentCode}";
+                TempData["SuccessMessage"] = $"ÄÃ£ táº¡o thanh toÃ¡n thÃ nh cÃ´ng! MÃ£ thanh toÃ¡n: {payment.PaymentCode}";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -280,7 +280,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             ViewBag.Orders = orders.Select(o => new SelectListItem
             {
                 Value = o.OrderId.ToString(),
-                Text = $"{o.OrderCode} - {o.FinalAmount?.ToString("N0")} đ"
+                Text = $"{o.OrderCode} - {o.FinalAmount?.ToString("N0")} Ä‘"
             }).ToList();
 
             var invoices = await _context.Invoices
@@ -291,10 +291,10 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             ViewBag.Invoices = invoices.Select(i => new SelectListItem
             {
                 Value = i.InvoiceId.ToString(),
-                Text = $"{i.InvoiceCode} - {i.TotalAmount.ToString("N0")} đ"
+                Text = $"{i.InvoiceCode} - {i.TotalAmount.ToString("N0")} Ä‘"
             }).ToList();
 
-            var paymentStatusList = new[] { AppConstants.PaymentStatus.Pending, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Failed, "Đã hủy", AppConstants.PaymentStatus.Refunded };
+            var paymentStatusList = new[] { AppConstants.PaymentStatus.Pending, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Failed, AppConstants.PaymentStatus.Canceled, AppConstants.PaymentStatus.Refunded };
             ViewBag.PaymentStatusList = paymentStatusList;
 
             var paymentMethodList = new[] { AppConstants.PaymentMethod.Cash, AppConstants.PaymentMethod.BankTransfer, AppConstants.PaymentMethod.CreditCard, AppConstants.PaymentMethod.EWallet, AppConstants.PaymentMethod.VNPay, AppConstants.PaymentMethod.COD };
@@ -338,7 +338,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             ViewBag.Orders = orders.Select(o => new SelectListItem
             {
                 Value = o.OrderId.ToString(),
-                Text = $"{o.OrderCode} - {o.FinalAmount?.ToString("N0")} đ"
+                Text = $"{o.OrderCode} - {o.FinalAmount?.ToString("N0")} Ä‘"
             }).ToList();
 
             // Get invoices
@@ -350,10 +350,10 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             ViewBag.Invoices = invoices.Select(i => new SelectListItem
             {
                 Value = i.InvoiceId.ToString(),
-                Text = $"{i.InvoiceCode} - {i.TotalAmount.ToString("N0")} đ"
+                Text = $"{i.InvoiceCode} - {i.TotalAmount.ToString("N0")} Ä‘"
             }).ToList();
 
-            var paymentStatusList = new[] { AppConstants.PaymentStatus.Pending, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Failed, "Đã hủy", AppConstants.PaymentStatus.Refunded };
+            var paymentStatusList = new[] { AppConstants.PaymentStatus.Pending, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Failed, AppConstants.PaymentStatus.Canceled, AppConstants.PaymentStatus.Refunded };
             ViewBag.PaymentStatusList = paymentStatusList;
 
             var paymentMethodList = new[] { AppConstants.PaymentMethod.Cash, AppConstants.PaymentMethod.BankTransfer, AppConstants.PaymentMethod.CreditCard, AppConstants.PaymentMethod.EWallet, AppConstants.PaymentMethod.VNPay, AppConstants.PaymentMethod.COD };
@@ -439,7 +439,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                         }
                     }
 
-                    TempData["SuccessMessage"] = "Đã cập nhật thanh toán thành công!";
+                    TempData["SuccessMessage"] = "ÄÃ£ cáº­p nháº­t thanh toÃ¡n thÃ nh cÃ´ng!";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
@@ -475,7 +475,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             ViewBag.Orders = orders.Select(o => new SelectListItem
             {
                 Value = o.OrderId.ToString(),
-                Text = $"{o.OrderCode} - {o.FinalAmount?.ToString("N0")} đ"
+                Text = $"{o.OrderCode} - {o.FinalAmount?.ToString("N0")} Ä‘"
             }).ToList();
 
             var invoices = await _context.Invoices
@@ -486,10 +486,10 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             ViewBag.Invoices = invoices.Select(i => new SelectListItem
             {
                 Value = i.InvoiceId.ToString(),
-                Text = $"{i.InvoiceCode} - {i.TotalAmount.ToString("N0")} đ"
+                Text = $"{i.InvoiceCode} - {i.TotalAmount.ToString("N0")} Ä‘"
             }).ToList();
 
-            var paymentStatusList = new[] { AppConstants.PaymentStatus.Pending, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Failed, "Đã hủy", AppConstants.PaymentStatus.Refunded };
+            var paymentStatusList = new[] { AppConstants.PaymentStatus.Pending, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Failed, AppConstants.PaymentStatus.Canceled, AppConstants.PaymentStatus.Refunded };
             ViewBag.PaymentStatusList = paymentStatusList;
 
             var paymentMethodList = new[] { AppConstants.PaymentMethod.Cash, AppConstants.PaymentMethod.BankTransfer, AppConstants.PaymentMethod.CreditCard, AppConstants.PaymentMethod.EWallet, AppConstants.PaymentMethod.VNPay, AppConstants.PaymentMethod.COD };
@@ -587,7 +587,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                     }
                 }
 
-                TempData["SuccessMessage"] = "Đã xóa thanh toán thành công!";
+                TempData["SuccessMessage"] = "ÄÃ£ xÃ³a thanh toÃ¡n thÃ nh cÃ´ng!";
             }
 
             return RedirectToAction(nameof(Index));
@@ -599,4 +599,5 @@ namespace CarServ.MVC.Areas.Admin.Controllers
         }
     }
 }
+
 

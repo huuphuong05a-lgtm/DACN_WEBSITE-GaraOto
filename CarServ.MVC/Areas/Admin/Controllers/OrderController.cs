@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +7,7 @@ using CarServ.MVC.Models;
 namespace CarServ.MVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(AuthenticationSchemes = "AdminAuth")]
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOrStaff)]
     public class OrderController : Controller
     {
         private readonly CarServContext _context;
@@ -151,11 +151,11 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             ViewBag.Products = products.Select(p => new SelectListItem 
             { 
                 Value = p.ProductId.ToString(), 
-                Text = $"{p.ProductName} - {p.Price?.ToString("N0")} đ" 
+                Text = $"{p.ProductName} - {p.Price?.ToString("N0")} Ä‘" 
             }).ToList();
 
             // Status options
-            var statusList = new[] { AppConstants.OrderStatus.Pending, AppConstants.OrderStatus.Processing, AppConstants.OrderStatus.Shipping, AppConstants.OrderStatus.Delivered, "Đã hủy", AppConstants.OrderStatus.Returned };
+            var statusList = new[] { AppConstants.OrderStatus.Pending, AppConstants.OrderStatus.Processing, AppConstants.OrderStatus.Shipping, AppConstants.OrderStatus.Delivered, AppConstants.OrderStatus.Canceled, AppConstants.OrderStatus.Returned };
             ViewBag.StatusList = statusList;
 
             // Payment status options
@@ -216,10 +216,10 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             ViewBag.Products = products.Select(p => new SelectListItem 
             { 
                 Value = p.ProductId.ToString(), 
-                Text = $"{p.ProductName} - {p.Price?.ToString("N0")} đ" 
+                Text = $"{p.ProductName} - {p.Price?.ToString("N0")} Ä‘" 
             }).ToList();
 
-            var statusList = new[] { AppConstants.OrderStatus.Pending, AppConstants.OrderStatus.Processing, AppConstants.OrderStatus.Shipping, AppConstants.OrderStatus.Delivered, "Đã hủy", AppConstants.OrderStatus.Returned };
+            var statusList = new[] { AppConstants.OrderStatus.Pending, AppConstants.OrderStatus.Processing, AppConstants.OrderStatus.Shipping, AppConstants.OrderStatus.Delivered, AppConstants.OrderStatus.Canceled, AppConstants.OrderStatus.Returned };
             ViewBag.StatusList = statusList;
 
             var paymentStatusList = new[] { AppConstants.PaymentStatus.Unpaid, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Partial, AppConstants.PaymentStatus.Refunded };
@@ -261,7 +261,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             }).ToList();
 
             // Status options
-            var statusList = new[] { AppConstants.OrderStatus.Pending, AppConstants.OrderStatus.Processing, AppConstants.OrderStatus.Shipping, AppConstants.OrderStatus.Delivered, "Đã hủy", AppConstants.OrderStatus.Returned };
+            var statusList = new[] { AppConstants.OrderStatus.Pending, AppConstants.OrderStatus.Processing, AppConstants.OrderStatus.Shipping, AppConstants.OrderStatus.Delivered, AppConstants.OrderStatus.Canceled, AppConstants.OrderStatus.Returned };
             ViewBag.StatusList = statusList;
 
             // Payment status options
@@ -343,7 +343,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 Text = $"{c.FullName} - {c.Phone}" 
             }).ToList();
 
-            var statusList = new[] { AppConstants.OrderStatus.Pending, AppConstants.OrderStatus.Processing, AppConstants.OrderStatus.Shipping, AppConstants.OrderStatus.Delivered, "Đã hủy", AppConstants.OrderStatus.Returned };
+            var statusList = new[] { AppConstants.OrderStatus.Pending, AppConstants.OrderStatus.Processing, AppConstants.OrderStatus.Shipping, AppConstants.OrderStatus.Delivered, AppConstants.OrderStatus.Canceled, AppConstants.OrderStatus.Returned };
             ViewBag.StatusList = statusList;
 
             var paymentStatusList = new[] { AppConstants.PaymentStatus.Unpaid, AppConstants.PaymentStatus.Paid, AppConstants.PaymentStatus.Partial, AppConstants.PaymentStatus.Refunded };
@@ -410,5 +410,6 @@ namespace CarServ.MVC.Areas.Admin.Controllers
         }
     }
 }
+
 
 

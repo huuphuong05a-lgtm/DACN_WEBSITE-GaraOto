@@ -12,15 +12,18 @@ namespace CarServ.MVC.Controllers
         private readonly CarServContext _context;
         private readonly IPaymentGatewayService _paymentGatewayService;
         private readonly ILogger<PaymentController> _logger;
+        private readonly IWebHostEnvironment _environment;
 
         public PaymentController(
             CarServContext context,
             IPaymentGatewayService paymentGatewayService,
-            ILogger<PaymentController> logger)
+            ILogger<PaymentController> logger,
+            IWebHostEnvironment environment)
         {
             _context = context;
             _paymentGatewayService = paymentGatewayService;
             _logger = logger;
+            _environment = environment;
         }
 
         // GET: Payment/CreatePaymentUrl
@@ -411,8 +414,14 @@ namespace CarServ.MVC.Controllers
 
         // GET: Payment/TestPaymentUrl (for debugging)
         [HttpGet]
+        [Authorize(AuthenticationSchemes = "AdminAuth", Roles = "Admin")]
         public async Task<IActionResult> TestPaymentUrl(int orderId = 1, string paymentMethod = "VNPay")
         {
+            if (!_environment.IsDevelopment())
+            {
+                return Forbid();
+            }
+
             try
             {
                 var order = await _context.Orders.FindAsync(orderId);

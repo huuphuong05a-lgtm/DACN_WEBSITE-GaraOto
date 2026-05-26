@@ -74,8 +74,31 @@
                 <div class="bg-light rounded p-5 mb-4">
                     <h3 class="mb-4">Thông tin cá nhân</h3>
 
-                    <form asp-action="Profile" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <form asp-controller="Customer" asp-action="Profile" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        <input type="hidden" asp-for="Avatar" />
+
+                        <div class="d-flex flex-column flex-md-row align-items-md-center gap-3 mb-4 p-3 bg-white rounded border">
+                            @if (!string.IsNullOrWhiteSpace(Model.Avatar))
+                            {
+                                <img id="avatarPreview" src="@Model.Avatar" alt="@Model.FullName" class="rounded-circle border" style="width: 96px; height: 96px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div id="avatarPlaceholder" class="rounded-circle border d-flex align-items-center justify-content-center bg-light text-primary" style="width: 96px; height: 96px;">
+                                    <i class="fa fa-user fa-2x"></i>
+                                </div>
+                                <img id="avatarPreview" src="" alt="Ảnh đại diện" class="rounded-circle border d-none" style="width: 96px; height: 96px; object-fit: cover;" />
+                            }
+
+                            <div class="flex-grow-1">
+                                <label asp-for="AvatarFile" class="form-label fw-semibold">Ảnh đại diện</label>
+                                <input asp-for="AvatarFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+                                <small class="text-muted d-block mt-2">Chọn ảnh từ máy của bạn. Hỗ trợ JPG, PNG, WEBP, tối đa 2MB.</small>
+                                <span asp-validation-for="AvatarFile" class="text-danger"></span>
+                            </div>
+                        </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -194,6 +217,20 @@
                 alert('Mật khẩu xác nhận không khớp!');
                 return false;
             }
+        });
+
+        document.getElementById('AvatarFile')?.addEventListener('change', function(e) {
+            const file = e.target.files && e.target.files[0];
+            const preview = document.getElementById('avatarPreview');
+            const placeholder = document.getElementById('avatarPlaceholder');
+
+            if (!file || !preview) {
+                return;
+            }
+
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove('d-none');
+            placeholder?.classList.add('d-none');
         });
     </script>
 }

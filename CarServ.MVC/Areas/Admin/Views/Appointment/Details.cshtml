@@ -1,14 +1,51 @@
 @model CarServ.MVC.Models.Appointment
+@using CarServ.MVC.Models
 
 @{
-    ViewData["Title"] = "Chi tiết Lịch hẹn";
+    ViewData["Title"] = "Chi tiết lịch hẹn";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var statusClass = Model.Status switch
+    {
+        AppConstants.AppointmentStatus.Pending => "badge-warning",
+        AppConstants.AppointmentStatus.Confirmed => "badge-info",
+        AppConstants.AppointmentStatus.InProgress => "badge-primary",
+        AppConstants.AppointmentStatus.Completed => "badge-success",
+        AppConstants.AppointmentStatus.Canceled => "badge-danger",
+        AppConstants.AppointmentStatus.NoShow => "badge-dark",
+        _ => "badge-secondary"
+    };
+    var vehicleName = Model.Vehicle == null
+        ? null
+        : string.Join(" ", new[] { Model.Vehicle.Brand?.BrandName, Model.Vehicle.Model?.ModelName, Model.Vehicle.Year?.ToString() }.Where(value => !string.IsNullOrWhiteSpace(value)));
+    var canComplete = Model.VehicleId.HasValue
+        && Model.Status != AppConstants.AppointmentStatus.Completed
+        && Model.Status != AppConstants.AppointmentStatus.Canceled
+        && Model.Status != AppConstants.AppointmentStatus.NoShow;
+    var latestInvoice = Model.ServiceHistories
+        .SelectMany(history => history.Invoices)
+        .OrderByDescending(invoice => invoice.InvoiceDate)
+        .FirstOrDefault();
+    var invoiceStatusClass = latestInvoice?.PaymentStatus switch
+    {
+        AppConstants.PaymentStatus.Paid => "badge-success",
+        AppConstants.PaymentStatus.Partial => "badge-info",
+        AppConstants.PaymentStatus.Pending => "badge-warning",
+        AppConstants.PaymentStatus.Unpaid => "badge-secondary",
+        AppConstants.PaymentStatus.Failed => "badge-danger",
+        _ => "badge-light"
+    };
 }
 
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Chi tiết Lịch hẹn</h1>
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết lịch hẹn</h1>
         <div>
+            @if (canComplete)
+            {
+                <a href="@Url.Action("Complete", "Appointment", new { area = "Admin", id = Model.AppointmentId })" class="btn btn-success">
+                    <i class="fas fa-check"></i> Hoàn thành
+                </a>
+            }
             <a href="@Url.Action("Edit", "Appointment", new { area = "Admin", id = Model.AppointmentId })" class="btn btn-warning">
                 <i class="fas fa-edit"></i> Chỉnh sửa
             </a>
@@ -18,94 +55,113 @@
         </div>
     </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Thông tin Lịch hẹn</h6>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">Mã lịch hẹn:</dt>
-                <dd class="col-sm-9"><strong>@(Model.AppointmentCode ?? "-")</strong></dd>
+    }
 
-                <dt class="col-sm-3">Trạng thái:</dt>
-                <dd class="col-sm-9">
-                    @if (!string.IsNullOrEmpty(Model.Status))
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin lịch hẹn</h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Mã lịch hẹn</dt>
+                        <dd class="col-sm-8"><strong>@(Model.AppointmentCode ?? "-")</strong></dd>
+
+                        <dt class="col-sm-4">Trạng thái</dt>
+                        <dd class="col-sm-8"><span class="badge @statusClass">@(Model.Status ?? "-")</span></dd>
+
+                        <dt class="col-sm-4">Ngày giờ hẹn</dt>
+                        <dd class="col-sm-8"><strong>@Model.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</strong></dd>
+
+                        <dt class="col-sm-4">Dịch vụ</dt>
+                        <dd class="col-sm-8">
+                            <strong>@(Model.Service?.ServiceName ?? Model.ServiceType ?? "-")</strong>
+                            @if (Model.Service?.Price != null)
+                            {
+                                <div>Giá niêm yết: @Model.Service.Price.Value.ToString("N0") đ</div>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Thời gian ước tính</dt>
+                        <dd class="col-sm-8">@(Model.EstimatedDuration.HasValue ? Model.EstimatedDuration.Value + " phút" : "-")</dd>
+
+                        <dt class="col-sm-4">Thời gian thực tế</dt>
+                        <dd class="col-sm-8">@(Model.ActualDuration.HasValue ? Model.ActualDuration.Value + " phút" : "-")</dd>
+
+                        <dt class="col-sm-4">Tổng tiền</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.TotalPrice.HasValue)
+                            {
+                                <strong class="text-danger">@Model.TotalPrice.Value.ToString("N0") đ</strong>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Ghi chú</dt>
+                        <dd class="col-sm-8">@(Model.Notes ?? "-")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Khách hàng</h6>
+                </div>
+                <div class="card-body">
+                    <div><strong>@(Model.Customer?.FullName ?? Model.CustomerName ?? "-")</strong></div>
+                    <div>SĐT: @(Model.Customer?.Phone ?? Model.CustomerPhone ?? "-")</div>
+                    <div>Email: @(Model.Customer?.Email ?? Model.CustomerEmail ?? "-")</div>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Xe</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Vehicle != null)
                     {
-                        string statusClass = "badge-secondary";
-                        @switch (Model.Status)
-                        {
-                            case "Chờ xác nhận":
-                                statusClass = "badge-warning";
-                                break;
-                            case "Đã xác nhận":
-                                statusClass = "badge-info";
-                                break;
-                            case "Đang thực hiện":
-                                statusClass = "badge-primary";
-                                break;
-                            case "Hoàn thành":
-                                statusClass = "badge-success";
-                                break;
-                            case "Đã hủy":
-                                statusClass = "badge-danger";
-                                break;
-                        }
-                        <span class="badge @statusClass">@Model.Status</span>
+                        <div><strong>@Model.Vehicle.LicensePlate</strong></div>
+                        <div>@(string.IsNullOrWhiteSpace(vehicleName) ? "-" : vehicleName)</div>
+                        <div>Số km: @(Model.Vehicle.Mileage.HasValue ? Model.Vehicle.Mileage.Value.ToString("N0") + " km" : "-")</div>
+                        <div class="mt-2 text-muted">@Model.VehicleInfo</div>
                     }
                     else
                     {
-                        <span class="badge badge-secondary">-</span>
+                        <div>@(Model.VehicleInfo ?? "-")</div>
                     }
-                </dd>
+                </div>
+            </div>
 
-                <dt class="col-sm-3">Khách hàng:</dt>
-                <dd class="col-sm-9">
-                    @if (Model.Customer != null)
-                    {
-                        <div><strong>@Model.Customer.FullName</strong></div>
-                        <div>SĐT: @Model.Customer.Phone</div>
-                        <div>Email: @Model.Customer.Email</div>
-                    }
-                    else if (!string.IsNullOrEmpty(Model.CustomerName))
-                    {
-                        <div><strong>@Model.CustomerName</strong></div>
-                        @if (!string.IsNullOrEmpty(Model.CustomerPhone))
-                        {
-                            <div>SĐT: @Model.CustomerPhone</div>
-                        }
-                        @if (!string.IsNullOrEmpty(Model.CustomerEmail))
-                        {
-                            <div>Email: @Model.CustomerEmail</div>
-                        }
-                    }
-                    else
-                    {
-                        <span class="text-muted">-</span>
-                    }
-                </dd>
-
-                <dt class="col-sm-3">Dịch vụ:</dt>
-                <dd class="col-sm-9">
-                    @if (Model.Service != null)
-                    {
-                        <div><strong>@Model.Service.ServiceName</strong></div>
-                        @if (Model.Service.Price.HasValue)
-                        {
-                            <div>Giá: @Model.Service.Price.Value.ToString("N0") đ</div>
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(Model.ServiceType))
-                    {
-                        <span>@Model.ServiceType</span>
-                    }
-                    else
-                    {
-                        <span class="text-muted">-</span>
-                    }
-                </dd>
-
-                <dt class="col-sm-3">Kỹ thuật viên:</dt>
-                <dd class="col-sm-9">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Kỹ thuật viên</h6>
+                </div>
+                <div class="card-body">
                     @if (Model.Technician != null)
                     {
                         <div><strong>@Model.Technician.FullName</strong></div>
@@ -116,43 +172,30 @@
                     {
                         <span class="text-muted">Chưa phân công</span>
                     }
-                </dd>
-
-                <dt class="col-sm-3">Ngày giờ hẹn:</dt>
-                <dd class="col-sm-9"><strong>@(Model.AppointmentDate.ToString("dd/MM/yyyy HH:mm"))</strong></dd>
-
-                <dt class="col-sm-3">Thời gian ước tính:</dt>
-                <dd class="col-sm-9">@(Model.EstimatedDuration.HasValue ? Model.EstimatedDuration.Value + " phút" : "-")</dd>
-
-                <dt class="col-sm-3">Thời gian thực tế:</dt>
-                <dd class="col-sm-9">@(Model.ActualDuration.HasValue ? Model.ActualDuration.Value + " phút" : "-")</dd>
-
-                <dt class="col-sm-3">Tổng tiền:</dt>
-                <dd class="col-sm-9">
-                    @if (Model.TotalPrice.HasValue)
-                    {
-                        <strong class="text-danger">@Model.TotalPrice.Value.ToString("N0") đ</strong>
-                    }
-                    else
-                    {
-                        <span class="text-muted">-</span>
-                    }
-                </dd>
-
-                <dt class="col-sm-3">Thông tin xe:</dt>
-                <dd class="col-sm-9">@(Model.VehicleInfo ?? "-")</dd>
-
-                <dt class="col-sm-3">Ghi chú:</dt>
-                <dd class="col-sm-9">@(Model.Notes ?? "-")</dd>
-
-                <dt class="col-sm-3">Ngày tạo:</dt>
-                <dd class="col-sm-9">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
-
-                <dt class="col-sm-3">Ngày cập nhật:</dt>
-                <dd class="col-sm-9">@(Model.UpdatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
-            </dl>
+                </div>
+            </div>
+            @if (latestInvoice != null)
+            {
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Hoa don sua chua</h6>
+                    </div>
+                    <div class="card-body">
+                        <div><strong>@latestInvoice.InvoiceCode</strong></div>
+                        <div>Ngay tao: @latestInvoice.InvoiceDate.ToString("dd/MM/yyyy")</div>
+                        <div>Tong tien: <strong class="text-danger">@latestInvoice.TotalAmount.ToString("N0") d</strong></div>
+                        <div>Thanh toan: <span class="badge @invoiceStatusClass">@(latestInvoice.PaymentStatus ?? "-")</span></div>
+                        <div class="mt-3">
+                            <a href="@Url.Action("Create", "Payment", new { area = "Admin", invoiceId = latestInvoice.InvoiceId })" class="btn btn-sm btn-success">
+                                <i class="fas fa-money-bill"></i> Ghi nhan thanh toan
+                            </a>
+                            <a href="@Url.Action("Index", "Payment", new { area = "Admin", invoiceId = latestInvoice.InvoiceId })" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-list"></i> Lich su thanh toan
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
-
-

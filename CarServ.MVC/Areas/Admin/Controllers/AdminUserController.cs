@@ -9,7 +9,7 @@ using CarServ.MVC.Helpers;
 namespace CarServ.MVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(AuthenticationSchemes = "AdminAuth")]
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOnly)]
     public class AdminUserController : Controller
     {
         private readonly CarServContext _context;
@@ -58,11 +58,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
         // GET: Admin/AdminUser/Create
         public IActionResult Create()
         {
-            ViewBag.Roles = new List<SelectListItem>
-            {
-                new SelectListItem { Text = "Admin", Value = "Admin" },
-                new SelectListItem { Text = "Staff", Value = "Staff" }
-            };
+            ViewBag.Roles = GetRoleSelectList();
             return View();
         }
 
@@ -80,11 +76,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 if (existingUser != null)
                 {
                     ModelState.AddModelError("Username", "Tên đăng nhập đã tồn tại.");
-                    ViewBag.Roles = new List<SelectListItem>
-                    {
-                        new SelectListItem { Text = "Admin", Value = "Admin" },
-                        new SelectListItem { Text = "Staff", Value = "Staff" }
-                    };
+                    ViewBag.Roles = GetRoleSelectList(model.Role);
                     return View(model);
                 }
 
@@ -112,11 +104,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.Roles = new List<SelectListItem>
-            {
-                new SelectListItem { Text = "Admin", Value = "Admin" },
-                new SelectListItem { Text = "Staff", Value = "Staff" }
-            };
+            ViewBag.Roles = GetRoleSelectList(model.Role);
             return View(model);
         }
 
@@ -134,11 +122,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            ViewBag.Roles = new List<SelectListItem>
-            {
-                new SelectListItem { Text = "Admin", Value = "Admin", Selected = adminUser.Role == "Admin" },
-                new SelectListItem { Text = "Staff", Value = "Staff", Selected = adminUser.Role == "Staff" }
-            };
+            ViewBag.Roles = GetRoleSelectList(adminUser.Role);
 
             var model = new AdminUserEditViewModel
             {
@@ -179,11 +163,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 if (existingUser != null)
                 {
                     ModelState.AddModelError("Username", "Tên đăng nhập đã tồn tại.");
-                    ViewBag.Roles = new List<SelectListItem>
-                    {
-                        new SelectListItem { Text = "Admin", Value = "Admin", Selected = model.Role == "Admin" },
-                        new SelectListItem { Text = "Staff", Value = "Staff", Selected = model.Role == "Staff" }
-                    };
+                    ViewBag.Roles = GetRoleSelectList(model.Role);
                     return View(model);
                 }
 
@@ -221,11 +201,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 }
             }
 
-            ViewBag.Roles = new List<SelectListItem>
-            {
-                new SelectListItem { Text = "Admin", Value = "Admin", Selected = model.Role == "Admin" },
-                new SelectListItem { Text = "Staff", Value = "Staff", Selected = model.Role == "Staff" }
-            };
+            ViewBag.Roles = GetRoleSelectList(model.Role);
             return View(model);
         }
 
@@ -267,6 +243,18 @@ namespace CarServ.MVC.Areas.Admin.Controllers
         private bool AdminUserExists(int id)
         {
             return _context.AdminUsers.Any(e => e.Id == id);
+        }
+
+        private static List<SelectListItem> GetRoleSelectList(string? selectedRole = null)
+        {
+            return AppConstants.AdminRole.All
+                .Select(role => new SelectListItem
+                {
+                    Text = AppConstants.AdminRole.GetDisplayName(role),
+                    Value = role,
+                    Selected = role == selectedRole
+                })
+                .ToList();
         }
     }
 }

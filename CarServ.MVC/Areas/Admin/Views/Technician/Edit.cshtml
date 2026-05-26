@@ -70,26 +70,63 @@
 
                 <div class="form-group">
                     <label class="control-label">Ảnh kỹ thuật viên</label>
-                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                    {
-                        <div class="mb-3">
-                            <div class="border p-2 d-inline-block">
-                                <img src="@Model.ImageUrl" alt="@Model.FullName" id="currentImagePreview" style="max-width: 200px; max-height: 200px;" class="img-thumbnail" />
-                                <br /><small class="text-muted">Ảnh hiện tại</small>
+                    <input type="hidden" asp-for="ImageUrl" id="selectedImageUrl" />
+                    <div class="admin-image-picker">
+                        <div class="admin-image-picker__header">
+                            <div>
+                                <span class="admin-image-picker__title">Ảnh hồ sơ kỹ thuật viên</span>
+                                <span class="admin-image-picker__hint">Ảnh mới chọn sẽ thay thế ảnh hiện tại sau khi bấm Cập nhật.</span>
+                            </div>
+                            <div class="admin-image-picker__actions">
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imageBrowserModal">
+                                    <i class="fas fa-images"></i> Chọn ảnh
+                                </button>
+                                <button type="button" class="btn btn-outline-danger" onclick="clearSelectedImage()">
+                                    <i class="fas fa-times"></i> Bỏ ảnh
+                                </button>
                             </div>
                         </div>
-                    }
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imageBrowserModal">
-                        <i class="fas fa-images"></i> Chọn ảnh
-                    </button>
-                    <input type="hidden" asp-for="ImageUrl" id="selectedImageUrl" />
-                    <div id="selectedImagePreview" class="mt-3" style="display: @(string.IsNullOrEmpty(Model.ImageUrl) ? "none" : "block");">
-                        <div class="border p-2 d-inline-block">
-                            <img id="previewImg" src="@Model.ImageUrl" alt="Preview" style="max-width: 200px; max-height: 200px;" class="img-thumbnail" />
-                            <br /><small class="text-muted">Ảnh đã chọn: <span id="selectedImageName">@(Model.ImageUrl != null ? Model.ImageUrl.Split('/').Last() : "")</span></small>
-                            <button type="button" class="btn btn-sm btn-danger ml-2" onclick="clearSelectedImage()">
-                                <i class="fas fa-times"></i> Xóa
-                            </button>
+
+                        <div class="admin-image-grid">
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <div class="admin-image-preview">
+                                    <img src="@Model.ImageUrl" alt="@Model.FullName" id="currentImagePreview" />
+                                    <div class="admin-image-preview__footer">
+                                        <div class="admin-image-file">
+                                            <strong>Ảnh hiện tại</strong>
+                                            <span>@Model.ImageUrl.Split('/').Last()</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="admin-image-empty">
+                                    <i class="fas fa-user-cog"></i>
+                                    <strong>Chưa có ảnh hiện tại</strong>
+                                    <span>Hãy chọn ảnh từ thư viện để hồ sơ kỹ thuật viên đầy đủ hơn.</span>
+                                </div>
+                            }
+
+                            <div id="selectedImagePreview" class="admin-image-preview" style="display: none;">
+                                <img id="previewImg" src="" alt="Ảnh kỹ thuật viên mới" />
+                                <div class="admin-image-preview__footer">
+                                    <div class="admin-image-file">
+                                        <strong>Ảnh mới đã chọn</strong>
+                                        <span id="selectedImageName"></span>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="clearSelectedImage()">
+                                        <i class="fas fa-trash-alt"></i> Xóa
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="emptyImagePreview" class="admin-image-empty">
+                                <i class="fas fa-images"></i>
+                                <strong>Chưa chọn ảnh mới</strong>
+                                <span>Ảnh mới sẽ xuất hiện tại đây trước khi lưu.</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -197,6 +234,7 @@
             $('#selectedImagePreview').hide();
             $('#previewImg').attr('src', '');
             $('#selectedImageName').text('');
+            $('#emptyImagePreview').show();
         }
 
         function selectImage(url, name) {
@@ -204,6 +242,7 @@
             $('#ImageUrl').val(url);
             $('#previewImg').attr('src', url);
             $('#selectedImageName').text(name);
+            $('#emptyImagePreview').hide();
             $('#selectedImagePreview').show();
             $('#imageBrowserModal').modal('hide');
         }

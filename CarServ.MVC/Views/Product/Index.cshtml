@@ -6,6 +6,8 @@
     var selectedCategoryId = ViewData["CategoryId"] as int?;
 }
 
+@Html.AntiForgeryToken()
+
 <!-- Page Header -->
 <div class="container-fluid page-header p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
     <div class="container-fluid page-header-inner py-5">
@@ -60,12 +62,12 @@
         }
 
         <!-- Products Grid -->
-        <div class="row g-4">
+        <div class="product-grid">
             @if (Model != null && Model.Any())
             {
                 @foreach (var product in Model)
                 {
-                    <div class="col-xl-3 col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="product-grid-col wow fadeInUp" data-wow-delay="0.1s">
                         <div class="product-item d-flex flex-column h-100">
                             <!-- Image -->
                             <div class="product-img-wrapper">
@@ -122,7 +124,7 @@
                                 }
 
                                 <!-- Price + CTA -->
-                                <div class="d-flex align-items-center justify-content-between mt-auto pt-3" style="border-top: 1px solid var(--gray-50);">
+                                <div class="mt-auto pt-3" style="border-top: 1px solid var(--gray-50);">
                                     <div>
                                         @if (product.SalePrice.HasValue && product.SalePrice < product.Price)
                                         {
@@ -138,9 +140,17 @@
                                             <span class="text-primary fw-bold" style="font-size: 14px;">Liên hệ</span>
                                         }
                                     </div>
-                                    <a class="btn-text-primary" href="@(string.IsNullOrEmpty(product.Slug) ? Url.Action("Details", "Product", new { id = product.ProductId }) : Url.Action("Details", "Product", new { slug = product.Slug }))">
-                                        Chi Tiết <i class="fa fa-arrow-right ms-1"></i>
-                                    </a>
+                                    <div class="product-card-actions">
+                                        <button type="button" class="btn btn-outline-primary product-cart-btn" title="Thêm vào giỏ hàng" aria-label="Thêm vào giỏ hàng" onclick="addProductToCart(@product.ProductId, this)">
+                                            <i class="fa fa-shopping-cart"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-primary product-buy-btn" onclick="buyProductNow(@product.ProductId, this)">
+                                            Mua ngay
+                                        </button>
+                                        <a class="btn-text-primary product-detail-link" href="@(string.IsNullOrEmpty(product.Slug) ? Url.Action("Details", "Product", new { id = product.ProductId }) : Url.Action("Details", "Product", new { slug = product.Slug }))">
+                                            Chi Tiết <i class="fa fa-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -149,7 +159,7 @@
             }
             else
             {
-                <div class="col-12 text-center py-5">
+                <div class="product-empty text-center py-5">
                     <div class="d-flex flex-column align-items-center">
                         <i class="fa fa-box-open fa-2x text-muted mb-3"></i>
                         <p class="text-muted mb-0" style="font-size: 14px;">Không tìm thấy sản phẩm nào.</p>
@@ -160,3 +170,136 @@
     </div>
 </div>
 <!-- Products End -->
+
+<div id="product-toast" class="product-toast" role="status" aria-live="polite">
+    <span class="product-toast-icon"><i class="fa fa-check"></i></span>
+    <span id="product-toast-message">Đã thêm vào giỏ hàng.</span>
+</div>
+
+@section Scripts {
+    <script>
+        const productAntiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        const productUserIsAuthenticated = @((User.Identity?.IsAuthenticated ?? false).ToString().ToLower());
+        const productLoginUrl = '@Url.Action("Login", "Account")';
+        const cartAddUrl = '@Url.Action("AddToCart", "Cart")';
+        const cartCountUrl = '@Url.Action("GetCartCount", "Cart")';
+        const checkoutUrl = '@Url.Action("Checkout", "Cart")';
+
+        function redirectToProductLogin() {
+            const currentUrl = window.location.pathname + window.location.search;
+            window.location.href = productLoginUrl + '?returnUrl=' + encodeURIComponent(currentUrl);
+        }
+
+        function setProductButtonLoading(button, isLoading) {
+            if (!button) return;
+            button.disabled = isLoading;
+            button.classList.toggle('is-loading', isLoading);
+        }
+
+        function updateProductCartCount(count) {
+            const cartCount = document.getElementById('cart-count');
+            const cartCountMobile = document.getElementById('cart-count-mobile');
+            [cartCount, cartCountMobile].forEach(function (badge) {
+                if (!badge) return;
+                badge.textContent = count;
+                badge.style.display = count > 0 ? '' : 'none';
+            });
+        }
+
+        function refreshProductCartCount() {
+            fetch(cartCountUrl)
+                .then(response => response.json())
+                .then(data => updateProductCartCount(data.count || 0))
+                .catch(() => {});
+        }
+
+        let productToastTimer;
+        function showProductToast(message, type = 'success') {
+            const toast = document.getElementById('product-toast');
+            const toastMessage = document.getElementById('product-toast-message');
+            if (!toast || !toastMessage) return;
+
+            toastMessage.textContent = message;
+            toast.classList.remove('is-error', 'show');
+            if (type === 'error') {
+                toast.classList.add('is-error');
+            }
+
+            window.clearTimeout(productToastTimer);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            productToastTimer = window.setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2600);
+        }
+
+        function postProductToCart(productId) {
+            const formData = new FormData();
+            formData.append('__RequestVerificationToken', productAntiForgeryToken);
+            formData.append('productId', productId);
+            formData.append('quantity', 1);
+
+            return fetch(cartAddUrl, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            });
+        }
+
+        function addProductToCart(productId, button) {
+            if (!productUserIsAuthenticated) {
+                redirectToProductLogin();
+                return;
+            }
+
+            setProductButtonLoading(button, true);
+            postProductToCart(productId)
+                .then(response => {
+                    if (response.status === 401 || response.status === 403) {
+                        redirectToProductLogin();
+                        return null;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data) return;
+                    if (data.success) {
+                        updateProductCartCount(data.cartCount || 0);
+                        showProductToast(data.message || 'Đã thêm vào giỏ hàng.');
+                    } else {
+                        showProductToast(data.message || 'Không thể thêm sản phẩm vào giỏ hàng.', 'error');
+                    }
+                })
+                .catch(() => showProductToast('Có lỗi xảy ra. Vui lòng thử lại.', 'error'))
+                .finally(() => setProductButtonLoading(button, false));
+        }
+
+        function buyProductNow(productId, button) {
+            if (!productUserIsAuthenticated) {
+                redirectToProductLogin();
+                return;
+            }
+
+            setProductButtonLoading(button, true);
+            postProductToCart(productId)
+                .then(response => {
+                    if (response.status === 401 || response.status === 403) {
+                        redirectToProductLogin();
+                        return null;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data) return;
+                    if (data.success) {
+                        window.location.href = checkoutUrl;
+                    } else {
+                        alert(data.message || 'Không thể mua sản phẩm này.');
+                    }
+                })
+                .catch(() => alert('Có lỗi xảy ra. Vui lòng thử lại.'))
+                .finally(() => setProductButtonLoading(button, false));
+        }
+
+        document.addEventListener('DOMContentLoaded', refreshProductCartCount);
+    </script>
+}

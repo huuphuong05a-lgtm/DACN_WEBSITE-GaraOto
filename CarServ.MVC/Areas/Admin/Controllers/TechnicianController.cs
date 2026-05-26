@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using CarServ.MVC.Helpers;
 using CarServ.MVC.Models;
 using Microsoft.AspNetCore.Hosting;
 
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace CarServ.MVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(AuthenticationSchemes = "AdminAuth")]
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOnly)]
     public class TechnicianController : Controller
     {
         private readonly CarServContext _context;
@@ -248,29 +249,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
         // GET: Admin/Technician/BrowseImages
         public IActionResult BrowseImages()
         {
-            var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "technicians");
-            var images = new List<object>();
-
-            if (Directory.Exists(imagePath))
-            {
-                var files = Directory.GetFiles(imagePath)
-                    .Where(f => f.ToLower().EndsWith(".jpg") || f.ToLower().EndsWith(".jpeg") || f.ToLower().EndsWith(".png") || f.ToLower().EndsWith(".gif"))
-                    .OrderBy(f => f);
-
-                foreach (var file in files)
-                {
-                    var fileName = Path.GetFileName(file);
-                    var fileInfo = new FileInfo(file);
-                    images.Add(new
-                    {
-                        url = $"/images/technicians/{fileName}",
-                        name = fileName,
-                        size = fileInfo.Length
-                    });
-                }
-            }
-
-            return Json(images);
+            return Json(AdminImageStorage.BrowseImages(_webHostEnvironment, "images", "technicians"));
         }
 
         private bool TechnicianExists(int id)

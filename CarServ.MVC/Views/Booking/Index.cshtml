@@ -1,38 +1,37 @@
 @model CarServ.MVC.Models.Appointment
 
 @{
-    ViewData["Title"] = "Đặt Lịch Hẹn";
+    ViewData["Title"] = "Đặt lịch hẹn";
     var services = ViewData["Services"] as SelectList;
     var technicians = ViewData["Technicians"] as SelectList;
-    var selectedService = ViewData["SelectedService"] as CarServ.MVC.Models.Service;
+    var vehicles = ViewData["Vehicles"] as SelectList;
+    var isDisabled = !(User.Identity?.IsAuthenticated ?? false);
+    var selectedDate = Model?.AppointmentDate == default ? DateTime.Today : Model!.AppointmentDate.Date;
 }
 
-<!-- Page Header -->
 <div class="container-fluid page-header p-0" style="background-image: url(/img/carousel-bg-2.jpg);">
     <div class="container-fluid page-header-inner py-5">
         <div class="container text-center py-4">
             <p class="text-white-50 text-uppercase mb-2" style="font-size: 12px; letter-spacing: 4px; font-weight: 600;">NHP-AUTO</p>
-            <h1 class="text-white mb-3" style="font-family:'Montserrat',sans-serif; font-weight:800; font-size:clamp(1.6rem,3.5vw,2.2rem);">Đặt Lịch Dịch Vụ</h1>
+            <h1 class="text-white mb-3" style="font-family:'Montserrat',sans-serif; font-weight:800; font-size:clamp(1.6rem,3.5vw,2.2rem);">Đặt lịch dịch vụ</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb justify-content-center mb-0" style="font-size: 13px;">
-                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")" class="text-white-50 text-decoration-none">Trang Chủ</a></li>
-                    <li class="breadcrumb-item text-white active" aria-current="page">Đặt Lịch</li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")" class="text-white-50 text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Đặt lịch</li>
                 </ol>
             </nav>
         </div>
     </div>
 </div>
 
-<!-- Booking Start -->
 <div class="container-xxl py-5">
     <div class="container">
         <div class="row g-5 justify-content-center">
-            <!-- Left Info Panel -->
             <div class="col-lg-5">
                 <div class="sticky-lg-top" style="top: 100px;">
-                    <p class="text-primary text-uppercase fw-bold mb-2" style="font-size: 12px; letter-spacing: 3px;">Đặt Lịch Hẹn</p>
-                    <h2 class="fw-bold text-dark mb-4" style="font-size: clamp(1.4rem, 3vw, 1.8rem); line-height: 1.3;">Dịch Vụ Sửa Chữa Ô Tô Chuyên Nghiệp</h2>
-                    <p class="text-muted mb-4" style="font-size: 14px; line-height: 1.8;">NHP-AUTO tự hào với đội ngũ kỹ thuật viên chuyên nghiệp, trang thiết bị hiện đại và dịch vụ khách hàng tận tâm.</p>
+                    <p class="text-primary text-uppercase fw-bold mb-2" style="font-size: 12px; letter-spacing: 3px;">Đặt lịch hẹn</p>
+                    <h2 class="fw-bold text-dark mb-4" style="font-size: clamp(1.4rem, 3vw, 1.8rem); line-height: 1.3;">Dịch vụ sửa chữa ô tô chuyên nghiệp</h2>
+                    <p class="text-muted mb-4" style="font-size: 14px; line-height: 1.8;">Chọn dịch vụ, kỹ thuật viên nếu muốn, sau đó lấy một khung giờ còn trống. Hệ thống sẽ tự chặn lịch bị trùng.</p>
 
                     <div class="d-flex flex-column gap-3 mb-4">
                         <div class="d-flex align-items-center gap-3">
@@ -40,8 +39,17 @@
                                 <i class="fa fa-clock text-primary" style="font-size: 13px;"></i>
                             </div>
                             <div>
-                                <h6 class="fw-bold mb-0" style="font-size: 13px;">Phản hồi nhanh</h6>
-                                <span class="text-muted" style="font-size: 12px;">Xác nhận lịch hẹn trong 5 phút</span>
+                                <h6 class="fw-bold mb-0" style="font-size: 13px;">Khung giờ rõ ràng</h6>
+                                <span class="text-muted" style="font-size: 12px;">Làm việc 08:00 - 17:00, nghỉ trưa 12:00 - 13:00</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 40px; height: 40px; background: rgba(225,29,46,0.08);">
+                                <i class="fa fa-user-cog text-primary" style="font-size: 13px;"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0" style="font-size: 13px;">Không trùng kỹ thuật viên</h6>
+                                <span class="text-muted" style="font-size: 12px;">Slot sẽ tự khóa khi kỹ thuật viên đã bận</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-3">
@@ -49,17 +57,8 @@
                                 <i class="fa fa-shield-alt text-primary" style="font-size: 13px;"></i>
                             </div>
                             <div>
-                                <h6 class="fw-bold mb-0" style="font-size: 13px;">Cam kết chất lượng</h6>
-                                <span class="text-muted" style="font-size: 12px;">Bảo hành dịch vụ rõ ràng</span>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 40px; height: 40px; background: rgba(225,29,46,0.08);">
-                                <i class="fa fa-wallet text-primary" style="font-size: 13px;"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-0" style="font-size: 13px;">Giá cả minh bạch</h6>
-                                <span class="text-muted" style="font-size: 12px;">Báo giá trước khi thực hiện</span>
+                                <h6 class="fw-bold mb-0" style="font-size: 13px;">Xác nhận từ gara</h6>
+                                <span class="text-muted" style="font-size: 12px;">Lịch mới sẽ ở trạng thái chờ xác nhận</span>
                             </div>
                         </div>
                     </div>
@@ -77,11 +76,10 @@
                 </div>
             </div>
 
-            <!-- Right Form -->
             <div class="col-lg-6">
                 <div class="bg-white p-4 p-md-5" style="border-radius: 16px; border: 1px solid #f0f0f0;">
-                    <h4 class="fw-bold text-dark mb-1" style="font-size: 1.1rem;">Thông Tin Đặt Lịch</h4>
-                    <p class="text-muted mb-4" style="font-size: 13px;">Vui lòng điền đầy đủ thông tin bên dưới.</p>
+                    <h4 class="fw-bold text-dark mb-1" style="font-size: 1.1rem;">Thông tin đặt lịch</h4>
+                    <p class="text-muted mb-4" style="font-size: 13px;">Vui lòng điền thông tin bên dưới.</p>
 
                     @if (TempData["SuccessMessage"] != null)
                     {
@@ -91,7 +89,15 @@
                         </div>
                     }
 
-                    @if (!User.Identity?.IsAuthenticated ?? true)
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="border-radius: 10px; font-size: 13px;">
+                            <i class="fa fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 11px;"></button>
+                        </div>
+                    }
+
+                    @if (isDisabled)
                     {
                         <div class="p-4 mb-4" style="border-radius: 12px; background: #FFF7ED; border: 1px solid #FED7AA;">
                             <div class="d-flex align-items-start gap-3">
@@ -114,9 +120,7 @@
 
                     <form asp-action="Create" method="post" id="bookingForm">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 13px;"></div>
-                        @{
-                            var isDisabled = !(User.Identity?.IsAuthenticated ?? false);
-                        }
+                        <input asp-for="AppointmentDate" type="hidden" id="AppointmentDate" />
 
                         <div class="row g-3">
                             <div class="col-12 col-sm-6">
@@ -136,21 +140,33 @@
                             </div>
                             <div class="col-12 col-sm-6">
                                 <label class="form-label">Dịch vụ <span class="text-danger">*</span></label>
-                                <select asp-for="ServiceId" asp-items="services" class="form-select" required disabled="@isDisabled">
+                                <select asp-for="ServiceId" asp-items="services" class="form-select" id="ServiceId" required disabled="@isDisabled">
                                     <option value="">Chọn dịch vụ</option>
                                 </select>
                                 <span asp-validation-for="ServiceId" class="text-danger" style="font-size: 12px;"></span>
                             </div>
                             <div class="col-12 col-sm-6">
                                 <label class="form-label">Kỹ thuật viên</label>
-                                <select asp-for="TechnicianId" asp-items="technicians" class="form-select" disabled="@isDisabled">
-                                    <option value="">Tùy chọn</option>
+                                <select asp-for="TechnicianId" asp-items="technicians" class="form-select" id="TechnicianId" disabled="@isDisabled">
+                                    <option value="">Tự động sắp xếp</option>
                                 </select>
                             </div>
                             <div class="col-12 col-sm-6">
-                                <label class="form-label">Ngày & giờ hẹn <span class="text-danger">*</span></label>
-                                <input asp-for="AppointmentDate" type="datetime-local" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" disabled="@isDisabled">
+                                <label class="form-label">Xe của tôi</label>
+                                <select asp-for="VehicleId" asp-items="vehicles" class="form-select" id="VehicleId" disabled="@isDisabled">
+                                    <option value="">Nhập thông tin xe bên dưới</option>
+                                </select>
+                                <span asp-validation-for="VehicleId" class="text-danger" style="font-size: 12px;"></span>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label">Ngày hẹn <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="BookingDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" value="@selectedDate.ToString("yyyy-MM-dd")" required disabled="@isDisabled">
                                 <span asp-validation-for="AppointmentDate" class="text-danger" style="font-size: 12px;"></span>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Khung giờ <span class="text-danger">*</span></label>
+                                <div id="slotList" class="d-grid gap-2" style="grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));"></div>
+                                <small id="slotHelp" class="form-text text-muted">Chọn dịch vụ và ngày để xem giờ còn trống.</small>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Thông tin xe</label>
@@ -163,8 +179,8 @@
                             <div class="col-12 pt-2">
                                 @if (User.Identity?.IsAuthenticated == true)
                                 {
-                                    <button class="btn btn-primary rounded-pill w-100 py-2" type="submit" style="font-size: 14px;">
-                                        <i class="fa fa-calendar-check me-2" style="font-size: 13px;"></i>Xác Nhận Đặt Lịch
+                                    <button class="btn btn-primary rounded-pill w-100 py-2" id="submitBooking" type="submit" style="font-size: 14px;" disabled>
+                                        <i class="fa fa-calendar-check me-2" style="font-size: 13px;"></i>Xác nhận đặt lịch
                                     </button>
                                 }
                                 else
@@ -181,18 +197,104 @@
         </div>
     </div>
 </div>
-<!-- Booking End -->
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    @if (!User.Identity?.IsAuthenticated ?? true)
-    {
-        <script>
-            document.getElementById('bookingForm')?.addEventListener('submit', function(e) {
-                e.preventDefault();
-                alert('Vui lòng đăng nhập để đặt lịch hẹn dịch vụ.');
-                window.location.href = '@Url.Action("Login", "Account", new { returnUrl = Url.Action("Index", "Booking") })';
+    <script>
+        (() => {
+            const isDisabled = @Json.Serialize(isDisabled);
+            const serviceSelect = document.getElementById('ServiceId');
+            const technicianSelect = document.getElementById('TechnicianId');
+            const vehicleSelect = document.getElementById('VehicleId');
+            const vehicleInfoInput = document.getElementById('VehicleInfo');
+            const dateInput = document.getElementById('BookingDate');
+            const appointmentInput = document.getElementById('AppointmentDate');
+            const slotList = document.getElementById('slotList');
+            const slotHelp = document.getElementById('slotHelp');
+            const submitButton = document.getElementById('submitBooking');
+            const selectedValue = '@(Model?.AppointmentDate == default ? "" : Model!.AppointmentDate.ToString("yyyy-MM-ddTHH:mm"))';
+
+            if (isDisabled) {
+                return;
+            }
+
+            const setMessage = (message) => {
+                slotList.innerHTML = '';
+                slotHelp.textContent = message;
+                appointmentInput.value = '';
+                if (submitButton) submitButton.disabled = true;
+            };
+
+            const loadSlots = async () => {
+                const serviceId = serviceSelect.value;
+                const date = dateInput.value;
+                const technicianId = technicianSelect.value;
+
+                if (!serviceId || !date) {
+                    setMessage('Chọn dịch vụ và ngày để xem giờ còn trống.');
+                    return;
+                }
+
+                setMessage('Đang tải khung giờ...');
+
+                const url = new URL('@Url.Action("GetAvailableSlots", "Booking")', window.location.origin);
+                url.searchParams.set('date', date);
+                url.searchParams.set('serviceId', serviceId);
+                if (technicianId) {
+                    url.searchParams.set('technicianId', technicianId);
+                }
+
+                const response = await fetch(url);
+                const slots = await response.json();
+                slotList.innerHTML = '';
+
+                if (!slots.length) {
+                    setMessage('Ngày này chưa có khung giờ phù hợp.');
+                    return;
+                }
+
+                slots.forEach(slot => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = slot.available ? 'btn btn-outline-primary btn-sm rounded-pill' : 'btn btn-outline-secondary btn-sm rounded-pill';
+                    button.textContent = slot.remaining > 1 ? `${slot.label} (${slot.remaining} slot)` : slot.label;
+                    button.disabled = !slot.available;
+                    button.dataset.value = slot.value;
+
+                    if (slot.value === selectedValue && slot.available) {
+                        button.classList.remove('btn-outline-primary');
+                        button.classList.add('btn-primary');
+                        appointmentInput.value = slot.value;
+                        if (submitButton) submitButton.disabled = false;
+                    }
+
+                    button.addEventListener('click', () => {
+                        slotList.querySelectorAll('button').forEach(item => {
+                            item.classList.remove('btn-primary');
+                            item.classList.toggle('btn-outline-primary', !item.disabled);
+                        });
+                        button.classList.remove('btn-outline-primary');
+                        button.classList.add('btn-primary');
+                        appointmentInput.value = slot.value;
+                        if (submitButton) submitButton.disabled = false;
+                    });
+
+                    slotList.appendChild(button);
+                });
+
+                slotHelp.textContent = 'Các khung giờ mờ là đã kín lịch hoặc ngoài giờ làm việc.';
+            };
+
+            serviceSelect.addEventListener('change', loadSlots);
+            technicianSelect.addEventListener('change', loadSlots);
+            dateInput.addEventListener('change', loadSlots);
+            vehicleSelect?.addEventListener('change', () => {
+                const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
+                if (selectedOption?.value && vehicleInfoInput) {
+                    vehicleInfoInput.value = selectedOption.text;
+                }
             });
-        </script>
-    }
+            loadSlots();
+        })();
+    </script>
 }

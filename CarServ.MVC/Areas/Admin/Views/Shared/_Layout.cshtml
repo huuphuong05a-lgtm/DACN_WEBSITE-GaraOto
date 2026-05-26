@@ -21,16 +21,24 @@
     
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/admin/css/admin-custom.css" rel="stylesheet" />
 
 </head>
 
 <body id="page-top">
+    @{
+        var isAdmin = User.IsInRole(AppConstants.AdminRole.Admin);
+        var isStaff = User.IsInRole(AppConstants.AdminRole.Staff);
+        var isTechnician = User.IsInRole(AppConstants.AdminRole.Technician);
+        var canOperate = isAdmin || isStaff;
+        var canViewAppointments = canOperate || isTechnician;
+    }
 
     <!-- Page Wrapper -->
     <div id="wrapper">
 
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion admin-sidebar" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="@Url.Action("Index", "Home", new { area = "Admin" })">
@@ -59,133 +67,147 @@
                 Quản lý
             </div>
 
-            <!-- Nav Item - Menu -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "Menu", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-bars"></i>
-                    <span>Quản lý Menu</span>
-                </a>
-            </li>
+            @if (isAdmin)
+            {
+                <!-- Nav Item - Menu -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Menu", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-bars"></i>
+                        <span>Quản lý Menu</span>
+                    </a>
+                </li>
+            }
 
-            <!-- Nav Item - Service -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "Service", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-cogs"></i>
-                    <span>Quản lý Dịch vụ</span>
-                </a>
-            </li>
+            @if (canOperate)
+            {
+                <!-- Nav Item - Service -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Service", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-cogs"></i>
+                        <span>Quản lý Dịch vụ</span>
+                    </a>
+                </li>
 
-            <!-- Nav Item - Category -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "Category", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-folder"></i>
-                    <span>Quản lý Danh mục</span>
-                </a>
-            </li>
+                <!-- Nav Item - Category -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Category", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-folder"></i>
+                        <span>Quản lý Danh mục</span>
+                    </a>
+                </li>
 
-            <!-- Nav Item - Product -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "Product", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-box"></i>
-                    <span>Quản lý Sản phẩm</span>
-                </a>
-            </li>
+                <!-- Nav Item - Product -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Product", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-box"></i>
+                        <span>Quản lý Sản phẩm</span>
+                    </a>
+                </li>
+            }
 
-            <!-- Nav Item - Appointment -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "Appointment", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-calendar-check"></i>
-                    <span>Quản lý Đặt lịch hẹn</span>
-                </a>
-            </li>
+            @if (canViewAppointments)
+            {
+                <!-- Nav Item - Appointment -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Appointment", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-calendar-check"></i>
+                        <span>Quản lý Đặt lịch hẹn</span>
+                    </a>
+                </li>
+            }
 
-            <!-- Nav Item - Order -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "Order", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-shopping-cart"></i>
-                    <span>Quản lý Đơn hàng</span>
-                </a>
-            </li>
+            @if (canOperate)
+            {
+                <!-- Nav Item - Order -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Order", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-shopping-cart"></i>
+                        <span>Quản lý Đơn hàng</span>
+                    </a>
+                </li>
 
-            <!-- Nav Item - Payment -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "Payment", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-credit-card"></i>
-                    <span>Quản lý Thanh toán</span>
-                </a>
-            </li>
+                <!-- Nav Item - Payment -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Payment", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-credit-card"></i>
+                        <span>Quản lý Thanh toán</span>
+                    </a>
+                </li>
 
-            <!-- Nav Item - Customer -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "Customer", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-users"></i>
-                    <span>Quản lý Khách hàng</span>
-                </a>
-            </li>
+                <!-- Nav Item - Customer -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Customer", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-users"></i>
+                        <span>Quản lý Khách hàng</span>
+                    </a>
+                </li>
+            }
 
-            <!-- Nav Item - Admin User -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "AdminUser", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-user-shield"></i>
-                    <span>Quản lý Quản trị viên</span>
-                </a>
-            </li>
+            @if (isAdmin)
+            {
+                <!-- Nav Item - Admin User -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "AdminUser", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-user-shield"></i>
+                        <span>Quản lý Quản trị viên</span>
+                    </a>
+                </li>
 
-            <!-- Nav Item - Technician -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "Technician", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-user-cog"></i>
-                    <span>Quản lý Kỹ thuật viên</span>
-                </a>
-            </li>
+                <!-- Nav Item - Technician -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Technician", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-user-cog"></i>
+                        <span>Quản lý Kỹ thuật viên</span>
+                    </a>
+                </li>
 
-            <!-- Nav Item - Coupon -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "Coupon", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-ticket-alt"></i>
-                    <span>Quản lý Mã giảm giá</span>
-                </a>
-            </li>
+            }
 
-            <!-- Nav Item - Contact -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "Contact", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-envelope"></i>
-                    <span>Quản lý Liên hệ</span>
-                </a>
-            </li>
+            @if (canOperate)
+            {
+                <!-- Nav Item - Contact -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Contact", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-envelope"></i>
+                        <span>Quản lý Liên hệ</span>
+                    </a>
+                </li>
 
-            <!-- Nav Item - Review Admin -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "ReviewAdmin", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-comments"></i>
-                    <span>Quản lý Reviews</span>
-                </a>
-            </li>
+                <!-- Nav Item - Review Admin -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "ReviewAdmin", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-comments"></i>
+                        <span>Quản lý Reviews</span>
+                    </a>
+                </li>
+            }
 
-            <!-- Divider -->
-            <hr class="sidebar-divider">
+            @if (isAdmin)
+            {
+                <!-- Divider -->
+                <hr class="sidebar-divider">
 
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Blog
-            </div>
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    Blog
+                </div>
 
-            <!-- Nav Item - Blog Categories -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "BlogCategoryAdmin", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-folder"></i>
-                    <span>Chuyên mục Blog</span>
-                </a>
-            </li>
+                <!-- Nav Item - Blog Categories -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "BlogCategoryAdmin", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-folder"></i>
+                        <span>Chuyên mục Blog</span>
+                    </a>
+                </li>
 
-            <!-- Nav Item - Blog Posts -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "BlogPostAdmin", new { area = "Admin" })">
-                    <i class="fas fa-fw fa-blog"></i>
-                    <span>Bài viết Blog</span>
-                </a>
-            </li>
+                <!-- Nav Item - Blog Posts -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "BlogPostAdmin", new { area = "Admin" })">
+                        <i class="fas fa-fw fa-blog"></i>
+                        <span>Bài viết Blog</span>
+                    </a>
+                </li>
+            }
 
             <!-- Divider -->
             <hr class="sidebar-divider">
@@ -200,7 +222,7 @@
         </ul>
         <!-- End of Sidebar -->
         <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content-wrapper" class="d-flex flex-column admin-main">
 
             <!-- Topbar -->
             <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
@@ -223,7 +245,7 @@
                         <!-- Dropdown - User Information -->
                         <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                              aria-labelledby="userDropdown">
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item" href="@Url.Action("Profile", "Account", new { area = "Admin" })">
                                 <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                 Thông tin tài khoản
                             </a>
@@ -307,8 +329,37 @@
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
 
+    <script>
+        (function () {
+            const sidebar = document.getElementById("accordionSidebar");
+            const toggleButtons = document.querySelectorAll("#sidebarToggle, #sidebarToggleTop");
+
+            if (!sidebar) {
+                return;
+            }
+
+            const applyStoredState = function () {
+                const isCollapsed = localStorage.getItem("adminSidebarCollapsed") === "true";
+                sidebar.classList.toggle("toggled", isCollapsed);
+                document.body.classList.toggle("sidebar-toggled", isCollapsed);
+            };
+
+            applyStoredState();
+
+            toggleButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    window.setTimeout(function () {
+                        const isCollapsed = sidebar.classList.contains("toggled");
+                        localStorage.setItem("adminSidebarCollapsed", isCollapsed ? "true" : "false");
+                    }, 0);
+                });
+            });
+        })();
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>
 
 </html>
+

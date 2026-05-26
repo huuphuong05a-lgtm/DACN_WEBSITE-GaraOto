@@ -4,6 +4,20 @@
 @{
     ViewData["Title"] = "Xóa Khách hàng";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var orderCount = ViewBag.OrderCount as int? ?? Model.Orders?.Count() ?? 0;
+    var appointmentCount = ViewBag.AppointmentCount as int? ?? Model.Appointments?.Count() ?? 0;
+    var invoiceCount = ViewBag.InvoiceCount as int? ?? Model.Invoices?.Count() ?? 0;
+    var paymentCount = ViewBag.PaymentCount as int? ?? 0;
+    var vehicleCount = ViewBag.VehicleCount as int? ?? Model.Vehicles?.Count() ?? 0;
+    var cartCount = ViewBag.CartCount as int? ?? Model.Carts?.Count() ?? 0;
+    var testimonialCount = ViewBag.TestimonialCount as int? ?? Model.Testimonials?.Count() ?? 0;
+    var hasRelatedData = orderCount > 0
+        || appointmentCount > 0
+        || invoiceCount > 0
+        || paymentCount > 0
+        || vehicleCount > 0
+        || cartCount > 0
+        || testimonialCount > 0;
 }
 
 <div class="container-fluid">
@@ -52,59 +66,45 @@
                 <dd class="col-sm-9">@(Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
 
                 <dt class="col-sm-3">Số đơn hàng:</dt>
-                <dd class="col-sm-9">
-                    @if (Model.Orders != null && Model.Orders.Any())
-                    {
-                        <text>@Model.Orders.Count() đơn hàng</text>
-                    }
-                    else
-                    {
-                        <text>0</text>
-                    }
-                </dd>
+                <dd class="col-sm-9">@orderCount</dd>
 
                 <dt class="col-sm-3">Số lịch hẹn:</dt>
-                <dd class="col-sm-9">
-                    @if (Model.Appointments != null && Model.Appointments.Any())
-                    {
-                        <text>@Model.Appointments.Count() lịch hẹn</text>
-                    }
-                    else
-                    {
-                        <text>0</text>
-                    }
-                </dd>
+                <dd class="col-sm-9">@appointmentCount</dd>
+
+                <dt class="col-sm-3">Số hóa đơn:</dt>
+                <dd class="col-sm-9">@invoiceCount</dd>
+
+                <dt class="col-sm-3">Số thanh toán:</dt>
+                <dd class="col-sm-9">@paymentCount</dd>
+
+                <dt class="col-sm-3">Số xe:</dt>
+                <dd class="col-sm-9">@vehicleCount</dd>
+
+                <dt class="col-sm-3">Giỏ hàng / đánh giá:</dt>
+                <dd class="col-sm-9">@cartCount sản phẩm trong giỏ, @testimonialCount đánh giá</dd>
             </dl>
 
-            @if ((Model.Orders != null && Model.Orders.Any()) || (Model.Appointments != null && Model.Appointments.Any()))
+            @if (hasRelatedData)
             {
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle"></i> 
-                    <strong>Cảnh báo:</strong> Khách hàng này có 
-                    @if (Model.Orders != null && Model.Orders.Any())
-                    {
-                        <text>@Model.Orders.Count() đơn hàng</text>
-                    }
-                    @if (Model.Orders != null && Model.Orders.Any() && Model.Appointments != null && Model.Appointments.Any())
-                    {
-                        <text> và </text>
-                    }
-                    @if (Model.Appointments != null && Model.Appointments.Any())
-                    {
-                        <text>@Model.Appointments.Count() lịch hẹn</text>
-                    }
-                    . Không thể xóa khách hàng có đơn hàng hoặc lịch hẹn liên quan.
+                    <strong>Cảnh báo:</strong> Khách hàng này đã phát sinh dữ liệu liên quan trong hệ thống.
+                    Không thể xóa trực tiếp vì sẽ làm mất lịch sử nghiệp vụ. Bạn nên chuyển trạng thái khách hàng sang
+                    <strong>Không hoạt động</strong> nếu không muốn tài khoản tiếp tục sử dụng.
                 </div>
             }
 
             <form asp-action="Delete" method="post">
                 <input type="hidden" asp-for="CustomerId" />
                 <div class="form-group">
-                    @if ((Model.Orders != null && Model.Orders.Any()) || (Model.Appointments != null && Model.Appointments.Any()))
+                    @if (hasRelatedData)
                     {
                         <button type="submit" class="btn btn-danger" disabled>
                             <i class="fas fa-trash"></i> Xóa (Không thể xóa)
                         </button>
+                        <a href="@Url.Action("Edit", "Customer", new { area = "Admin", id = Model.CustomerId })" class="btn btn-warning">
+                            <i class="fas fa-user-lock"></i> Khóa / sửa trạng thái
+                        </a>
                     }
                     else
                     {

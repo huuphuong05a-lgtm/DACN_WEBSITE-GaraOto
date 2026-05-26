@@ -1,9 +1,10 @@
-@model CarServ.MVC.Models.Product
+﻿@model CarServ.MVC.Models.Product
 
 @{
     ViewData["Title"] = "Thêm Sản phẩm Mới";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
+
 
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -114,17 +115,40 @@
 
                 <div class="form-group">
                     <label class="control-label">Ảnh sản phẩm</label>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imageBrowserModal">
-                        <i class="fas fa-images"></i> Chọn ảnh
-                    </button>
                     <input type="hidden" asp-for="ImageUrl" id="selectedImageUrl" />
-                    <div id="selectedImagePreview" class="mt-3" style="display: none;">
-                        <div class="border p-2 d-inline-block">
-                            <img id="previewImg" src="" alt="Preview" style="max-width: 200px; max-height: 200px;" class="img-thumbnail" />
-                            <br /><small class="text-muted">Ảnh đã chọn: <span id="selectedImageName"></span></small>
-                            <button type="button" class="btn btn-sm btn-danger ml-2" onclick="clearSelectedImage()">
-                                <i class="fas fa-times"></i> Xóa
-                            </button>
+                    <div class="product-image-picker">
+                        <div class="product-image-picker__header">
+                            <div>
+                                <span class="product-image-picker__title">Hình ảnh hiển thị trên trang sản phẩm</span>
+                                <span class="product-image-picker__hint">Chọn ảnh rõ nét, tỉ lệ ngang sẽ hiển thị đẹp nhất trên website.</span>
+                            </div>
+                            <div class="product-image-picker__actions">
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imageBrowserModal">
+                                    <i class="fas fa-images"></i> Chọn ảnh
+                                </button>
+                                <button type="button" class="btn btn-outline-danger" onclick="clearSelectedImage()">
+                                    <i class="fas fa-times"></i> Bỏ ảnh
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="emptyImagePreview" class="product-image-empty">
+                            <i class="fas fa-image"></i>
+                            <strong>Chưa chọn ảnh sản phẩm</strong>
+                            <span>Ảnh sau khi chọn từ thư viện sẽ được xem trước tại đây.</span>
+                        </div>
+
+                        <div id="selectedImagePreview" class="product-image-preview" style="display: none;">
+                            <img id="previewImg" src="" alt="Ảnh sản phẩm đã chọn" />
+                            <div class="product-image-preview__footer">
+                                <div class="product-image-file">
+                                    <strong>Ảnh đã chọn</strong>
+                                    <span id="selectedImageName"></span>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="clearSelectedImage()">
+                                    <i class="fas fa-trash-alt"></i> Xóa
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -419,6 +443,7 @@
                 $('#ImageUrl').val(url); // Update asp-for field
                 $('#previewImg').attr('src', url);
                 $('#selectedImageName').text(name);
+                $('#emptyImagePreview').hide();
                 $('#selectedImagePreview').show();
                 $('#imageBrowserModal').modal('hide');
             };
@@ -429,8 +454,10 @@
                 $('#previewImg').attr('src', '');
                 $('#selectedImageName').text('');
                 $('#selectedImagePreview').hide();
+                $('#emptyImagePreview').show();
             };
         });
     </script>
 }
+
 

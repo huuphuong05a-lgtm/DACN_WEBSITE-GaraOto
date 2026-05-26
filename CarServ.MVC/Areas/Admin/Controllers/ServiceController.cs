@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using CarServ.MVC.Helpers;
 using CarServ.MVC.Models;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Hosting;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace CarServ.MVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(AuthenticationSchemes = "AdminAuth")]
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOrStaff)]
     public class ServiceController : Controller
     {
         private readonly CarServContext _context;
@@ -328,21 +329,13 @@ namespace CarServ.MVC.Areas.Admin.Controllers
 
         private async Task<string> SaveImage(IFormFile imageFile)
         {
-            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "services");
-            if (!Directory.Exists(uploadsFolder))
+            var result = await AdminImageStorage.SaveImageAsync(_webHostEnvironment, imageFile, "images", "services");
+            if (!result.Success || result.Image == null)
             {
-                Directory.CreateDirectory(uploadsFolder);
+                throw new InvalidOperationException(result.Message ?? "Không thể lưu ảnh dịch vụ.");
             }
 
-            var uniqueFileName = Guid.NewGuid().ToString() + "_" + imageFile.FileName;
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(fileStream);
-            }
-
-            return "/images/services/" + uniqueFileName;
+            return result.Url!;
         }
 
         private void DeleteImageFile(string imageUrl)
@@ -350,43 +343,13 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             if (string.IsNullOrEmpty(imageUrl))
                 return;
 
-            var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, imageUrl.TrimStart('/'));
-            if (System.IO.File.Exists(imagePath))
-            {
-                System.IO.File.Delete(imagePath);
-            }
+            AdminImageStorage.DeleteImage(_webHostEnvironment, imageUrl, "images", "services");
         }
 
         // GET: Admin/Service/BrowseImages
         public IActionResult BrowseImages()
         {
-            var imagesFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "services");
-            var images = new List<object>();
-
-            if (Directory.Exists(imagesFolder))
-            {
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-                var files = Directory.GetFiles(imagesFolder)
-                    .Where(f => allowedExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
-                    .OrderByDescending(f => new FileInfo(f).CreationTime)
-                    .ToList();
-
-                foreach (var file in files)
-                {
-                    var fileName = Path.GetFileName(file);
-                    var fileUrl = "/images/services/" + fileName;
-                    var fileSize = new FileInfo(file).Length;
-                    
-                    images.Add(new
-                    {
-                        url = fileUrl,
-                        name = fileName,
-                        size = fileSize
-                    });
-                }
-            }
-
-            return Json(images);
+            return Json(AdminImageStorage.BrowseImages(_webHostEnvironment, "images", "services"));
         }
 
         // POST: Admin/Service/UploadImage
@@ -396,55 +359,14 @@ namespace CarServ.MVC.Areas.Admin.Controllers
         [RequestSizeLimit(10_485_760)] // 10MB
         public async Task<IActionResult> UploadImage(IFormFile file)
         {
-            if (file == null || file.Length == 0)
-            {
-                return Json(new { success = false, message = "Vui lòng chọn file ảnh" });
-            }
-
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-            var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            
-            if (!allowedExtensions.Contains(fileExtension))
-            {
-                return Json(new { success = false, message = "Chỉ chấp nhận file ảnh: JPG, JPEG, PNG, GIF, WEBP" });
-            }
-
-            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "services");
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-            }
-
-            // Sanitize filename
-            var sanitizedFileName = Path.GetFileName(file.FileName);
-            sanitizedFileName = string.Join("_", sanitizedFileName.Split(Path.GetInvalidFileNameChars()));
-            var uniqueFileName = Guid.NewGuid().ToString() + "_" + sanitizedFileName;
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
             try
             {
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(fileStream);
-                }
-
-                var fileUrl = "/images/services/" + uniqueFileName;
-                var fileSize = new FileInfo(filePath).Length;
-
-                return Json(new
-                {
-                    success = true,
-                    image = new
-                    {
-                        url = fileUrl,
-                        name = uniqueFileName,
-                        size = fileSize
-                    }
-                });
+                var result = await AdminImageStorage.SaveImageAsync(_webHostEnvironment, file, "images", "services");
+                return Json(new { success = result.Success, message = result.Message, image = result.Image });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Json(new { success = false, message = "Lỗi khi upload ảnh: " + ex.Message });
+                return Json(new { success = false, message = "Lỗi khi upload ảnh. Vui lòng thử lại." });
             }
         }
 
@@ -461,16 +383,12 @@ namespace CarServ.MVC.Areas.Admin.Controllers
 
             try
             {
-                var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, imageUrl.TrimStart('/'));
-                if (System.IO.File.Exists(imagePath))
+                if (AdminImageStorage.DeleteImage(_webHostEnvironment, imageUrl, "images", "services"))
                 {
-                    System.IO.File.Delete(imagePath);
                     return Json(new { success = true, message = "Xóa ảnh thành công" });
                 }
-                else
-                {
-                    return Json(new { success = false, message = "Không tìm thấy file ảnh" });
-                }
+
+                return Json(new { success = false, message = "Không tìm thấy file ảnh" });
             }
             catch (Exception ex)
             {

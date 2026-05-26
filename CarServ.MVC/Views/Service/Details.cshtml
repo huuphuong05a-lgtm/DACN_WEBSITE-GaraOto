@@ -109,36 +109,65 @@
         <!-- Related Services -->
         @if (relatedServices.Any())
         {
-            <div class="row g-4 mt-2">
-                <div class="col-12">
-                    <h3 class="mb-4">Dịch Vụ Liên Quan</h3>
+            <section class="related-services mt-5 pt-4">
+                <div class="d-flex align-items-end justify-content-between mb-4">
+                    <div>
+                        <span class="text-primary text-uppercase fw-bold d-block mb-2" style="font-size: 11px; letter-spacing: 1.5px;">Cùng nhóm dịch vụ</span>
+                        <h3 class="mb-0">Dịch Vụ Liên Quan</h3>
+                    </div>
+                    <a href="@Url.Action("Index", "Service")" class="btn-text-primary d-none d-md-inline-flex align-items-center">
+                        Xem tất cả <i class="fa fa-arrow-right ms-2"></i>
+                    </a>
                 </div>
-                @foreach (var service in relatedServices)
-                {
-                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                        <div class="service-item bg-light d-flex flex-column overflow-hidden h-100">
-                            <div class="position-relative overflow-hidden">
+
+                <div class="related-service-grid">
+                    @foreach (var service in relatedServices)
+                    {
+                        var serviceDetailsUrl = string.IsNullOrEmpty(service.Slug)
+                            ? Url.Action("Details", "Service", new { id = service.ServiceId })
+                            : Url.Action("Details", "Service", new { slug = service.Slug });
+
+                        <article class="related-service-card wow fadeInUp" data-wow-delay="0.1s">
+                            <a class="related-service-image" href="@serviceDetailsUrl">
                                 @if (!string.IsNullOrEmpty(service.ImageUrl))
                                 {
-                                    <img class="img-fluid" src="@service.ImageUrl" alt="@service.ServiceName" style="width: 100%; height: 200px; object-fit: cover;">
+                                    <img src="@service.ImageUrl" alt="@service.ServiceName">
                                 }
                                 else
                                 {
-                                    <img class="img-fluid" src="~/img/service-1.jpg" alt="@service.ServiceName" style="width: 100%; height: 200px; object-fit: cover;">
+                                    <img src="~/img/service-1.jpg" alt="@service.ServiceName">
                                 }
-                            </div>
-                            <div class="text-center p-4 pt-0 flex-grow-1 d-flex flex-column">
-                                <h5 class="mb-3">@service.ServiceName</h5>
-                                <div class="mt-auto">
-                                    <a class="btn btn-sm btn-primary rounded py-2 px-4" href="@Url.Action("Details", "Service", new { id = service.ServiceId })">
-                                        Xem Chi Tiết <i class="fa fa-arrow-right ms-2"></i>
+                                @if (!string.IsNullOrEmpty(service.ServiceCategory))
+                                {
+                                    <span>@service.ServiceCategory</span>
+                                }
+                            </a>
+
+                            <div class="related-service-body">
+                                <h5>
+                                    <a href="@serviceDetailsUrl">@service.ServiceName</a>
+                                </h5>
+                                @if (!string.IsNullOrEmpty(service.ShortDescription))
+                                {
+                                    <p>@(service.ShortDescription.Length > 80 ? service.ShortDescription.Substring(0, 80) + "..." : service.ShortDescription)</p>
+                                }
+
+                                <div class="related-service-meta">
+                                    <span><i class="fa fa-clock text-primary me-1"></i>@(service.EstimatedDuration.HasValue ? $"{service.EstimatedDuration} phút" : "Theo lịch hẹn")</span>
+                                    <strong>@(service.Price.HasValue ? service.Price.Value.ToString("N0") + " đ" : "Liên hệ")</strong>
+                                </div>
+
+                                <div class="related-service-actions">
+                                    <a class="btn btn-outline-dark" href="@serviceDetailsUrl">Chi tiết</a>
+                                    <a class="btn btn-primary" href="@Url.Action("Index", "Booking", new { serviceId = service.ServiceId })">
+                                        Đặt lịch <i class="fa fa-arrow-right ms-2"></i>
                                     </a>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                }
-            </div>
+                        </article>
+                    }
+                </div>
+            </section>
         }
     </div>
 </div>

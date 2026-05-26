@@ -6,7 +6,7 @@ using CarServ.MVC.Models;
 namespace CarServ.MVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(AuthenticationSchemes = "AdminAuth")]
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = "Admin,Staff")]
     public class ReviewAdminController : Controller
     {
         private readonly CarServContext _context;

@@ -41,6 +41,13 @@ namespace CarServ.MVC.Controllers
             return null; // Guest user
         }
 
+        private IQueryable<Cart> GetOwnedCartItems(int? customerId, string sessionId)
+        {
+            return _context.Carts
+                .Where(c => (customerId.HasValue && c.CustomerId == customerId)
+                    || (!customerId.HasValue && c.SessionId == sessionId));
+        }
+
         // GET: Cart
         public async Task<IActionResult> Index()
         {
@@ -75,6 +82,7 @@ namespace CarServ.MVC.Controllers
 
         // POST: Cart/AddToCart
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize]
         public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
         {
@@ -94,10 +102,8 @@ namespace CarServ.MVC.Controllers
             var sessionId = GetSessionId();
 
             // Check if product already in cart
-            var existingCart = await _context.Carts
-                .FirstOrDefaultAsync(c => c.ProductId == productId 
-                    && ((customerId.HasValue && c.CustomerId == customerId) 
-                        || (!customerId.HasValue && c.SessionId == sessionId)));
+            var existingCart = await GetOwnedCartItems(customerId, sessionId)
+                .FirstOrDefaultAsync(c => c.ProductId == productId);
 
             if (existingCart != null)
             {
@@ -126,9 +132,7 @@ namespace CarServ.MVC.Controllers
             await _context.SaveChangesAsync();
 
             // Get cart count
-            var cartCount = await _context.Carts
-                .Where(c => (customerId.HasValue && c.CustomerId == customerId) 
-                    || (!customerId.HasValue && c.SessionId == sessionId))
+            var cartCount = await GetOwnedCartItems(customerId, sessionId)
                 .SumAsync(c => c.Quantity ?? 0);
 
             return Json(new { success = true, message = "Đã thêm vào giỏ hàng!", cartCount = cartCount });
@@ -136,6 +140,7 @@ namespace CarServ.MVC.Controllers
 
         // POST: Cart/UpdateQuantity
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateQuantity(int cartId, int quantity)
         {
             if (quantity <= 0)
@@ -143,13 +148,16 @@ namespace CarServ.MVC.Controllers
                 return Json(new { success = false, message = "Số lượng phải lớn hơn 0." });
             }
 
-            var cartItem = await _context.Carts
+            var customerId = GetCurrentCustomerId();
+            var sessionId = GetSessionId();
+
+            var cartItem = await GetOwnedCartItems(customerId, sessionId)
                 .Include(c => c.Product)
                 .FirstOrDefaultAsync(c => c.CartId == cartId);
 
             if (cartItem == null)
             {
-                return Json(new { success = false, message = "Sản phẩm không tồn tại trong giỏ hàng." });
+                return Forbid();
             }
 
             // Check stock
@@ -165,13 +173,8 @@ namespace CarServ.MVC.Controllers
             var price = cartItem.Product?.SalePrice ?? cartItem.Product?.Price ?? 0;
             var itemTotal = price * quantity;
 
-            var customerId = GetCurrentCustomerId();
-            var sessionId = GetSessionId();
-
-            var totalAmount = await _context.Carts
+            var totalAmount = await GetOwnedCartItems(customerId, sessionId)
                 .Include(c => c.Product)
-                .Where(c => (customerId.HasValue && c.CustomerId == customerId) 
-                    || (!customerId.HasValue && c.SessionId == sessionId))
                 .SumAsync(c => (c.Product != null ? (c.Product.SalePrice ?? c.Product.Price ?? 0) : 0) * (c.Quantity ?? 0));
 
             return Json(new { success = true, itemTotal = itemTotal, totalAmount = totalAmount });
@@ -179,12 +182,17 @@ namespace CarServ.MVC.Controllers
 
         // POST: Cart/RemoveFromCart
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveFromCart(int cartId)
         {
-            var cartItem = await _context.Carts.FindAsync(cartId);
+            var customerId = GetCurrentCustomerId();
+            var sessionId = GetSessionId();
+
+            var cartItem = await GetOwnedCartItems(customerId, sessionId)
+                .FirstOrDefaultAsync(c => c.CartId == cartId);
             if (cartItem == null)
             {
-                return Json(new { success = false, message = "Sản phẩm không tồn tại trong giỏ hàng." });
+                return Forbid();
             }
 
             _context.Carts.Remove(cartItem);
@@ -197,7 +205,7 @@ namespace CarServ.MVC.Controllers
 
         // GET: Cart/Checkout
         [Authorize]
-        public async Task<IActionResult> Checkout()
+        public async Task<IActionResult> Checkout(int[]? selectedCartIds, bool fromCartSelection = false)
         {
             var customerId = GetCurrentCustomerId();
             var sessionId = GetSessionId();
@@ -207,6 +215,19 @@ namespace CarServ.MVC.Controllers
                 .Where(c => (customerId.HasValue && c.CustomerId == customerId) 
                     || (!customerId.HasValue && c.SessionId == sessionId))
                 .ToListAsync();
+
+            if (fromCartSelection && selectedCartIds?.Any() != true)
+            {
+                TempData["ErrorMessage"] = "Vui lÃ²ng chá»n sáº£n pháº©m cáº§n mua.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (selectedCartIds?.Any() == true)
+            {
+                cartItems = cartItems
+                    .Where(c => selectedCartIds.Contains(c.CartId))
+                    .ToList();
+            }
 
             if (!cartItems.Any())
             {
@@ -230,7 +251,10 @@ namespace CarServ.MVC.Controllers
             ViewData["TotalAmount"] = subtotal;
             ViewData["CartItems"] = cartItems;
 
-            return View(new CheckoutViewModel());
+            return View(new CheckoutViewModel
+            {
+                SelectedCartIds = cartItems.Select(c => c.CartId).ToList()
+            });
         }
 
         // POST: Cart/ProcessCheckout
@@ -247,6 +271,13 @@ namespace CarServ.MVC.Controllers
                 .Where(c => (customerId.HasValue && c.CustomerId == customerId) 
                     || (!customerId.HasValue && c.SessionId == sessionId))
                 .ToListAsync();
+
+            if (model.SelectedCartIds.Any())
+            {
+                cartItems = cartItems
+                    .Where(c => model.SelectedCartIds.Contains(c.CartId))
+                    .ToList();
+            }
 
             if (!cartItems.Any())
             {
@@ -348,7 +379,7 @@ namespace CarServ.MVC.Controllers
                 }
             }
 
-            // Clear cart
+            // Clear only purchased cart items. Unselected items stay in cart.
             _context.Carts.RemoveRange(cartItems);
             await _context.SaveChangesAsync();
 

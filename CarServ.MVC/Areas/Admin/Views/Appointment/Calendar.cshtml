@@ -1,0 +1,137 @@
+﻿@model IEnumerable<CarServ.MVC.Models.Appointment>
+@using CarServ.MVC.Models
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Lịch hẹn";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+    var selectedMonth = (DateTime)ViewBag.SelectedMonth;
+    var previousMonth = (DateTime)ViewBag.PreviousMonth;
+    var nextMonth = (DateTime)ViewBag.NextMonth;
+    int? currentTechnicianId = ViewBag.CurrentTechnicianId as int?;
+    string? currentStatus = ViewBag.CurrentStatus as string;
+    var firstDayOffset = ((int)selectedMonth.DayOfWeek + 6) % 7;
+    var calendarStart = selectedMonth.AddDays(-firstDayOffset);
+    var appointmentsByDate = Model
+        .GroupBy(a => a.AppointmentDate.Date)
+        .ToDictionary(g => g.Key, g => g.OrderBy(a => a.AppointmentDate).ToList());
+}
+
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Lịch hẹn tháng @selectedMonth.ToString("MM/yyyy")</h1>
+            <p class="text-muted mb-0">Theo dõi lịch làm việc theo ngày, trạng thái và kỹ thuật viên.</p>
+        </div>
+        <div>
+            <a href="@Url.Action("Index", "Appointment", new { area = "Admin" })" class="btn btn-secondary">
+                <i class="fas fa-list"></i> Danh sách
+            </a>
+            <a href="@Url.Action("Create", "Appointment", new { area = "Admin" })" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Thêm lịch hẹn
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form asp-action="Calendar" method="get" class="row align-items-end">
+                <div class="col-md-3">
+                    <label>Tháng</label>
+                    <input type="month" name="month" class="form-control" value="@selectedMonth.ToString("yyyy-MM")" />
+                </div>
+                <div class="col-md-3">
+                    <label>Kỹ thuật viên</label>
+                    <select name="technicianId" class="form-control">
+                        <option value="">Tất cả kỹ thuật viên</option>
+                        @foreach (SelectListItem technician in ViewBag.Technicians ?? new List<SelectListItem>())
+                        {
+                            <option value="@technician.Value" selected="@(currentTechnicianId.HasValue && currentTechnicianId.Value.ToString() == technician.Value)">@technician.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Trạng thái</label>
+                    <select name="statusFilter" class="form-control">
+                        <option value="">Tất cả trạng thái</option>
+                        @foreach (var status in AppConstants.AppointmentStatus.All)
+                        {
+                            <option value="@status" selected="@(currentStatus == status)">@status</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-filter"></i> Lọc lịch
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a class="btn btn-outline-primary" href="@Url.Action("Calendar", new { month = previousMonth.ToString("yyyy-MM-01"), technicianId = currentTechnicianId, statusFilter = currentStatus })">
+            <i class="fas fa-chevron-left"></i> Tháng trước
+        </a>
+        <strong>@selectedMonth.ToString("MMMM yyyy")</strong>
+        <a class="btn btn-outline-primary" href="@Url.Action("Calendar", new { month = nextMonth.ToString("yyyy-MM-01"), technicianId = currentTechnicianId, statusFilter = currentStatus })">
+            Tháng sau <i class="fas fa-chevron-right"></i>
+        </a>
+    </div>
+
+    <div class="calendar-grid shadow-sm mb-4">
+        @foreach (var dayName in new[] { "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật" })
+        {
+            <div class="calendar-head">@dayName</div>
+        }
+
+        @for (var i = 0; i < 42; i++)
+        {
+            var day = calendarStart.AddDays(i);
+            var isMuted = day.Month != selectedMonth.Month;
+            var isToday = day.Date == DateTime.Today;
+            appointmentsByDate.TryGetValue(day.Date, out var dayAppointments);
+
+            <div class="calendar-day @(isMuted ? "calendar-muted" : "") @(isToday ? "calendar-today" : "")">
+                <div class="d-flex justify-content-between">
+                    <strong>@day.Day</strong>
+                    @if (dayAppointments?.Any() == true)
+                    {
+                        <span class="badge badge-primary">@dayAppointments.Count</span>
+                    }
+                </div>
+
+                @if (dayAppointments?.Any() == true)
+                {
+                    @foreach (var appointment in dayAppointments)
+                    {
+                        var pillClass = appointment.Status switch
+                        {
+                            AppConstants.AppointmentStatus.Pending => "appointment-warning",
+                            AppConstants.AppointmentStatus.Confirmed => "appointment-info",
+                            AppConstants.AppointmentStatus.InProgress => "appointment-primary",
+                            AppConstants.AppointmentStatus.Completed => "appointment-success",
+                            AppConstants.AppointmentStatus.Canceled => "appointment-danger",
+                            AppConstants.AppointmentStatus.NoShow => "appointment-dark",
+                            _ => "appointment-primary"
+                        };
+                        var customer = appointment.Customer?.FullName ?? appointment.CustomerName ?? "Khách lẻ";
+                        var service = appointment.Service?.ServiceName ?? appointment.ServiceType ?? "Dịch vụ";
+
+                        <a class="appointment-pill @pillClass" href="@Url.Action("Details", "Appointment", new { area = "Admin", id = appointment.AppointmentId })">
+                            <strong>@appointment.AppointmentDate.ToString("HH:mm")</strong> - @customer
+                            <div class="text-muted">@service</div>
+                            @if (appointment.Vehicle != null)
+                            {
+                                <div>@appointment.Vehicle.LicensePlate</div>
+                            }
+                        </a>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+

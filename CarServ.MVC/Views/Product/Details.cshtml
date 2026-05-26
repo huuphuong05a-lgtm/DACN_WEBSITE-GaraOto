@@ -117,44 +117,116 @@
         <!-- Related Products -->
         @if (relatedProducts.Any())
         {
-            <div class="row g-4 mt-5">
-                <div class="col-12">
-                    <h3 class="mb-4">Sản Phẩm Liên Quan</h3>
+            <section class="related-products mt-5 pt-4">
+                <div class="d-flex align-items-end justify-content-between mb-4">
+                    <div>
+                        <span class="text-primary text-uppercase fw-bold d-block mb-2" style="font-size: 11px; letter-spacing: 1.5px;">Gợi ý thêm</span>
+                        <h3 class="mb-0">Sản Phẩm Liên Quan</h3>
+                    </div>
+                    <a href="@Url.Action("Index", "Product")" class="btn-text-primary d-none d-md-inline-flex align-items-center">
+                        Xem tất cả <i class="fa fa-arrow-right ms-2"></i>
+                    </a>
                 </div>
-                @foreach (var product in relatedProducts)
-                {
-                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                        <div class="product-item bg-light d-flex flex-column overflow-hidden h-100">
-                            <div class="position-relative overflow-hidden">
-                                @if (!string.IsNullOrEmpty(product.ImageUrl))
-                                {
-                                    <img class="img-fluid" src="@product.ImageUrl" alt="@product.ProductName" style="width: 100%; height: 200px; object-fit: cover;">
-                                }
-                                else
-                                {
-                                    <img class="img-fluid" src="~/img/product-1.jpg" alt="@product.ProductName" style="width: 100%; height: 200px; object-fit: cover;">
-                                }
-                            </div>
-                            <div class="text-center p-4 pt-0 flex-grow-1 d-flex flex-column">
-                                <h5 class="mb-3">@product.ProductName</h5>
-                                <div class="mt-auto">
-                                    <a class="btn btn-sm btn-primary rounded py-2 px-4" href="@(string.IsNullOrEmpty(product.Slug) ? Url.Action("Details", "Product", new { id = product.ProductId }) : Url.Action("Details", "Product", new { slug = product.Slug }))">
-                                        Xem Chi Tiết <i class="fa fa-arrow-right ms-2"></i>
-                                    </a>
+
+                <div class="product-grid">
+                    @foreach (var product in relatedProducts)
+                    {
+                        var productDetailsUrl = string.IsNullOrEmpty(product.Slug)
+                            ? Url.Action("Details", "Product", new { id = product.ProductId })
+                            : Url.Action("Details", "Product", new { slug = product.Slug });
+
+                        <div class="product-grid-col wow fadeInUp" data-wow-delay="0.1s">
+                            <div class="product-item d-flex flex-column h-100">
+                                <div class="product-img-wrapper">
+                                    @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                    {
+                                        <img src="@product.ImageUrl" alt="@product.ProductName">
+                                    }
+                                    else
+                                    {
+                                        <img src="~/img/product-1.jpg" alt="@product.ProductName">
+                                    }
+
+                                    <div class="product-badges">
+                                        @if (product.IsNew)
+                                        {
+                                            <span class="badge text-white" style="background: #111827;">Mới</span>
+                                        }
+                                        @if (product.IsFeatured)
+                                        {
+                                            <span class="badge text-white" style="background: #E11D2E;">Hot</span>
+                                        }
+                                        @if (product.SalePrice.HasValue && product.SalePrice < product.Price && product.Price.HasValue && product.Price > 0)
+                                        {
+                                            var discount = Math.Round((1 - (decimal)product.SalePrice.Value / (decimal)product.Price.Value) * 100);
+                                            <span class="badge text-primary" style="background: rgba(225,29,46,0.1);">-@discount%</span>
+                                        }
+                                    </div>
+
+                                    <div class="product-overlay position-absolute start-0 top-0 w-100 h-100">
+                                        <a class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center" href="@productDetailsUrl" style="width: 44px; height: 44px;">
+                                            <i class="fa fa-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 flex-grow-1 d-flex flex-column">
+                                    @if (product.Category != null)
+                                    {
+                                        <span class="text-muted mb-2 d-block" style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">@product.Category.CategoryName</span>
+                                    }
+                                    <h6 class="fw-bold text-dark mb-2" style="font-size: 15px; line-height: 1.4;">
+                                        <a href="@productDetailsUrl" class="text-dark text-decoration-none">@product.ProductName</a>
+                                    </h6>
+                                    @if (!string.IsNullOrEmpty(product.ShortDescription))
+                                    {
+                                        <p class="text-muted mb-4 flex-grow-1" style="font-size: 13px; line-height: 1.5;">@(product.ShortDescription.Length > 60 ? product.ShortDescription.Substring(0, 60) + "..." : product.ShortDescription)</p>
+                                    }
+
+                                    <div class="mt-auto pt-3" style="border-top: 1px solid var(--gray-50);">
+                                        <div>
+                                            @if (product.SalePrice.HasValue && product.SalePrice < product.Price)
+                                            {
+                                                <span class="text-primary fw-bold d-block" style="font-size: 16px;">@product.SalePrice.Value.ToString("N0") đ</span>
+                                                <small class="text-muted text-decoration-line-through" style="font-size: 12px;">@product.Price.Value.ToString("N0") đ</small>
+                                            }
+                                            else if (product.Price.HasValue)
+                                            {
+                                                <span class="text-primary fw-bold" style="font-size: 16px;">@product.Price.Value.ToString("N0") đ</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-primary fw-bold" style="font-size: 14px;">Liên hệ</span>
+                                            }
+                                        </div>
+                                        <div class="product-card-actions">
+                                            <button type="button" class="btn btn-outline-primary product-cart-btn" title="Thêm vào giỏ hàng" aria-label="Thêm vào giỏ hàng" onclick="addToCart(@product.ProductId, 1)">
+                                                <i class="fa fa-shopping-cart"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-primary product-buy-btn" onclick="buyNow(@product.ProductId)">
+                                                Mua ngay
+                                            </button>
+                                            <a class="btn-text-primary product-detail-link" href="@productDetailsUrl">
+                                                Chi Tiết <i class="fa fa-arrow-right ms-1"></i>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                }
-            </div>
+                    }
+                </div>
+            </section>
         }
     </div>
 </div>
 <!-- Product Details End -->
 
 @section Scripts {
+    @Html.AntiForgeryToken()
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        const antiForgeryToken = $('input[name="__RequestVerificationToken"]').val();
         var isAuthenticated = @((User.Identity?.IsAuthenticated ?? false).ToString().ToLower());
         
         function addToCart(productId, quantity) {
@@ -174,6 +246,7 @@
                 url: '@Url.Action("AddToCart", "Cart")',
                 type: 'POST',
                 data: {
+                    __RequestVerificationToken: antiForgeryToken,
                     productId: productId,
                     quantity: quantity
                 },
@@ -197,6 +270,41 @@
                             var loginUrl = '@Url.Action("Login", "Account")' + '?returnUrl=' + encodeURIComponent(currentUrl);
                             window.location.href = loginUrl;
                         }
+                    } else {
+                        alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                    }
+                }
+            });
+        }
+
+        function buyNow(productId) {
+            if (!isAuthenticated) {
+                var currentUrl = window.location.pathname + window.location.search;
+                var loginUrl = '@Url.Action("Login", "Account")' + '?returnUrl=' + encodeURIComponent(currentUrl);
+                window.location.href = loginUrl;
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("AddToCart", "Cart")',
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: antiForgeryToken,
+                    productId: productId,
+                    quantity: 1
+                },
+                success: function(response) {
+                    if (response.success) {
+                        window.location.href = '@Url.Action("Checkout", "Cart")';
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 401 || xhr.status === 403 || xhr.status === 0) {
+                        var currentUrl = window.location.pathname + window.location.search;
+                        var loginUrl = '@Url.Action("Login", "Account")' + '?returnUrl=' + encodeURIComponent(currentUrl);
+                        window.location.href = loginUrl;
                     } else {
                         alert('Có lỗi xảy ra. Vui lòng thử lại.');
                     }

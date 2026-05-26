@@ -1,0 +1,147 @@
+@model CarServ.MVC.Areas.Admin.Controllers.CompleteAppointmentViewModel
+
+@{
+    ViewData["Title"] = "Hoàn thành lịch hẹn";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Hoàn thành lịch hẹn</h1>
+        <a href="@Url.Action("Details", "Appointment", new { area = "Admin", id = Model.AppointmentId })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Tóm tắt lịch hẹn</h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-5">Mã lịch</dt>
+                        <dd class="col-7">@Model.AppointmentCode</dd>
+                        <dt class="col-5">Khách</dt>
+                        <dd class="col-7">@Model.CustomerName</dd>
+                        <dt class="col-5">Xe</dt>
+                        <dd class="col-7">@Model.VehicleInfo</dd>
+                        <dt class="col-5">Dịch vụ</dt>
+                        <dd class="col-7">@Model.ServiceName</dd>
+                        <dt class="col-5">Kỹ thuật viên</dt>
+                        <dd class="col-7">@(Model.TechnicianName ?? "Chưa phân công")</dd>
+                        <dt class="col-5">Ngày hẹn</dt>
+                        <dd class="col-7">@Model.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin sửa chữa</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Complete" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="AppointmentId" />
+                        <input type="hidden" asp-for="AppointmentCode" />
+                        <input type="hidden" asp-for="CustomerName" />
+                        <input type="hidden" asp-for="VehicleInfo" />
+                        <input type="hidden" asp-for="ServiceName" />
+                        <input type="hidden" asp-for="TechnicianName" />
+                        <input type="hidden" asp-for="AppointmentDate" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="Mileage">Số km hiện tại</label>
+                                    <input asp-for="Mileage" type="number" min="0" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="ActualDuration">Thời gian thực tế (phút)</label>
+                                    <input asp-for="ActualDuration" type="number" min="1" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="WarrantyExpiryDate">Hạn bảo hành</label>
+                                    <input asp-for="WarrantyExpiryDate" type="date" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="LaborCost">Tiền công</label>
+                                    <input asp-for="LaborCost" type="number" min="0" step="1000" class="form-control cost-input" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="PartsCost">Tiền phụ tùng</label>
+                                    <input asp-for="PartsCost" type="number" min="0" step="1000" class="form-control cost-input" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="TotalCost">Tổng chi phí</label>
+                                    <input asp-for="TotalCost" type="number" min="0" step="1000" class="form-control" />
+                                    <small class="form-text text-muted">Bỏ trống để tự cộng tiền công và phụ tùng.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="PartsReplaced">Phụ tùng đã thay</label>
+                            <textarea asp-for="PartsReplaced" class="form-control" rows="2" placeholder="Ví dụ: Dầu máy, lọc dầu, má phanh..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description">Nội dung công việc</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Mô tả các hạng mục đã kiểm tra/sửa chữa"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="NextServiceDate">Ngày bảo dưỡng tiếp theo</label>
+                                    <input asp-for="NextServiceDate" type="date" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="NextServiceMileage">Km bảo dưỡng tiếp theo</label>
+                                    <input asp-for="NextServiceMileage" type="number" min="0" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Notes">Ghi chú kỹ thuật viên</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Khuyến nghị, lưu ý bảo hành, vấn đề cần theo dõi..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Hoàn thành và lưu lịch sử
+                        </button>
+                        <a href="@Url.Action("Details", "Appointment", new { area = "Admin", id = Model.AppointmentId })" class="btn btn-secondary">
+                            Hủy
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

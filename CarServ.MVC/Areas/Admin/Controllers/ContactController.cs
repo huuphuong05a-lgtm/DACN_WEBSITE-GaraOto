@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace CarServ.MVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(AuthenticationSchemes = "AdminAuth")]
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOrStaff)]
     public class ContactController : Controller
     {
         private readonly CarServContext _context;

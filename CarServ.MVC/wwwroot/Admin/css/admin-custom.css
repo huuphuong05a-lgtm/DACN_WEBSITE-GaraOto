@@ -1,0 +1,387 @@
+#wrapper {
+    align-items: stretch;
+}
+
+.admin-auth-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    max-width: 450px;
+    width: 100%;
+}
+
+.login-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.login-body {
+    padding: 40px;
+}
+
+.login-body .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-login {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    padding: 12px;
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.admin-sidebar {
+    flex: 0 0 14rem;
+    width: 14rem !important;
+    transition: width 0.25s ease, flex-basis 0.25s ease;
+}
+
+.admin-main {
+    min-width: 0;
+    transition: width 0.25s ease;
+}
+
+.admin-sidebar.toggled {
+    flex-basis: 6.5rem;
+    width: 6.5rem !important;
+    overflow: visible;
+}
+
+.admin-sidebar.toggled .nav-item .nav-link,
+.admin-sidebar.toggled .sidebar-brand {
+    text-align: center;
+    justify-content: center;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+.admin-sidebar.toggled .nav-item .nav-link span,
+.admin-sidebar.toggled .sidebar-brand-text,
+.admin-sidebar.toggled .sidebar-heading {
+    display: none;
+}
+
+.admin-sidebar.toggled .nav-item .nav-link i {
+    margin-right: 0;
+    font-size: 1rem;
+}
+
+.admin-sidebar .sidebar-brand-icon,
+.admin-sidebar .nav-item .nav-link i {
+    transition: margin 0.25s ease, font-size 0.25s ease;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table th:last-child,
+.table td:last-child {
+    white-space: nowrap;
+    min-width: 112px;
+    text-align: center;
+}
+
+.table td:last-child .btn,
+.table td:last-child .btn-group,
+.table td:last-child form {
+    white-space: nowrap;
+}
+
+.table td:last-child > .btn,
+.table td:last-child > a.btn,
+.table td:last-child > form,
+.table td:last-child .btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: nowrap;
+    vertical-align: middle;
+}
+
+.table td:last-child > a.btn + a.btn,
+.table td:last-child > a.btn + form,
+.table td:last-child > form + a.btn {
+    margin-left: 4px;
+}
+
+.table td:last-child .btn-sm {
+    min-width: 34px;
+    justify-content: center;
+}
+
+.table td:last-child select.form-control-sm {
+    min-width: 132px;
+}
+
+.admin-image-picker,
+.product-image-picker {
+    border: 1px solid #e4e8f0;
+    border-radius: 10px;
+    background: #fff;
+    padding: 18px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.admin-image-picker__header,
+.product-image-picker__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.admin-image-picker__title,
+.product-image-picker__title {
+    display: block;
+    margin-bottom: 2px;
+    color: #1f2937;
+    font-weight: 700;
+}
+
+.admin-image-picker__hint,
+.product-image-picker__hint {
+    color: #7b8496;
+    font-size: 13px;
+}
+
+.admin-image-picker__actions,
+.product-image-picker__actions {
+    display: inline-flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.admin-image-grid,
+.product-image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.admin-image-empty,
+.product-image-empty,
+.admin-image-preview,
+.product-image-preview {
+    border: 1px dashed #ccd4e0;
+    border-radius: 10px;
+    background: #f8fafc;
+    min-height: 220px;
+    padding: 14px;
+}
+
+.admin-image-empty,
+.product-image-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #7b8496;
+}
+
+.admin-image-empty i,
+.product-image-empty i {
+    color: #4e73df;
+    font-size: 34px;
+    margin-bottom: 10px;
+}
+
+.admin-image-preview img,
+.product-image-preview img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #edf0f5;
+    background: #fff;
+}
+
+.product-image-picker .product-image-preview img {
+    max-height: 260px;
+}
+
+.admin-image-preview__footer,
+.product-image-preview__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.admin-image-file,
+.product-image-file {
+    min-width: 0;
+    color: #4b5563;
+    font-size: 13px;
+}
+
+.admin-image-file strong,
+.admin-image-file span,
+.product-image-file strong,
+.product-image-file span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.admin-image-file strong,
+.product-image-file strong {
+    color: #111827;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(140px, 1fr));
+    border: 1px solid #e3e6f0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.calendar-head,
+.calendar-day {
+    border-right: 1px solid #e3e6f0;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.calendar-head {
+    padding: 10px;
+    background: #f8f9fc;
+    font-weight: 700;
+    text-align: center;
+    color: #4e73df;
+}
+
+.calendar-day {
+    min-height: 150px;
+    padding: 10px;
+}
+
+.calendar-day:nth-child(7n) {
+    border-right: 0;
+}
+
+.calendar-muted {
+    background: #fafafa;
+    color: #9aa0a6;
+}
+
+.calendar-today {
+    box-shadow: inset 0 0 0 2px #4e73df;
+}
+
+.appointment-pill {
+    display: block;
+    border-left: 4px solid #4e73df;
+    background: #f8f9fc;
+    border-radius: 4px;
+    padding: 7px 8px;
+    margin-top: 7px;
+    font-size: 12px;
+    color: #2e3440;
+    text-decoration: none;
+}
+
+.appointment-pill:hover {
+    text-decoration: none;
+    background: #eef2ff;
+    color: #2e3440;
+}
+
+.appointment-warning {
+    border-left-color: #f6c23e;
+}
+
+.appointment-info {
+    border-left-color: #36b9cc;
+}
+
+.appointment-primary {
+    border-left-color: #4e73df;
+}
+
+.appointment-success {
+    border-left-color: #1cc88a;
+}
+
+.appointment-danger {
+    border-left-color: #e74a3b;
+}
+
+.appointment-dark {
+    border-left-color: #5a5c69;
+}
+
+@media (max-width: 992px) {
+    .admin-image-grid,
+    .product-image-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .calendar-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .calendar-head {
+        display: none;
+    }
+
+    .calendar-day {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .admin-sidebar,
+    .admin-sidebar.toggled {
+        flex-basis: 6.5rem;
+        width: 6.5rem !important;
+    }
+
+    .admin-sidebar .nav-item .nav-link span,
+    .admin-sidebar .sidebar-brand-text,
+    .admin-sidebar .sidebar-heading {
+        display: none;
+    }
+
+    .admin-image-picker__header,
+    .product-image-picker__header,
+    .admin-image-preview__footer,
+    .product-image-preview__footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-image-picker__actions,
+    .product-image-picker__actions {
+        justify-content: flex-start;
+    }
+}

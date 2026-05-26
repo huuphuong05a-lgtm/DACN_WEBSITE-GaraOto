@@ -39,7 +39,7 @@
                     <input type="hidden" name="searchString" value="@ViewData["CurrentFilter"]">
                     <select name="categoryFilter" class="form-select" onchange="this.form.submit()" style="font-size: 13px;">
                         <option value="">Tất cả danh mục</option>
-                        @foreach (var category in (List<string>)ViewData["Categories"])
+                        @foreach (var category in (ViewData["Categories"] as List<string> ?? new List<string>()))
                         {
                             <option value="@category" selected="@(ViewData["CategoryFilter"]?.ToString() == category)">@category</option>
                         }

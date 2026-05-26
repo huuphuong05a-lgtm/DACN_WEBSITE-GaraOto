@@ -25,7 +25,7 @@
 <!-- Page Header End -->
 
 <!-- Checkout Start -->
-<div class="container-xxl py-5">
+<div class="container-xxl py-5 checkout-page">
     <div class="container">
         @if (TempData["ErrorMessage"] != null)
         {
@@ -35,15 +35,19 @@
             </div>
         }
 
-        <form asp-action="ProcessCheckout" method="post">
-            <div class="row">
+        <form asp-action="ProcessCheckout" method="post" class="checkout-form">
+            @foreach (var cartId in Model.SelectedCartIds)
+            {
+                <input type="hidden" name="SelectedCartIds" value="@cartId" />
+            }
+            <div class="row g-4 align-items-start">
                 <div class="col-lg-8">
-                    <div class="card shadow mb-4">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="fa fa-user me-2"></i>Thông Tin Khách Hàng</h5>
+                    <div class="checkout-section">
+                        <div class="checkout-section-header">
+                            <h5><i class="fa fa-user me-2"></i>Thông Tin Khách Hàng</h5>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
+                        <div class="checkout-section-body">
+                            <div class="row g-3">
                                 <div class="col-md-6 mb-3">
                                     <label asp-for="CustomerName" class="form-label"></label>
                                     <input asp-for="CustomerName" class="form-control" />
@@ -59,17 +63,27 @@
                                     <input asp-for="CustomerEmail" type="email" class="form-control" />
                                     <span asp-validation-for="CustomerEmail" class="text-danger"></span>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-12 mb-3">
                                     <label asp-for="PaymentMethod" class="form-label">Phương thức thanh toán <span class="text-danger">*</span></label>
-                                    <select asp-for="PaymentMethod" class="form-select" id="paymentMethod" required>
-                                        <option value="">Chọn phương thức</option>
-                                        <option value="COD">Thanh toán khi nhận hàng (COD)</option>
-                                        <option value="VNPay">VNPay (Thanh toán online)</option>
-                                    </select>
+                                    <div class="checkout-payment-options">
+                                        <label class="checkout-payment-option">
+                                            <input asp-for="PaymentMethod" type="radio" value="COD" />
+                                            <span class="checkout-payment-icon"><i class="fa fa-money-bill-wave"></i></span>
+                                            <span>
+                                                <strong>Thanh toán khi nhận hàng</strong>
+                                                <small>Thanh toán trực tiếp sau khi đơn được xác nhận.</small>
+                                            </span>
+                                        </label>
+                                        <label class="checkout-payment-option">
+                                            <input asp-for="PaymentMethod" type="radio" value="VNPay" />
+                                            <span class="checkout-payment-icon"><i class="fa fa-credit-card"></i></span>
+                                            <span>
+                                                <strong>VNPay</strong>
+                                                <small>Chuyển đến cổng thanh toán online sau khi đặt hàng.</small>
+                                            </span>
+                                        </label>
+                                    </div>
                                     <span asp-validation-for="PaymentMethod" class="text-danger"></span>
-                                    <small class="form-text text-muted">
-                                        <i class="fa fa-info-circle"></i> Nếu chọn VNPay, bạn sẽ được chuyển đến trang thanh toán sau khi đặt hàng.
-                                    </small>
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label asp-for="ShippingAddress" class="form-label"></label>
@@ -84,82 +98,76 @@
                         </div>
                     </div>
 
-                    <div class="card shadow">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="fa fa-shopping-cart me-2"></i>Đơn Hàng Của Bạn</h5>
+                    <div class="checkout-section">
+                        <div class="checkout-section-header">
+                            <h5><i class="fa fa-shopping-cart me-2"></i>Đơn Hàng Của Bạn</h5>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Sản phẩm</th>
-                                            <th>Số lượng</th>
-                                            <th>Giá</th>
-                                            <th>Tổng</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var item in cartItems)
-                                        {
-                                            if (item.Product != null)
+                        <div class="checkout-section-body">
+                            <div class="checkout-order-list">
+                                @foreach (var item in cartItems)
+                                {
+                                    if (item.Product != null)
+                                    {
+                                        var price = item.Product.SalePrice ?? item.Product.Price ?? 0;
+                                        var itemTotal = price * (item.Quantity ?? 1);
+                                        <div class="checkout-order-item">
+                                            @if (!string.IsNullOrEmpty(item.Product.ImageUrl))
                                             {
-                                                var price = item.Product.SalePrice ?? item.Product.Price ?? 0;
-                                                var itemTotal = price * (item.Quantity ?? 1);
-                                                <tr>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            @if (!string.IsNullOrEmpty(item.Product.ImageUrl))
-                                                            {
-                                                                <img src="@item.Product.ImageUrl" alt="@item.Product.ProductName" class="img-thumbnail me-3" style="width: 60px; height: 60px; object-fit: cover;">
-                                                            }
-                                                            <div>
-                                                                <h6 class="mb-0">@item.Product.ProductName</h6>
-                                                                @if (!string.IsNullOrEmpty(item.Product.Sku))
-                                                                {
-                                                                    <small class="text-muted">SKU: @item.Product.Sku</small>
-                                                                }
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>@(item.Quantity ?? 1)</td>
-                                                    <td>@price.ToString("N0") đ</td>
-                                                    <td class="fw-bold">@itemTotal.ToString("N0") đ</td>
-                                                </tr>
+                                                <img src="@item.Product.ImageUrl" alt="@item.Product.ProductName">
                                             }
-                                        }
-                                    </tbody>
-                                </table>
+                                            else
+                                            {
+                                                <img src="~/img/product-1.jpg" alt="@item.Product.ProductName">
+                                            }
+                                            <div class="checkout-order-info">
+                                                <h6>@item.Product.ProductName</h6>
+                                                @if (!string.IsNullOrEmpty(item.Product.Sku))
+                                                {
+                                                    <small>SKU: @item.Product.Sku</small>
+                                                }
+                                                <span>Số lượng: @(item.Quantity ?? 1)</span>
+                                            </div>
+                                            <div class="checkout-order-price">
+                                                <span>@price.ToString("N0") đ</span>
+                                                <strong>@itemTotal.ToString("N0") đ</strong>
+                                            </div>
+                                        </div>
+                                    }
+                                }
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-lg-4">
-                    <div class="card shadow sticky-top" style="top: 20px;">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="fa fa-calculator me-2"></i>Tóm Tắt</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between mb-3">
-                                <span>Tạm tính:</span>
-                                <strong>@subtotal.ToString("N0") đ</strong>
+                    <div class="checkout-summary-wrap">
+                        <div class="checkout-section checkout-summary">
+                            <div class="checkout-section-header">
+                                <h5><i class="fa fa-calculator me-2"></i>Tóm Tắt</h5>
                             </div>
-                            <div class="d-flex justify-content-between mb-3">
-                                <span>Phí vận chuyển:</span>
-                                <strong>@shippingFee.ToString("N0") đ</strong>
+                            <div class="summary-details">
+                                <div class="checkout-summary-row">
+                                    <span>Tạm tính</span>
+                                    <strong>@subtotal.ToString("N0") đ</strong>
+                                </div>
+                                <div class="checkout-summary-row">
+                                    <span>Phí vận chuyển</span>
+                                    <strong>@shippingFee.ToString("N0") đ</strong>
+                                </div>
+                                <div class="checkout-summary-total">
+                                    <span>Tổng cộng</span>
+                                    <strong>@totalAmount.ToString("N0") đ</strong>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-submit-checkout">
+                                    <i class="fa fa-check me-2"></i>Đặt Hàng
+                                </button>
+                                <a href="@Url.Action("Index", "Cart")" class="btn btn-outline-secondary checkout-back-btn">
+                                    <i class="fa fa-arrow-left me-2"></i>Quay Lại Giỏ Hàng
+                                </a>
+                                <p class="checkout-secure-note">
+                                    <i class="fa fa-shield-alt me-2"></i>Thông tin thanh toán của bạn được xử lý an toàn.
+                                </p>
                             </div>
-                            <hr>
-                            <div class="d-flex justify-content-between mb-4">
-                                <h5>Tổng cộng:</h5>
-                                <h5 class="text-primary">@totalAmount.ToString("N0") đ</h5>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 py-3 mb-3">
-                                <i class="fa fa-check me-2"></i>Đặt Hàng
-                            </button>
-                            <a href="@Url.Action("Index", "Cart")" class="btn btn-outline-secondary w-100">
-                                <i class="fa fa-arrow-left me-2"></i>Quay Lại Giỏ Hàng
-                            </a>
                         </div>
                     </div>
                 </div>

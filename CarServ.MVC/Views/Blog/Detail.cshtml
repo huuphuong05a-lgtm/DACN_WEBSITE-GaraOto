@@ -27,7 +27,7 @@
 <!-- Page Header End -->
 
 <!-- Blog Detail Start -->
-<div class="container-xxl py-5">
+<div class="container-xxl py-5 blog-detail-page">
     <div class="container">
         <div class="row g-5">
             <!-- Main Content - Left Column (8/12) -->
@@ -35,22 +35,23 @@
                 <article class="blog-post">
                     <!-- Post Header -->
                     <div class="mb-4">
-                        <h1 class="mb-3">@Model.Post.Title</h1>
-                        <div class="d-flex align-items-center flex-wrap mb-3">
+                        <h1 class="blog-detail-title">@Model.Post.Title</h1>
+                        <div class="blog-meta">
                             @if (Model.Post.PublishedDate.HasValue)
                             {
-                                <span class="text-muted me-3">
-                                    <i class="fa fa-calendar me-1"></i>@Model.Post.PublishedDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                <span>
+                                    <i class="far fa-calendar-alt"></i>@Model.Post.PublishedDate.Value.ToString("dd/MM/yyyy")
                                 </span>
                             }
                             @if (Model.Post.Category != null)
                             {
-                                <a href="@Url.Action("Index", "Blog", new { categoryId = Model.Post.Category.Id })" class="badge bg-primary text-decoration-none me-3">
-                                    @Model.Post.Category.Name
-                                </a>
+                                <span>
+                                    <i class="far fa-folder"></i>
+                                    <a href="@Url.Action("Index", "Blog", new { categoryId = Model.Post.Category.Id })">@Model.Post.Category.Name</a>
+                                </span>
                             }
-                            <span class="text-muted">
-                                <i class="fa fa-eye me-1"></i>@Model.Post.ViewCount lượt xem
+                            <span>
+                                <i class="far fa-eye"></i>@Model.Post.ViewCount lượt xem
                             </span>
                         </div>
                     </div>
@@ -86,46 +87,47 @@
                     <!-- Related Posts -->
                     @if (Model.RelatedPosts.Any())
                     {
-                        <div class="mt-5">
-                            <h4 class="mb-4">Bài Viết Liên Quan</h4>
-                            <div class="row g-4">
+                        <section class="related-blog-section mt-5">
+                            <div class="related-blog-heading">
+                                <span>Đọc thêm</span>
+                                <h4>Bài Viết Liên Quan</h4>
+                            </div>
+                            <div class="related-blog-grid">
                                 @foreach (var relatedPost in Model.RelatedPosts)
                                 {
-                                    <div class="col-md-6">
-                                        <div class="card h-100 shadow-sm">
+                                    <article class="related-blog-card">
                                             @if (!string.IsNullOrEmpty(relatedPost.Thumbnail))
                                             {
-                                                <a href="@Url.Action("Detail", "Blog", new { slug = relatedPost.Slug })">
-                                                    <img src="@relatedPost.Thumbnail" class="card-img-top" alt="@relatedPost.Title" style="height: 150px; object-fit: cover;">
+                                                <a class="related-blog-image" href="@Url.Action("Detail", "Blog", new { slug = relatedPost.Slug })">
+                                                    <img src="@relatedPost.Thumbnail" alt="@relatedPost.Title">
                                                 </a>
                                             }
-                                            <div class="card-body">
-                                                <h6 class="card-title">
-                                                    <a href="@Url.Action("Detail", "Blog", new { slug = relatedPost.Slug })" class="text-dark text-decoration-none">
+                                            <div class="related-blog-body">
+                                                <h5>
+                                                    <a href="@Url.Action("Detail", "Blog", new { slug = relatedPost.Slug })">
                                                         @relatedPost.Title
                                                     </a>
-                                                </h6>
+                                                </h5>
                                                 @if (!string.IsNullOrEmpty(relatedPost.ShortDescription))
                                                 {
-                                                    <p class="card-text text-muted" style="font-size: 0.9rem;">
+                                                    <p>
                                                         @(relatedPost.ShortDescription.Length > 100 ? relatedPost.ShortDescription.Substring(0, 100) + "..." : relatedPost.ShortDescription)
                                                     </p>
                                                 }
-                                                <div class="d-flex justify-content-between align-items-center">
+                                                <div class="related-blog-footer">
                                                     @if (relatedPost.PublishedDate.HasValue)
                                                     {
-                                                        <small class="text-muted">@relatedPost.PublishedDate.Value.ToString("dd/MM/yyyy")</small>
+                                                        <time><i class="far fa-calendar-alt me-1"></i>@relatedPost.PublishedDate.Value.ToString("dd/MM/yyyy")</time>
                                                     }
-                                                    <a href="@Url.Action("Detail", "Blog", new { slug = relatedPost.Slug })" class="btn btn-sm btn-primary">
-                                                        Đọc tiếp <i class="fa fa-arrow-right ms-1"></i>
+                                                    <a href="@Url.Action("Detail", "Blog", new { slug = relatedPost.Slug })" class="related-blog-link">
+                                                        Đọc tiếp <i class="fa fa-arrow-right ms-2"></i>
                                                     </a>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
+                                    </article>
                                 }
                             </div>
-                        </div>
+                        </section>
                     }
                 </article>
             </div>
@@ -133,11 +135,9 @@
             <!-- Sidebar - Right Column (4/12) -->
             <div class="col-lg-4">
                 <!-- Search Box -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fa fa-search me-2"></i>Tìm Kiếm</h5>
-                    </div>
-                    <div class="card-body">
+                <div class="sidebar-widget">
+                    <h5 class="widget-title"><i class="fa fa-search me-2"></i>Tìm Kiếm</h5>
+                    <div>
                         <form asp-action="Index" method="get">
                             <div class="input-group">
                                 <input type="text" name="search" class="form-control" placeholder="Tìm kiếm bài viết...">
@@ -152,22 +152,20 @@
                 <!-- Categories -->
                 @if (Model.Categories.Any())
                 {
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="fa fa-folder me-2"></i>Chuyên Mục</h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item">
-                                    <a href="@Url.Action("Index", "Blog")" class="text-decoration-none text-dark">
-                                        <i class="fa fa-list me-2"></i>Tất cả
+                    <div class="sidebar-widget">
+                        <h5 class="widget-title"><i class="fa fa-folder me-2"></i>Chuyên Mục</h5>
+                        <div>
+                            <ul class="blog-category-list">
+                                <li>
+                                    <a href="@Url.Action("Index", "Blog")">
+                                        <span><i class="fa fa-list me-2"></i>Tất cả</span>
                                     </a>
                                 </li>
                                 @foreach (var category in Model.Categories)
                                 {
-                                    <li class="list-group-item">
-                                        <a href="@Url.Action("Index", "Blog", new { categoryId = category.Id })" class="text-decoration-none text-dark">
-                                            <i class="fa fa-folder-open me-2"></i>@category.Name
+                                    <li>
+                                        <a href="@Url.Action("Index", "Blog", new { categoryId = category.Id })">
+                                            <span><i class="fa fa-folder-open me-2"></i>@category.Name</span>
                                         </a>
                                     </li>
                                 }
@@ -182,34 +180,28 @@
                 }
                 @if (latestPosts.Any())
                 {
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="fa fa-clock me-2"></i>Bài Viết Mới Nhất</h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <ul class="list-group list-group-flush">
-                                @foreach (var post in latestPosts)
+                    <div class="sidebar-widget">
+                        <h5 class="widget-title"><i class="fa fa-clock me-2"></i>Bài Viết Mới Nhất</h5>
+                        @foreach (var post in latestPosts)
+                        {
+                            <div class="recent-post-item">
+                                @if (!string.IsNullOrEmpty(post.Thumbnail))
                                 {
-                                    <li class="list-group-item">
-                                        <a href="@Url.Action("Detail", "Blog", new { slug = post.Slug })" class="text-decoration-none text-dark">
-                                            <div class="d-flex align-items-start">
-                                                @if (!string.IsNullOrEmpty(post.Thumbnail))
-                                                {
-                                                    <img src="@post.Thumbnail" class="me-3 rounded" alt="@post.Title" style="width: 60px; height: 60px; object-fit: cover;">
-                                                }
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-1" style="font-size: 0.9rem;">@post.Title</h6>
-                                                    @if (post.PublishedDate.HasValue)
-                                                    {
-                                                        <small class="text-muted">@post.PublishedDate.Value.ToString("dd/MM/yyyy")</small>
-                                                    }
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
+                                    <a class="recent-post-thumb" href="@Url.Action("Detail", "Blog", new { slug = post.Slug })">
+                                        <img src="@post.Thumbnail" alt="@post.Title">
+                                    </a>
                                 }
-                            </ul>
-                        </div>
+                                <div>
+                                    <h6 class="recent-post-title">
+                                        <a href="@Url.Action("Detail", "Blog", new { slug = post.Slug })">@post.Title</a>
+                                    </h6>
+                                    @if (post.PublishedDate.HasValue)
+                                    {
+                                        <small class="text-muted"><i class="far fa-calendar-alt me-1"></i>@post.PublishedDate.Value.ToString("dd/MM/yyyy")</small>
+                                    }
+                                </div>
+                            </div>
+                        }
                     </div>
                 }
             </div>

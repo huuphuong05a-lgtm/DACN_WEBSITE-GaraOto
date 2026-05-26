@@ -61,8 +61,12 @@ builder.Services.AddHttpContextAccessor();
 // Add Authorization with Roles
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("AdminOrStaff", policy => policy.RequireRole("Admin", "Staff"));
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole(AppConstants.AdminRole.Admin));
+    options.AddPolicy("AdminOrStaff", policy => policy.RequireRole(AppConstants.AdminRole.Admin, AppConstants.AdminRole.Staff));
+    options.AddPolicy("AdminStaffOrTechnician", policy => policy.RequireRole(
+        AppConstants.AdminRole.Admin,
+        AppConstants.AdminRole.Staff,
+        AppConstants.AdminRole.Technician));
 });
 
 builder.Services.AddDbContext<CarServContext>(options =>
@@ -79,7 +83,7 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<CarServContext>();
-        await CarServ.MVC.Helpers.AdminUserSeeder.SeedAdminUserAsync(context);
+        await CarServ.MVC.Helpers.AdminUserSeeder.SeedAdminUserAsync(context, builder.Configuration);
     }
 }
 catch (Exception ex)

@@ -1,5 +1,11 @@
+@model CarServ.MVC.Models.ViewModels.AdminDashboardViewModel
 @{
     ViewData["Title"] = "Dashboard";
+
+    var isAdmin = User.IsInRole(AppConstants.AdminRole.Admin);
+    var isStaff = User.IsInRole(AppConstants.AdminRole.Staff);
+    var isTechnician = User.IsInRole(AppConstants.AdminRole.Technician);
+    var canOperate = isAdmin || isStaff;
 }
 
 <div id="content">
@@ -7,7 +13,16 @@
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <div>
                 <h1 class="h3 mb-1 text-gray-800">Bảng điều khiển NHP-AUTO</h1>
-                <p class="mb-0 text-muted">Truy cập nhanh các khu vực vận hành chính của gara.</p>
+                <p class="mb-0 text-muted">
+                    @if (isTechnician && !canOperate)
+                    {
+                        <span>Theo dõi lịch hẹn và công việc kỹ thuật được phân công.</span>
+                    }
+                    else
+                    {
+                        <span>Truy cập nhanh các khu vực vận hành chính của gara.</span>
+                    }
+                </p>
             </div>
             <a href="@Url.Action("Index", "Home", new { area = "" })" class="d-none d-sm-inline-block btn btn-sm btn-outline-primary shadow-sm">
                 <i class="fas fa-external-link-alt fa-sm mr-1"></i> Xem website
@@ -15,114 +30,365 @@
         </div>
 
         <div class="row">
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-primary shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Lịch hẹn</div>
-                                <a href="@Url.Action("Index", "Appointment", new { area = "Admin" })" class="h6 mb-0 font-weight-bold text-gray-800">Quản lý lịch hẹn</a>
+            <div class="col-xl-@(canOperate ? 3 : 4) col-md-6 mb-4">
+                <a class="text-decoration-none" href="@Url.Action("Index", "Appointment", new { area = "Admin" })">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Lịch hẹn</div>
+                                    <div class="h6 mb-0 font-weight-bold text-gray-800">Quản lý lịch hẹn</div>
+                                </div>
+                                <div class="col-auto"><i class="fas fa-calendar-check fa-2x text-gray-300"></i></div>
                             </div>
-                            <div class="col-auto"><i class="fas fa-calendar-check fa-2x text-gray-300"></i></div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
 
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-success shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Đơn hàng</div>
-                                <a href="@Url.Action("Index", "Order", new { area = "Admin" })" class="h6 mb-0 font-weight-bold text-gray-800">Theo dõi đơn hàng</a>
+            @if (canOperate)
+            {
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <a class="text-decoration-none" href="@Url.Action("Index", "Order", new { area = "Admin" })">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Đơn hàng</div>
+                                        <div class="h6 mb-0 font-weight-bold text-gray-800">Theo dõi đơn hàng</div>
+                                    </div>
+                                    <div class="col-auto"><i class="fas fa-shopping-cart fa-2x text-gray-300"></i></div>
+                                </div>
                             </div>
-                            <div class="col-auto"><i class="fas fa-shopping-cart fa-2x text-gray-300"></i></div>
                         </div>
-                    </div>
+                    </a>
                 </div>
-            </div>
 
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-info shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Sản phẩm</div>
-                                <a href="@Url.Action("Index", "Product", new { area = "Admin" })" class="h6 mb-0 font-weight-bold text-gray-800">Quản lý kho hàng</a>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <a class="text-decoration-none" href="@Url.Action("Index", "Product", new { area = "Admin" })">
+                        <div class="card border-left-info shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Sản phẩm</div>
+                                        <div class="h6 mb-0 font-weight-bold text-gray-800">Quản lý kho hàng</div>
+                                    </div>
+                                    <div class="col-auto"><i class="fas fa-box fa-2x text-gray-300"></i></div>
+                                </div>
                             </div>
-                            <div class="col-auto"><i class="fas fa-box fa-2x text-gray-300"></i></div>
                         </div>
-                    </div>
+                    </a>
                 </div>
-            </div>
 
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-warning shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Liên hệ</div>
-                                <a href="@Url.Action("Index", "Contact", new { area = "Admin" })" class="h6 mb-0 font-weight-bold text-gray-800">Xử lý yêu cầu</a>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <a class="text-decoration-none" href="@Url.Action("Index", "Contact", new { area = "Admin" })">
+                        <div class="card border-left-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Liên hệ</div>
+                                        <div class="h6 mb-0 font-weight-bold text-gray-800">Xử lý yêu cầu</div>
+                                    </div>
+                                    <div class="col-auto"><i class="fas fa-envelope fa-2x text-gray-300"></i></div>
+                                </div>
                             </div>
-                            <div class="col-auto"><i class="fas fa-envelope fa-2x text-gray-300"></i></div>
                         </div>
-                    </div>
+                    </a>
                 </div>
-            </div>
+            }
         </div>
 
-        <div class="row">
-            <div class="col-lg-8 mb-4">
-                <div class="card shadow h-100">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Quản trị nội dung</h6>
+        @if (canOperate)
+        {
+            <div class="row">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-danger shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Doanh thu hôm nay</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TodayRevenue.ToString("N0") đ</div>
+                                </div>
+                                <div class="col-auto"><i class="fas fa-coins fa-2x text-gray-300"></i></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <a class="btn btn-light btn-block text-left" href="@Url.Action("Index", "Service", new { area = "Admin" })">
-                                    <i class="fas fa-cogs text-primary mr-2"></i> Dịch vụ
-                                </a>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Doanh thu tháng này</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.MonthRevenue.ToString("N0") đ</div>
+                                </div>
+                                <div class="col-auto"><i class="fas fa-chart-line fa-2x text-gray-300"></i></div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <a class="btn btn-light btn-block text-left" href="@Url.Action("Index", "Banner", new { area = "Admin" })">
-                                    <i class="fas fa-image text-primary mr-2"></i> Banner
-                                </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tổng doanh thu</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalRevenue.ToString("N0") đ</div>
+                                </div>
+                                <div class="col-auto"><i class="fas fa-wallet fa-2x text-gray-300"></i></div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <a class="btn btn-light btn-block text-left" href="@Url.Action("Index", "BlogPostAdmin", new { area = "Admin" })">
-                                    <i class="fas fa-blog text-primary mr-2"></i> Bài viết blog
-                                </a>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <a class="btn btn-light btn-block text-left" href="@Url.Action("Index", "ReviewAdmin", new { area = "Admin" })">
-                                    <i class="fas fa-comments text-primary mr-2"></i> Đánh giá
-                                </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Lịch hẹn chờ xác nhận</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.PendingAppointmentCount</div>
+                                </div>
+                                <div class="col-auto"><i class="fas fa-clock fa-2x text-gray-300"></i></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-4 mb-4">
-                <div class="card shadow h-100">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Vận hành</h6>
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">Doanh thu 7 ngày gần đây</h6>
+                            <span class="small text-muted">Đơn hàng + hóa đơn đã thanh toán</span>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="dailyRevenueChart" height="110"></canvas>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <a class="btn btn-primary btn-block mb-3" href="@Url.Action("Index", "Customer", new { area = "Admin" })">
-                            <i class="fas fa-users mr-2"></i> Khách hàng
-                        </a>
-                        <a class="btn btn-outline-primary btn-block mb-3" href="@Url.Action("Index", "Technician", new { area = "Admin" })">
-                            <i class="fas fa-user-cog mr-2"></i> Kỹ thuật viên
-                        </a>
-                        <a class="btn btn-outline-primary btn-block" href="@Url.Action("Index", "Payment", new { area = "Admin" })">
-                            <i class="fas fa-credit-card mr-2"></i> Thanh toán
-                        </a>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Tổng quan vận hành</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span>Đơn hàng đã thanh toán</span>
+                                <strong class="text-success">@Model.PaidOrderCount</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span>Hóa đơn dịch vụ đã thanh toán</span>
+                                <strong class="text-success">@Model.PaidInvoiceCount</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span>Lịch hẹn hoàn thành</span>
+                                <strong class="text-primary">@Model.CompletedAppointmentCount</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Sản phẩm sắp hết hàng</span>
+                                <strong class="text-warning">@Model.LowStockProductCount</strong>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <div class="row">
+                <div class="col-lg-12 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Doanh thu 6 tháng gần đây</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="monthlyRevenueChart" height="80"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (isTechnician && !canOperate)
+        {
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Công việc kỹ thuật</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-4">
+                                Tài khoản kỹ thuật viên chỉ được truy cập lịch hẹn để xem thông tin xe, dịch vụ và công việc cần xử lý.
+                            </p>
+                            <a class="btn btn-primary" href="@Url.Action("Index", "Appointment", new { area = "Admin" })">
+                                <i class="fas fa-calendar-check mr-2"></i> Vào danh sách lịch hẹn
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Quyền truy cập</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <i class="fas fa-check-circle text-success mr-2"></i> Dashboard
+                            </div>
+                            <div class="mb-3">
+                                <i class="fas fa-check-circle text-success mr-2"></i> Quản lý lịch hẹn
+                            </div>
+                            <div class="text-muted small">
+                                Các mục như sản phẩm, đơn hàng, thanh toán, khách hàng và nội dung chỉ dành cho quản trị viên hoặc nhân viên.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Quản trị nội dung</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <a class="btn btn-light btn-block text-left" href="@Url.Action("Index", "Service", new { area = "Admin" })">
+                                        <i class="fas fa-cogs text-primary mr-2"></i> Dịch vụ
+                                    </a>
+                                </div>
+
+                                @if (isAdmin)
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <a class="btn btn-light btn-block text-left" href="@Url.Action("Index", "BlogPostAdmin", new { area = "Admin" })">
+                                            <i class="fas fa-blog text-primary mr-2"></i> Bài viết blog
+                                        </a>
+                                    </div>
+                                }
+
+                                <div class="col-md-6 mb-3">
+                                    <a class="btn btn-light btn-block text-left" href="@Url.Action("Index", "ReviewAdmin", new { area = "Admin" })">
+                                        <i class="fas fa-comments text-primary mr-2"></i> Đánh giá
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Vận hành</h6>
+                        </div>
+                        <div class="card-body">
+                            <a class="btn btn-primary btn-block mb-3" href="@Url.Action("Index", "Customer", new { area = "Admin" })">
+                                <i class="fas fa-users mr-2"></i> Khách hàng
+                            </a>
+
+                            @if (isAdmin)
+                            {
+                                <a class="btn btn-outline-primary btn-block mb-3" href="@Url.Action("Index", "Technician", new { area = "Admin" })">
+                                    <i class="fas fa-user-cog mr-2"></i> Kỹ thuật viên
+                                </a>
+                            }
+
+                            <a class="btn btn-outline-primary btn-block" href="@Url.Action("Index", "Payment", new { area = "Admin" })">
+                                <i class="fas fa-credit-card mr-2"></i> Thanh toán
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </div>
+
+@if (canOperate)
+{
+    @section Scripts {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const dailyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueLabels));
+            const dailyValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueValues));
+            const monthlyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenueLabels));
+            const monthlyValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenueValues));
+
+            const formatCurrency = value => new Intl.NumberFormat('vi-VN').format(value) + ' đ';
+
+            new Chart(document.getElementById('dailyRevenueChart'), {
+                type: 'line',
+                data: {
+                    labels: dailyLabels,
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: dailyValues,
+                        borderColor: '#e74a3b',
+                        backgroundColor: 'rgba(231, 74, 59, 0.12)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#e74a3b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: context => formatCurrency(context.parsed.y || 0)
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: value => formatCurrency(value) }
+                        }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('monthlyRevenueChart'), {
+                type: 'bar',
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: monthlyValues,
+                        backgroundColor: '#4e73df',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: context => formatCurrency(context.parsed.y || 0)
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: value => formatCurrency(value) }
+                        }
+                    }
+                }
+            });
+        </script>
+    }
+}
