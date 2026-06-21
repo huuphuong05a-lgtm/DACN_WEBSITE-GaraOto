@@ -5,6 +5,8 @@
     var services = ViewData["Services"] as SelectList;
     var technicians = ViewData["Technicians"] as SelectList;
     var vehicles = ViewData["Vehicles"] as SelectList;
+    var selectedVehicleLabel = ViewData["SelectedVehicleLabel"] as string;
+    var vehicleLabels = ViewData["VehicleLabels"] as Dictionary<int, string> ?? new Dictionary<int, string>();
     var isDisabled = !(User.Identity?.IsAuthenticated ?? false);
     var selectedDate = Model?.AppointmentDate == default ? DateTime.Today : Model!.AppointmentDate.Date;
 }
@@ -122,6 +124,16 @@
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 13px;"></div>
                         <input asp-for="AppointmentDate" type="hidden" id="AppointmentDate" />
 
+                        @if (!string.IsNullOrWhiteSpace(selectedVehicleLabel))
+                        {
+                            <div class="p-3 mb-3" style="border-radius: 12px; background: #F0FDF4; border: 1px solid #BBF7D0; color: #14532D; font-size: 13px;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fa fa-car"></i>
+                                    <span>Đang đặt lịch cho xe: <strong>@selectedVehicleLabel</strong></span>
+                                </div>
+                            </div>
+                        }
+
                         <div class="row g-3">
                             <div class="col-12 col-sm-6">
                                 <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
@@ -213,6 +225,7 @@
             const slotHelp = document.getElementById('slotHelp');
             const submitButton = document.getElementById('submitBooking');
             const selectedValue = '@(Model?.AppointmentDate == default ? "" : Model!.AppointmentDate.ToString("yyyy-MM-ddTHH:mm"))';
+            const vehicleLabels = @Json.Serialize(vehicleLabels);
 
             if (isDisabled) {
                 return;
@@ -289,11 +302,17 @@
             technicianSelect.addEventListener('change', loadSlots);
             dateInput.addEventListener('change', loadSlots);
             vehicleSelect?.addEventListener('change', () => {
+                if (!vehicleInfoInput) return;
+
                 const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
-                if (selectedOption?.value && vehicleInfoInput) {
-                    vehicleInfoInput.value = selectedOption.text;
+                if (selectedOption?.value) {
+                    vehicleInfoInput.value = vehicleLabels[selectedOption.value] || selectedOption.text;
                 }
             });
+            if (vehicleSelect?.value && vehicleInfoInput && !vehicleInfoInput.value) {
+                const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
+                vehicleInfoInput.value = vehicleLabels[vehicleSelect.value] || selectedOption?.text || '';
+            }
             loadSlots();
         })();
     </script>

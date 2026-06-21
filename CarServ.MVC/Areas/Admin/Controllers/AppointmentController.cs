@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace CarServ.MVC.Areas.Admin.Controllers
 {
@@ -42,6 +43,8 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                     .ThenInclude(v => v.Model)
                 .AsQueryable();
 
+            appointments = await ApplyTechnicianScopeAsync(appointments);
+
             if (!string.IsNullOrWhiteSpace(searchString))
             {
                 appointments = appointments.Where(a =>
@@ -64,7 +67,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
 
             appointments = sortOrder == "date_desc"
                 ? appointments.OrderByDescending(a => a.AppointmentDate)
-                : appointments.OrderByDescending(a => a.CreatedDate);
+                : appointments.OrderByDescending(a => a.AppointmentId);
 
             ViewBag.StatusList = AppConstants.AppointmentStatus.All;
             return View(await appointments.ToListAsync());
@@ -86,6 +89,22 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                     .ThenInclude(v => v.Model)
                 .Where(a => a.AppointmentDate >= selectedMonth && a.AppointmentDate < nextMonth)
                 .AsQueryable();
+
+            if (User.IsInRole(AppConstants.AdminRole.Technician))
+            {
+                var currentTechnicianId = await GetCurrentTechnicianIdAsync();
+                if (!currentTechnicianId.HasValue)
+                {
+                    TempData["ErrorMessage"] = "Tài khoản kỹ thuật viên chưa được liên kết với hồ sơ kỹ thuật viên.";
+                    appointments = appointments.Where(a => false);
+                    technicianId = null;
+                }
+                else
+                {
+                    technicianId = currentTechnicianId.Value;
+                    appointments = appointments.Where(a => a.TechnicianId == currentTechnicianId.Value);
+                }
+            }
 
             if (technicianId.HasValue)
             {
@@ -135,9 +154,15 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                     .ThenInclude(v => v.Model)
                 .FirstOrDefaultAsync(m => m.AppointmentId == id);
 
+            if (appointment != null && !await CurrentTechnicianCanAccessAppointmentAsync(appointment))
+            {
+                return Forbid();
+            }
+
             return appointment == null ? NotFound() : View(appointment);
         }
 
+        [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOrStaff)]
         public async Task<IActionResult> Create()
         {
             await LoadDropdownsAsync();
@@ -146,6 +171,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOrStaff)]
         public async Task<IActionResult> Create([Bind("CustomerId,TechnicianId,VehicleId,ServiceId,ServiceType,AppointmentDate,EstimatedDuration,Notes,Status,TotalPrice,CustomerName,CustomerPhone,CustomerEmail,VehicleInfo")] Appointment appointment)
         {
             await EnrichAppointmentAsync(appointment);
@@ -169,6 +195,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOrStaff)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -208,9 +235,20 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 return NotFound();
             }
 
+            if (!await CurrentTechnicianCanAccessAppointmentAsync(appointment))
+            {
+                return Forbid();
+            }
+
             if (!appointment.VehicleId.HasValue)
             {
                 TempData["ErrorMessage"] = "Lịch hẹn cần gắn với xe trước khi tạo lịch sử sửa chữa.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            if (IsClosedWithoutCompletion(appointment.Status))
+            {
+                TempData["ErrorMessage"] = "Không thể hoàn thành lịch hẹn đã hủy hoặc khách không đến.";
                 return RedirectToAction(nameof(Details), new { id });
             }
 
@@ -231,8 +269,11 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 ActualDuration = appointment.ActualDuration ?? appointment.EstimatedDuration,
                 Mileage = history?.Mileage ?? appointment.Vehicle?.Mileage,
                 LaborCost = history?.LaborCost ?? appointment.TotalPrice,
+                LaborCostInput = FormatMoney(history?.LaborCost ?? appointment.TotalPrice),
                 PartsCost = history?.PartsCost,
+                PartsCostInput = FormatMoney(history?.PartsCost),
                 TotalCost = history?.TotalCost ?? appointment.TotalPrice,
+                TotalCostInput = FormatMoney(history?.TotalCost ?? appointment.TotalPrice),
                 PartsReplaced = history?.PartsReplaced,
                 Description = history?.Description ?? appointment.Notes,
                 Notes = history?.Notes,
@@ -257,10 +298,24 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 return NotFound();
             }
 
+            if (!await CurrentTechnicianCanAccessAppointmentAsync(appointment))
+            {
+                return Forbid();
+            }
+
             if (!appointment.VehicleId.HasValue)
             {
                 ModelState.AddModelError(string.Empty, "Lịch hẹn cần gắn với xe trước khi tạo lịch sử sửa chữa.");
             }
+
+            if (IsClosedWithoutCompletion(appointment.Status))
+            {
+                ModelState.AddModelError(string.Empty, "Không thể hoàn thành lịch hẹn đã hủy hoặc khách không đến.");
+            }
+
+            model.LaborCost = ParseMoney(model.LaborCostInput);
+            model.PartsCost = ParseMoney(model.PartsCostInput);
+            model.TotalCost = ParseMoney(model.TotalCostInput);
 
             if (!ModelState.IsValid)
             {
@@ -321,6 +376,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOrStaff)]
         public async Task<IActionResult> Edit(int id, [Bind("AppointmentId,AppointmentCode,CustomerId,TechnicianId,VehicleId,ServiceId,ServiceType,AppointmentDate,EstimatedDuration,ActualDuration,Notes,Status,TotalPrice,CustomerName,CustomerPhone,CustomerEmail,VehicleInfo,CreatedDate")] Appointment appointment)
         {
             if (id != appointment.AppointmentId)
@@ -332,6 +388,13 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             if (existingAppointment == null)
             {
                 return NotFound();
+            }
+
+            if (existingAppointment.Status != AppConstants.AppointmentStatus.Completed
+                && appointment.Status == AppConstants.AppointmentStatus.Completed)
+            {
+                TempData["ErrorMessage"] = "Vui lòng sử dụng màn hình Hoàn thành để nhập kết quả sửa chữa.";
+                return RedirectToAction(nameof(Complete), new { id });
             }
 
             await EnrichAppointmentAsync(appointment);
@@ -389,16 +452,38 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 return NotFound();
             }
 
+            if (status == AppConstants.AppointmentStatus.Completed)
+            {
+                TempData["ErrorMessage"] = "Vui lòng sử dụng màn hình Hoàn thành để nhập kết quả sửa chữa.";
+                return RedirectToAction(nameof(Complete), new { id });
+            }
+
+            if (!await CurrentTechnicianCanAccessAppointmentAsync(appointment))
+            {
+                return Forbid();
+            }
+
+            if (User.IsInRole(AppConstants.AdminRole.Technician))
+            {
+                if (!IsTechnicianWorkStatus(status)
+                    || appointment.Status == AppConstants.AppointmentStatus.Completed
+                    || appointment.Status == AppConstants.AppointmentStatus.Canceled
+                    || appointment.Status == AppConstants.AppointmentStatus.NoShow)
+                {
+                    return Forbid();
+                }
+            }
+
             appointment.Status = status;
             appointment.UpdatedDate = DateTime.Now;
 
-            await EnsureServiceHistoryForCompletedAppointmentAsync(appointment);
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Đã cập nhật trạng thái lịch hẹn.";
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOrStaff)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -421,6 +506,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AppConstants.AdminRole.AdminOrStaff)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var appointment = await _context.Appointments.FindAsync(id);
@@ -449,6 +535,98 @@ namespace CarServ.MVC.Areas.Admin.Controllers
 
             var slots = await BuildAvailableSlotsAsync(date.Date, duration, technicianId, excludeAppointmentId);
             return Json(slots);
+        }
+
+        private static bool IsTechnicianWorkStatus(string? status)
+        {
+            return status == AppConstants.AppointmentStatus.Assigned
+                || status == AppConstants.AppointmentStatus.Inspecting
+                || status == AppConstants.AppointmentStatus.Repairing
+                || status == AppConstants.AppointmentStatus.WaitingParts;
+        }
+
+        private static bool IsClosedWithoutCompletion(string? status)
+        {
+            return status == AppConstants.AppointmentStatus.Canceled
+                || status == AppConstants.AppointmentStatus.NoShow;
+        }
+
+        private static IEnumerable<string> GetQuickUpdateStatuses()
+        {
+            return AppConstants.AppointmentStatus.All
+                .Where(status => status != AppConstants.AppointmentStatus.Completed);
+        }
+
+        private static decimal? ParseMoney(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            var normalized = value.Trim().Replace(",", string.Empty).Replace(".", string.Empty);
+            return decimal.TryParse(normalized, NumberStyles.Number, CultureInfo.InvariantCulture, out var result)
+                ? result
+                : null;
+        }
+
+        private static string? FormatMoney(decimal? value)
+        {
+            return value.HasValue
+                ? value.Value.ToString("N0", CultureInfo.InvariantCulture)
+                : null;
+        }
+
+        private async Task<IQueryable<Appointment>> ApplyTechnicianScopeAsync(IQueryable<Appointment> appointments)
+        {
+            if (!User.IsInRole(AppConstants.AdminRole.Technician))
+            {
+                return appointments;
+            }
+
+            var technicianId = await GetCurrentTechnicianIdAsync();
+            if (!technicianId.HasValue)
+            {
+                TempData["ErrorMessage"] = "Tài khoản kỹ thuật viên chưa được liên kết với hồ sơ kỹ thuật viên.";
+                return appointments.Where(a => false);
+            }
+
+            return appointments.Where(a => a.TechnicianId == technicianId.Value);
+        }
+
+        private async Task<bool> CurrentTechnicianCanAccessAppointmentAsync(Appointment appointment)
+        {
+            if (!User.IsInRole(AppConstants.AdminRole.Technician))
+            {
+                return true;
+            }
+
+            var technicianId = await GetCurrentTechnicianIdAsync();
+            return technicianId.HasValue && appointment.TechnicianId == technicianId.Value;
+        }
+
+        private async Task<int?> GetCurrentTechnicianIdAsync()
+        {
+            var userIdValue = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrWhiteSpace(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return null;
+            }
+
+            var email = await _context.AdminUsers
+                .Where(user => user.Id == userId && user.IsActive == true)
+                .Select(user => user.Email)
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return null;
+            }
+
+            return await _context.Technicians
+                .Where(technician => technician.IsActive == true && technician.Email == email)
+                .Select(technician => (int?)technician.TechnicianId)
+                .FirstOrDefaultAsync();
         }
 
         private async Task LoadDropdownsAsync()
@@ -496,7 +674,7 @@ namespace CarServ.MVC.Areas.Admin.Controllers
                 })
                 .ToListAsync();
 
-            ViewBag.StatusList = AppConstants.AppointmentStatus.All;
+            ViewBag.StatusList = GetQuickUpdateStatuses();
         }
 
         private async Task EnrichAppointmentAsync(Appointment appointment)
@@ -813,9 +991,15 @@ namespace CarServ.MVC.Areas.Admin.Controllers
 
         public decimal? LaborCost { get; set; }
 
+        public string? LaborCostInput { get; set; }
+
         public decimal? PartsCost { get; set; }
 
+        public string? PartsCostInput { get; set; }
+
         public decimal? TotalCost { get; set; }
+
+        public string? TotalCostInput { get; set; }
 
         public string? PartsReplaced { get; set; }
 

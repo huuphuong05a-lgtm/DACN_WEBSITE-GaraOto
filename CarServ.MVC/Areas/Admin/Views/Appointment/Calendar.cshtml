@@ -5,6 +5,7 @@
 @{
     ViewData["Title"] = "Lịch hẹn";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var isTechnician = User.IsInRole(AppConstants.AdminRole.Technician);
 
     var selectedMonth = (DateTime)ViewBag.SelectedMonth;
     var previousMonth = (DateTime)ViewBag.PreviousMonth;
@@ -29,11 +30,24 @@
             <a href="@Url.Action("Index", "Appointment", new { area = "Admin" })" class="btn btn-secondary">
                 <i class="fas fa-list"></i> Danh sách
             </a>
-            <a href="@Url.Action("Create", "Appointment", new { area = "Admin" })" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Thêm lịch hẹn
-            </a>
+            @if (!isTechnician)
+            {
+                <a href="@Url.Action("Create", "Appointment", new { area = "Admin" })" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Thêm lịch hẹn
+                </a>
+            }
         </div>
     </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
 
     <div class="card shadow mb-4">
         <div class="card-body">
@@ -42,16 +56,19 @@
                     <label>Tháng</label>
                     <input type="month" name="month" class="form-control" value="@selectedMonth.ToString("yyyy-MM")" />
                 </div>
-                <div class="col-md-3">
-                    <label>Kỹ thuật viên</label>
-                    <select name="technicianId" class="form-control">
-                        <option value="">Tất cả kỹ thuật viên</option>
-                        @foreach (SelectListItem technician in ViewBag.Technicians ?? new List<SelectListItem>())
-                        {
-                            <option value="@technician.Value" selected="@(currentTechnicianId.HasValue && currentTechnicianId.Value.ToString() == technician.Value)">@technician.Text</option>
-                        }
-                    </select>
-                </div>
+                @if (!isTechnician)
+                {
+                    <div class="col-md-3">
+                        <label>Kỹ thuật viên</label>
+                        <select name="technicianId" class="form-control">
+                            <option value="">Tất cả kỹ thuật viên</option>
+                            @foreach (SelectListItem technician in ViewBag.Technicians ?? new List<SelectListItem>())
+                            {
+                                <option value="@technician.Value" selected="@(currentTechnicianId.HasValue && currentTechnicianId.Value.ToString() == technician.Value)">@technician.Text</option>
+                            }
+                        </select>
+                    </div>
+                }
                 <div class="col-md-3">
                     <label>Trạng thái</label>
                     <select name="statusFilter" class="form-control">
@@ -111,6 +128,10 @@
                         {
                             AppConstants.AppointmentStatus.Pending => "appointment-warning",
                             AppConstants.AppointmentStatus.Confirmed => "appointment-info",
+                            AppConstants.AppointmentStatus.Assigned => "appointment-primary",
+                            AppConstants.AppointmentStatus.Inspecting => "appointment-dark",
+                            AppConstants.AppointmentStatus.Repairing => "appointment-primary",
+                            AppConstants.AppointmentStatus.WaitingParts => "appointment-warning",
                             AppConstants.AppointmentStatus.InProgress => "appointment-primary",
                             AppConstants.AppointmentStatus.Completed => "appointment-success",
                             AppConstants.AppointmentStatus.Canceled => "appointment-danger",

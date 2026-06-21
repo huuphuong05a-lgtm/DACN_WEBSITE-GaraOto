@@ -1,0 +1,341 @@
+@model CarServ.MVC.Controllers.ServiceReviewViewModel
+
+@{
+    ViewData["Title"] = "Đánh giá dịch vụ";
+}
+
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center">
+            <h1 class="display-4 text-white mb-3 animated slideInDown">Đánh giá dịch vụ</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Đánh giá dịch vụ</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="review-create-page py-5">
+    <div class="container" style="max-width: 980px;">
+        <div class="review-create-card">
+            <div class="review-create-header">
+                <div>
+                    <p>NHP-AUTO</p>
+                    <h2>Đánh giá dịch vụ</h2>
+                    <span>Chia sẻ trải nghiệm sau khi gara hoàn thành dịch vụ cho xe của bạn.</span>
+                </div>
+                <i class="fa fa-star"></i>
+            </div>
+
+            <div class="review-service-box">
+                <div>
+                    <small>Dịch vụ</small>
+                    <strong>@Model.ServiceName</strong>
+                </div>
+                <div>
+                    <small>Xe</small>
+                    <strong>@Model.VehicleLabel</strong>
+                </div>
+                <div>
+                    <small>Ngày sửa chữa</small>
+                    <strong>@Model.ServiceDate.ToString("dd/MM/yyyy")</strong>
+                </div>
+                <div>
+                    <small>Kỹ thuật viên</small>
+                    <strong>@(Model.TechnicianName ?? "-")</strong>
+                </div>
+            </div>
+
+            <form asp-action="Service" asp-controller="Review" method="post" enctype="multipart/form-data" class="review-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="AppointmentId" />
+                <input type="hidden" asp-for="ServiceHistoryId" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="review-field">
+                    <label>Chọn số sao <span>*</span></label>
+                    <div class="service-rating-input">
+                        @for (var i = 5; i >= 1; i--)
+                        {
+                            <input type="radio" id="rating-@i" name="Rating" value="@i" checked="@(Model.Rating == i)" required />
+                            <label for="rating-@i" title="@i sao">
+                                <i class="fa fa-star"></i>
+                            </label>
+                        }
+                    </div>
+                    <span asp-validation-for="Rating" class="text-danger small"></span>
+                </div>
+
+                <div class="review-field">
+                    <label asp-for="Comment">Nội dung đánh giá <span>*</span></label>
+                    <textarea asp-for="Comment" rows="5" maxlength="1000" required placeholder="Bạn hài lòng điều gì? Gara cần cải thiện gì?"></textarea>
+                    <span asp-validation-for="Comment" class="text-danger small"></span>
+                </div>
+
+                <div class="review-field">
+                    <label asp-for="ImageFile">Ảnh đính kèm</label>
+                    <div class="review-upload">
+                        <input asp-for="ImageFile" id="reviewImageInput" type="file" accept=".jpg,.jpeg,.png,.webp" />
+                        <div>
+                            <i class="fa fa-image"></i>
+                            <strong>Chọn ảnh thực tế</strong>
+                            <span>JPG, PNG, WEBP, tối đa 2MB. Ảnh là tùy chọn.</span>
+                        </div>
+                    </div>
+                    <img id="reviewImagePreview" class="review-image-preview" alt="Ảnh xem trước" />
+                    <span asp-validation-for="ImageFile" class="text-danger small d-block"></span>
+                </div>
+
+                <div class="review-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-paper-plane me-2"></i>Gửi đánh giá
+                    </button>
+                    <a href="@Url.Action("VehicleDetails", "Customer", new { id = Model.VehicleId })" class="btn btn-outline-secondary">
+                        Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .review-create-page {
+        background: #f7f8fb;
+    }
+
+    .review-create-card {
+        background: #fff;
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+        padding: 28px;
+    }
+
+    .review-create-header {
+        align-items: flex-start;
+        display: flex;
+        gap: 18px;
+        justify-content: space-between;
+        margin-bottom: 22px;
+    }
+
+    .review-create-header p {
+        color: #e11d2e;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 2px;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+    }
+
+    .review-create-header h2 {
+        color: #07142f;
+        font-size: 30px;
+        font-weight: 900;
+        margin-bottom: 6px;
+    }
+
+    .review-create-header span {
+        color: #64748b;
+    }
+
+    .review-create-header > i {
+        align-items: center;
+        background: #fff1f2;
+        border-radius: 50%;
+        color: #e11d2e;
+        display: flex;
+        flex: 0 0 54px;
+        font-size: 22px;
+        height: 54px;
+        justify-content: center;
+        width: 54px;
+    }
+
+    .review-service-box {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-bottom: 24px;
+        padding: 20px;
+    }
+
+    .review-service-box small {
+        color: #64748b;
+        display: block;
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .review-service-box strong {
+        color: #111827;
+    }
+
+    .review-form {
+        display: grid;
+        gap: 20px;
+    }
+
+    .review-field label {
+        color: #111827;
+        display: block;
+        font-weight: 900;
+        margin-bottom: 8px;
+    }
+
+    .review-field label span {
+        color: #e11d2e;
+    }
+
+    .review-field textarea {
+        border: 1px solid #dbe3ec;
+        border-radius: 8px;
+        color: #111827;
+        min-height: 132px;
+        padding: 14px 16px;
+        resize: vertical;
+        width: 100%;
+    }
+
+    .review-field textarea:focus {
+        border-color: #e11d2e;
+        box-shadow: 0 0 0 3px rgba(225, 29, 46, 0.12);
+        outline: none;
+    }
+
+    .service-rating-input {
+        display: inline-flex;
+        flex-direction: row-reverse;
+        gap: 7px;
+    }
+
+    .service-rating-input input {
+        display: none;
+    }
+
+    .service-rating-input label {
+        color: #d1d5db;
+        cursor: pointer;
+        font-size: 34px;
+        line-height: 1;
+        transition: color 0.16s ease, transform 0.16s ease;
+    }
+
+    .service-rating-input label:hover,
+    .service-rating-input label:hover ~ label,
+    .service-rating-input input:checked ~ label {
+        color: #f59e0b;
+    }
+
+    .service-rating-input label:hover {
+        transform: translateY(-1px);
+    }
+
+    .review-upload {
+        align-items: center;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        display: flex;
+        gap: 14px;
+        padding: 16px;
+        position: relative;
+    }
+
+    .review-upload input {
+        cursor: pointer;
+        inset: 0;
+        opacity: 0;
+        position: absolute;
+    }
+
+    .review-upload i {
+        align-items: center;
+        background: #fff1f2;
+        border-radius: 8px;
+        color: #e11d2e;
+        display: flex;
+        flex: 0 0 48px;
+        height: 48px;
+        justify-content: center;
+        width: 48px;
+    }
+
+    .review-upload strong,
+    .review-upload span {
+        display: block;
+    }
+
+    .review-upload strong {
+        color: #111827;
+    }
+
+    .review-upload span {
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .review-image-preview {
+        aspect-ratio: 1 / 1;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        display: none;
+        height: 120px;
+        margin-top: 12px;
+        object-fit: cover;
+        width: 120px;
+    }
+
+    .review-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .review-actions .btn {
+        align-items: center;
+        border-radius: 6px;
+        display: inline-flex;
+        font-weight: 900;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 22px;
+    }
+
+    @@media (max-width: 767.98px) {
+        .review-create-card {
+            padding: 20px;
+        }
+
+        .review-service-box {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        (() => {
+            const input = document.getElementById('reviewImageInput');
+            const preview = document.getElementById('reviewImagePreview');
+
+            input?.addEventListener('change', () => {
+                const file = input.files?.[0];
+                if (!file || !preview) {
+                    return;
+                }
+
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            });
+        })();
+    </script>
+}

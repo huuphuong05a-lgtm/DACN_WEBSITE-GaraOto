@@ -5,7 +5,309 @@
     ViewData["Title"] = "Xe của tôi";
 }
 
-<div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
+<style>
+    .customer-vehicles-page {
+        background: #f7f8fb;
+    }
+
+    .customer-vehicles-shell {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .account-menu-card,
+    .vehicle-panel,
+    .vehicle-card,
+    .empty-vehicle-state {
+        background: #fff;
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+    }
+
+    .account-menu-card {
+        padding: 18px;
+        position: sticky;
+        top: 92px;
+    }
+
+    .account-menu-title {
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        color: #111827;
+        margin-bottom: 14px;
+    }
+
+    .account-menu-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 12px;
+        border-radius: 6px;
+        color: #4b5563;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.18s ease;
+    }
+
+    .account-menu-link i {
+        width: 18px;
+        text-align: center;
+        color: #9ca3af;
+    }
+
+    .account-menu-link:hover {
+        color: #e11d2e;
+        background: #fff1f2;
+    }
+
+    .account-menu-link.active {
+        color: #e11d2e;
+        background: #fff1f2;
+        box-shadow: inset 3px 0 0 #e11d2e;
+    }
+
+    .account-menu-link.active i {
+        color: #e11d2e;
+    }
+
+    .vehicle-panel {
+        padding: 24px;
+    }
+
+    .section-eyebrow {
+        color: #e11d2e;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+
+    .vehicle-page-title {
+        color: #07142f;
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .vehicle-count-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: #111827;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .vehicle-card {
+        padding: 20px;
+        height: 100%;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .vehicle-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.09);
+    }
+
+    .vehicle-license {
+        color: #07142f;
+        font-size: 22px;
+        font-weight: 900;
+        letter-spacing: 0.4px;
+        margin-bottom: 4px;
+    }
+
+    .vehicle-name {
+        color: #6b7280;
+        margin-bottom: 0;
+        min-height: 24px;
+    }
+
+    .vehicle-status-badge {
+        border-radius: 999px;
+        padding: 7px 11px;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .vehicle-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin: 18px 0;
+    }
+
+    .vehicle-stat {
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        padding: 12px;
+        background: #fafbfc;
+    }
+
+    .vehicle-stat span {
+        display: block;
+        color: #6b7280;
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .vehicle-stat strong {
+        color: #111827;
+        font-size: 16px;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .vehicle-stat .invoice-amount {
+        display: inline-block;
+        max-width: 100%;
+        font-size: 15px;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .upcoming-box,
+    .empty-upcoming-box,
+    .maintenance-box {
+        border-radius: 8px;
+        padding: 13px 14px;
+        margin-bottom: 14px;
+        font-size: 14px;
+    }
+
+    .upcoming-box {
+        background: #ecfdf5;
+        border: 1px solid #bbf7d0;
+        color: #14532d;
+    }
+
+    .empty-upcoming-box {
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        color: #64748b;
+    }
+
+    .maintenance-box {
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        color: #78350f;
+    }
+
+    .vehicle-meta-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        color: #4b5563;
+        margin-bottom: 12px;
+    }
+
+    .vehicle-meta-row i {
+        color: #e11d2e;
+        width: 18px;
+        margin-top: 3px;
+    }
+
+    .invoice-total {
+        color: #e11d2e;
+        display: inline-block;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .vehicle-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        padding-top: 14px;
+        border-top: 1px solid #edf0f4;
+        margin-top: 16px;
+    }
+
+    .vehicle-actions .btn,
+    .vehicle-actions a,
+    .vehicle-actions button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        height: 40px;
+        line-height: 1;
+        padding: 0 14px;
+        border-radius: 6px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .vehicle-actions .btn i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+
+    .vehicle-actions form {
+        margin: 0;
+    }
+
+    .btn-icon-danger {
+        min-width: 72px;
+    }
+
+    .empty-vehicle-state {
+        padding: 54px 24px;
+        text-align: center;
+    }
+
+    .empty-vehicle-icon {
+        width: 72px;
+        height: 72px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #fff1f2;
+        color: #e11d2e;
+        font-size: 30px;
+        margin-bottom: 18px;
+    }
+
+    @@media (max-width: 991.98px) {
+        .account-menu-card {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 575.98px) {
+        .vehicle-panel {
+            padding: 18px;
+        }
+
+        .vehicle-page-title {
+            font-size: 24px;
+        }
+
+        .vehicle-stat-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .vehicle-actions .btn,
+        .vehicle-actions form {
+            flex: 1 1 130px;
+        }
+    }
+</style>
+
+<div class="container-fluid page-header mb-0 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
     <div class="container-fluid page-header-inner py-5">
         <div class="container text-center">
             <h1 class="display-3 text-white mb-3 animated slideInDown">Xe của tôi</h1>
@@ -19,19 +321,27 @@
     </div>
 </div>
 
-<div class="container-xxl py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-3 mb-4">
-                <div class="bg-light rounded p-4">
-                    <h5 class="mb-3">Tài khoản</h5>
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2"><a href="@Url.Action("Profile", "Customer")" class="text-dark"><i class="fa fa-user me-2"></i>Thông tin cá nhân</a></li>
-                        <li class="mb-2"><a href="@Url.Action("Orders", "Customer")" class="text-dark"><i class="fa fa-shopping-bag me-2"></i>Đơn hàng</a></li>
-                        <li class="mb-2"><a href="@Url.Action("Appointments", "Customer")" class="text-dark"><i class="fa fa-calendar me-2"></i>Lịch hẹn</a></li>
-                        <li class="mb-2"><a href="@Url.Action("Vehicles", "Customer")" class="text-primary"><i class="fa fa-car me-2"></i>Xe của tôi</a></li>
-                    </ul>
-                </div>
+<div class="customer-vehicles-page py-5">
+    <div class="container customer-vehicles-shell">
+        <div class="row g-4">
+            <div class="col-lg-3">
+                <aside class="account-menu-card">
+                    <div class="account-menu-title">Tài khoản</div>
+                    <nav class="d-grid gap-1">
+                        <a href="@Url.Action("Profile", "Customer")" class="account-menu-link">
+                            <i class="fa fa-user"></i><span>Thông tin cá nhân</span>
+                        </a>
+                        <a href="@Url.Action("Orders", "Customer")" class="account-menu-link">
+                            <i class="fa fa-shopping-bag"></i><span>Đơn hàng</span>
+                        </a>
+                        <a href="@Url.Action("Appointments", "Customer")" class="account-menu-link">
+                            <i class="fa fa-calendar"></i><span>Lịch hẹn</span>
+                        </a>
+                        <a href="@Url.Action("Vehicles", "Customer")" class="account-menu-link active">
+                            <i class="fa fa-car"></i><span>Xe của tôi</span>
+                        </a>
+                    </nav>
+                </aside>
             </div>
 
             <div class="col-lg-9">
@@ -51,150 +361,171 @@
                     </div>
                 }
 
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-                    <div>
-                        <p class="text-primary text-uppercase fw-bold mb-1" style="font-size: 12px; letter-spacing: 2px;">Garage profile</p>
-                        <h4 class="mb-0">Danh sách xe (@Model.Count())</h4>
-                    </div>
-                    <a href="@Url.Action("AddVehicle", "Customer")" class="btn btn-primary">
-                        <i class="fa fa-plus me-2"></i>Thêm xe mới
-                    </a>
-                </div>
-
-                @if (!Model.Any())
-                {
-                    <div class="bg-light rounded p-5 text-center">
-                        <i class="fa fa-car fa-4x text-muted mb-3"></i>
-                        <h4>Bạn chưa có xe nào</h4>
-                        <p class="text-muted">Thêm xe để đặt lịch nhanh hơn và theo dõi lịch sử bảo dưỡng.</p>
-                        <a href="@Url.Action("AddVehicle", "Customer")" class="btn btn-primary mt-3">
-                            <i class="fa fa-plus me-2"></i>Thêm xe ngay
+                <section class="vehicle-panel">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+                        <div>
+                            <p class="section-eyebrow">Garage profile</p>
+                            <div class="d-flex align-items-center gap-2">
+                                <h2 class="vehicle-page-title">Danh sách xe</h2>
+                                <span class="vehicle-count-pill">@Model.Count()</span>
+                            </div>
+                            <p class="text-muted mb-0 mt-2">Quản lý phương tiện, lịch hẹn và lịch sử sửa chữa của bạn.</p>
+                        </div>
+                        <a href="@Url.Action("AddVehicle", "Customer")" class="btn btn-primary">
+                            <i class="fa fa-plus me-2"></i>Thêm xe mới
                         </a>
                     </div>
-                }
-                else
-                {
-                    <div class="row">
-                        @foreach (var vehicle in Model)
-                        {
-                            var upcomingAppointment = vehicle.Appointments
-                                .Where(a => a.AppointmentDate >= DateTime.Now
-                                    && a.Status != AppConstants.AppointmentStatus.Canceled
-                                    && a.Status != AppConstants.AppointmentStatus.Completed
-                                    && a.Status != AppConstants.AppointmentStatus.NoShow)
-                                .OrderBy(a => a.AppointmentDate)
-                                .FirstOrDefault();
-                            var latestHistory = vehicle.ServiceHistories
-                                .OrderByDescending(h => h.ServiceDate)
-                                .FirstOrDefault();
-                            var totalInvoices = vehicle.Invoices.Sum(i => i.TotalAmount);
-                            var nextDateDue = latestHistory?.NextServiceDate.HasValue == true
-                                && latestHistory.NextServiceDate.Value.Date <= DateTime.Today.AddDays(30);
-                            var nextMileageDue = latestHistory?.NextServiceMileage.HasValue == true
-                                && vehicle.Mileage.HasValue
-                                && latestHistory.NextServiceMileage.Value - vehicle.Mileage.Value <= 500;
-                            var hasMaintenanceReminder = nextDateDue || nextMileageDue;
-                            var vehicleName = string.Join(" ", new[]
+
+                    @if (!Model.Any())
+                    {
+                        <div class="empty-vehicle-state">
+                            <div class="empty-vehicle-icon">
+                                <i class="fa fa-car"></i>
+                            </div>
+                            <h4 class="fw-bold mb-2">Bạn chưa thêm xe nào</h4>
+                            <p class="text-muted mb-4">Thêm xe để đặt lịch nhanh hơn và theo dõi lịch sử bảo dưỡng.</p>
+                            <a href="@Url.Action("AddVehicle", "Customer")" class="btn btn-primary">
+                                <i class="fa fa-plus me-2"></i>Thêm xe mới
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row g-4">
+                            @foreach (var vehicle in Model)
                             {
-                                vehicle.Brand?.BrandName,
-                                vehicle.Model?.ModelName,
-                                vehicle.Year?.ToString()
-                            }.Where(value => !string.IsNullOrWhiteSpace(value)));
+                                var upcomingAppointment = vehicle.Appointments
+                                    .Where(a => a.AppointmentDate >= DateTime.Now
+                                        && a.Status != AppConstants.AppointmentStatus.Canceled
+                                        && a.Status != AppConstants.AppointmentStatus.Completed
+                                        && a.Status != AppConstants.AppointmentStatus.NoShow)
+                                    .OrderBy(a => a.AppointmentDate)
+                                    .FirstOrDefault();
+                                var latestHistory = vehicle.ServiceHistories
+                                    .OrderByDescending(h => h.ServiceDate)
+                                    .FirstOrDefault();
+                                var totalInvoices = vehicle.Invoices.Sum(i => i.TotalAmount);
+                                var nextDateDue = latestHistory?.NextServiceDate.HasValue == true
+                                    && latestHistory.NextServiceDate.Value.Date <= DateTime.Today.AddDays(30);
+                                var nextMileageDue = latestHistory?.NextServiceMileage.HasValue == true
+                                    && vehicle.Mileage.HasValue
+                                    && latestHistory.NextServiceMileage.Value - vehicle.Mileage.Value <= 500;
+                                var hasMaintenanceReminder = nextDateDue || nextMileageDue;
+                                var vehicleName = string.Join(" ", new[]
+                                {
+                                    vehicle.Brand?.BrandName,
+                                    vehicle.Model?.ModelName,
+                                    vehicle.Year?.ToString()
+                                }.Where(value => !string.IsNullOrWhiteSpace(value)));
+                                var displayName = string.IsNullOrWhiteSpace(vehicle.VehicleName)
+                                    ? (string.IsNullOrWhiteSpace(vehicleName) ? "Chưa có thông tin dòng xe" : vehicleName)
+                                    : vehicle.VehicleName;
 
-                            <div class="col-md-6 mb-4">
-                                <div class="bg-light rounded p-4 h-100">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div>
-                                            <h5 class="mb-1">@vehicle.LicensePlate</h5>
-                                            <p class="text-muted mb-0">@(vehicle.VehicleName ?? vehicleName)</p>
+                                <div class="col-md-6">
+                                    <article class="vehicle-card">
+                                        <div class="d-flex justify-content-between align-items-start gap-3">
+                                            <div>
+                                                <h3 class="vehicle-license">@vehicle.LicensePlate</h3>
+                                                <p class="vehicle-name">@displayName</p>
+                                            </div>
+                                            <span class="vehicle-status-badge @(vehicle.IsActive == true ? "bg-success text-white" : "bg-secondary text-white")">
+                                                @(vehicle.IsActive == true ? "Đang dùng" : "Ngừng dùng")
+                                            </span>
                                         </div>
-                                        <span class="badge @(vehicle.IsActive == true ? "bg-success" : "bg-secondary")">
-                                            @(vehicle.IsActive == true ? "Đang dùng" : "Ngừng dùng")
-                                        </span>
-                                    </div>
 
-                                    <div class="row g-2 mb-3">
-                                        <div class="col-6">
-                                            <div class="bg-white rounded p-3 h-100">
-                                                <small class="text-muted d-block">Lịch hẹn</small>
+                                        <div class="vehicle-stat-grid">
+                                            <div class="vehicle-stat">
+                                                <span>Lịch hẹn</span>
                                                 <strong>@vehicle.Appointments.Count</strong>
                                             </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="bg-white rounded p-3 h-100">
-                                                <small class="text-muted d-block">Lịch sử sửa</small>
+                                            <div class="vehicle-stat">
+                                                <span>Lịch sử sửa</span>
                                                 <strong>@vehicle.ServiceHistories.Count</strong>
                                             </div>
+                                            <div class="vehicle-stat">
+                                                <span>Tổng hóa đơn</span>
+                                                <strong class="invoice-amount">@totalInvoices.ToString("N0") đ</strong>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    @if (upcomingAppointment != null)
-                                    {
-                                        <div class="alert alert-info py-2 mb-3" style="font-size: 13px;">
-                                            <strong>Lịch sắp tới:</strong> @upcomingAppointment.AppointmentDate.ToString("dd/MM/yyyy HH:mm")
-                                            <br />
-                                            <span>@(upcomingAppointment.Service?.ServiceName ?? upcomingAppointment.ServiceType)</span>
+                                        @if (upcomingAppointment != null)
+                                        {
+                                            <div class="upcoming-box">
+                                                <div class="fw-bold mb-1"><i class="fa fa-calendar-check me-2"></i>Lịch sắp tới</div>
+                                                <div>@upcomingAppointment.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</div>
+                                                <small>@(upcomingAppointment.Service?.ServiceName ?? upcomingAppointment.ServiceType ?? "Dịch vụ gara")</small>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="empty-upcoming-box">
+                                                <i class="fa fa-calendar-minus me-2"></i>Chưa có lịch hẹn sắp tới.
+                                            </div>
+                                        }
+
+                                        @if (hasMaintenanceReminder)
+                                        {
+                                            <div class="maintenance-box">
+                                                <strong><i class="fa fa-bell me-2"></i>Sắp đến hạn bảo dưỡng.</strong>
+                                                @if (latestHistory?.NextServiceDate.HasValue == true)
+                                                {
+                                                    <span> Ngày gợi ý: @latestHistory.NextServiceDate.Value.ToString("dd/MM/yyyy").</span>
+                                                }
+                                                @if (latestHistory?.NextServiceMileage.HasValue == true)
+                                                {
+                                                    <span> Mốc km: @latestHistory.NextServiceMileage.Value.ToString("N0") km.</span>
+                                                }
+                                            </div>
+                                        }
+
+                                        <div class="vehicle-meta-row">
+                                            <i class="fa fa-tools"></i>
+                                            <div>
+                                                <strong>Lần sửa gần nhất</strong>
+                                                @if (latestHistory != null)
+                                                {
+                                                    <div>@latestHistory.ServiceDate.ToString("dd/MM/yyyy")</div>
+                                                    <small class="text-muted">@(latestHistory.ServiceName ?? latestHistory.Service?.ServiceName ?? "-")</small>
+                                                }
+                                                else
+                                                {
+                                                    <div class="text-muted">Chưa có lịch sử sửa chữa.</div>
+                                                }
+                                            </div>
                                         </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="alert alert-secondary py-2 mb-3" style="font-size: 13px;">
-                                            Chưa có lịch hẹn sắp tới.
+
+                                        <div class="vehicle-meta-row mb-0">
+                                            <i class="fa fa-file-invoice-dollar"></i>
+                                            <div>
+                                                <strong>Tổng hóa đơn</strong>
+                                                <div class="invoice-total">@totalInvoices.ToString("N0") đ</div>
+                                            </div>
                                         </div>
-                                    }
 
-                                    @if (hasMaintenanceReminder)
-                                    {
-                                        <div class="alert alert-warning py-2 mb-3" style="font-size: 13px;">
-                                            <strong>Sắp đến hạn bảo dưỡng.</strong>
-                                            @if (latestHistory?.NextServiceDate.HasValue == true)
-                                            {
-                                                <span> Ngày hẹn gợi ý: @latestHistory.NextServiceDate.Value.ToString("dd/MM/yyyy").</span>
-                                            }
-                                            @if (latestHistory?.NextServiceMileage.HasValue == true)
-                                            {
-                                                <span> Mốc km: @latestHistory.NextServiceMileage.Value.ToString("N0") km.</span>
-                                            }
+                                        <div class="vehicle-actions">
+                                            <a href="@Url.Action("VehicleDetails", "Customer", new { id = vehicle.VehicleId })" class="btn btn-sm btn-outline-dark">
+                                                <i class="fa fa-eye me-1"></i>Chi tiết
+                                            </a>
+                                            <a href="@Url.Action("Index", "Booking", new { vehicleId = vehicle.VehicleId })" class="btn btn-sm btn-outline-primary">
+                                                <i class="fa fa-calendar-plus me-1"></i>Đặt lịch
+                                            </a>
+                                            <a href="@Url.Action("EditVehicle", "Customer", new { id = vehicle.VehicleId })" class="btn btn-sm btn-primary">
+                                                <i class="fa fa-edit me-1"></i>Sửa
+                                            </a>
+                                            <form asp-action="DeleteVehicle" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@vehicle.VehicleId" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger btn-icon-danger" title="Xóa xe" onclick="return confirm('Bạn có chắc chắn muốn xóa xe này?');">
+                                                    <i class="fa fa-trash me-1"></i>Xóa
+                                                </button>
+                                            </form>
                                         </div>
-                                    }
-
-                                    @if (latestHistory != null)
-                                    {
-                                        <div class="mb-2">
-                                            <i class="fa fa-tools text-primary me-2"></i>
-                                            <strong>Lần sửa gần nhất:</strong> @latestHistory.ServiceDate.ToString("dd/MM/yyyy")
-                                            <br />
-                                            <small class="text-muted">@latestHistory.ServiceName</small>
-                                        </div>
-                                    }
-
-                                    <div class="mb-3">
-                                        <i class="fa fa-file-invoice-dollar text-primary me-2"></i>
-                                        <strong>Tổng hóa đơn:</strong> @totalInvoices.ToString("N0") đ
-                                    </div>
-
-                                    <div class="d-flex flex-wrap gap-2 mt-3">
-                                        <a href="@Url.Action("VehicleDetails", "Customer", new { id = vehicle.VehicleId })" class="btn btn-sm btn-outline-dark">
-                                            <i class="fa fa-eye me-1"></i>Chi tiết
-                                        </a>
-                                        <a href="@Url.Action("Index", "Booking")" class="btn btn-sm btn-outline-primary">
-                                            <i class="fa fa-calendar-plus me-1"></i>Đặt lịch
-                                        </a>
-                                        <a href="@Url.Action("EditVehicle", "Customer", new { id = vehicle.VehicleId })" class="btn btn-sm btn-primary">
-                                            <i class="fa fa-edit me-1"></i>Sửa
-                                        </a>
-                                        <form asp-action="DeleteVehicle" method="post" class="d-inline">
-                                            <input type="hidden" name="id" value="@vehicle.VehicleId" />
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa xe này?');">
-                                                <i class="fa fa-trash me-1"></i>Xóa
-                                            </button>
-                                        </form>
-                                    </div>
+                                    </article>
                                 </div>
-                            </div>
-                        }
-                    </div>
-                }
+                            }
+                        </div>
+                    }
+                </section>
             </div>
         </div>
     </div>

@@ -42,7 +42,7 @@
     <!-- Bootstrap + Theme -->
     <link href="~/css/bootstrap.min.css" rel="stylesheet">
     <link href="~/css/style.css" rel="stylesheet">
-    <link href="~/css/site.css" rel="stylesheet">
+    <link href="~/css/site.css" rel="stylesheet" asp-append-version="true">
 </head>
 <body>
 
@@ -272,25 +272,52 @@
     @await RenderSectionAsync("Scripts", required: false)
 
     <!-- Chat Widget -->
-    <button id="chat-toggle-btn" class="chat-btn-toggle shadow">💬</button>
+    <button id="chat-toggle-btn" class="chat-btn-toggle shadow">
+        <i class="fas fa-comment-dots"></i>
+    </button>
     <div id="chat-window" class="chat-box-container shadow-lg">
         <div class="chat-box-header">
-            <span><i class="fas fa-robot me-2"></i>Trợ lý NHP-AUTO</span>
-            <span id="chat-close-btn" class="chat-box-close">✖</span>
+            <div class="chat-header-info">
+                <div class="chat-avatar-container">
+                    <img src="/img/bot-avatar.png" alt="Bot Avatar" class="chat-bot-avatar">
+                    <span class="chat-online-dot"></span>
+                </div>
+                <div class="chat-header-details">
+                    <span class="chat-title">Trợ lý NHP-AUTO</span>
+                    <span class="chat-status"><span class="chat-status-indicator"></span>Đang trực tuyến</span>
+                </div>
+            </div>
+            <span id="chat-close-btn" class="chat-box-close"><i class="fas fa-times"></i></span>
         </div>
         <div id="chat-messages" class="chat-msg-list">
             <div class="chat-bubble-row bot">
                 <div class="chat-bubble shadow-sm">
-                    Xin chào! 👋<br>
-                    Tôi là trợ lý ảo NHP-AUTO.<br>
+                    Xin chào 👋<br><br>
+                    Chào mừng bạn đến với NHP-AUTO.<br><br>
+                    Tôi là trợ lý AI của gara và có thể hỗ trợ:<br><br>
+                    📅 Tra cứu lịch trống<br>
+                    🔧 Tư vấn dịch vụ<br>
+                    🚗 Tư vấn bảo dưỡng xe<br>
+                    💰 Báo giá tham khảo<br>
+                    📞 Thông tin liên hệ<br><br>
                     Bạn cần hỗ trợ gì hôm nay?
                 </div>
             </div>
         </div>
+
+        <!-- Chat Suggestions Container -->
+        <div id="chat-suggestions" class="chat-suggestions-container">
+            <button class="chat-suggest-btn" data-text="Tra cứu lịch trống ngày mai"><i class="far fa-calendar-alt me-1"></i>Xem lịch trống</button>
+            <button class="chat-suggest-btn" data-text="Gara có những dịch vụ bảo dưỡng nào?"><i class="fas fa-tools me-1"></i>Dịch vụ bảo dưỡng</button>
+            <button class="chat-suggest-btn" data-text="Tư vấn sửa chữa xe giúp tôi"><i class="fas fa-car-crash me-1"></i>Tư vấn sửa chữa</button>
+            <button class="chat-suggest-btn" data-text="Báo giá dịch vụ sửa chữa bảo dưỡng xe"><i class="fas fa-hand-holding-usd me-1"></i>Báo giá dịch vụ</button>
+            <button class="chat-suggest-btn" data-text="Cho tôi thông tin liên hệ và địa chỉ gara"><i class="fas fa-phone-alt me-1"></i>Liên hệ gara</button>
+        </div>
+
         <div class="chat-box-footer">
             <input type="file" id="chat-image-upload" accept="image/*" style="display:none;" onchange="previewImage()">
             <button class="chat-btn-icon" onclick="document.getElementById('chat-image-upload').click()" title="Gửi ảnh">
-                <i class="fas fa-camera"></i>
+                <i class="fas fa-image"></i>
             </button>
             <input id="chat-input" class="chat-box-input" placeholder="Nhập tin nhắn..." autocomplete="off">
             <button id="chat-send-btn" class="chat-btn-send"><i class="fas fa-paper-plane"></i></button>
@@ -302,6 +329,6 @@
             </div>
         </div>
     </div>
-    <script src="/js/chat-widget.js"></script>
+    <script src="/js/chat-widget.js" asp-append-version="true"></script>
 </body>
 </html>

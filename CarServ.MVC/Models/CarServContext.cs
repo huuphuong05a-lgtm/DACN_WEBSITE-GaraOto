@@ -925,17 +925,34 @@ public partial class CarServContext : DbContext
 
             entity.HasIndex(e => e.ProductId, "IX_Reviews_ProductId");
             entity.HasIndex(e => e.ServiceId, "IX_Reviews_ServiceId");
+            entity.HasIndex(e => e.CustomerId, "IX_Reviews_CustomerId");
+            entity.HasIndex(e => e.OrderItemId, "IX_Reviews_OrderItemId");
+            entity.HasIndex(e => e.ServiceHistoryId, "IX_Reviews_ServiceHistoryId");
 
             entity.Property(e => e.Id).HasColumnName("Id");
             entity.Property(e => e.ProductId).HasColumnName("ProductId");
             entity.Property(e => e.ServiceId).HasColumnName("ServiceId");
+            entity.Property(e => e.CustomerId).HasColumnName("CustomerId");
+            entity.Property(e => e.OrderItemId).HasColumnName("OrderItemId");
+            entity.Property(e => e.ServiceHistoryId).HasColumnName("ServiceHistoryId");
             entity.Property(e => e.CustomerName).HasMaxLength(100);
+            entity.Property(e => e.ImageUrl).HasMaxLength(255);
             entity.Property(e => e.Rating).IsRequired();
             entity.Property(e => e.Comment).HasColumnType("nvarchar(max)");
             entity.Property(e => e.CreatedDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.IsApproved).HasDefaultValue(false);
+
+            entity.HasOne(d => d.Customer).WithMany()
+                .HasForeignKey(d => d.CustomerId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Reviews_Customers");
+
+            entity.HasOne(d => d.OrderItem).WithMany()
+                .HasForeignKey(d => d.OrderItemId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Reviews_OrderItems");
 
             entity.HasOne(d => d.Product).WithMany()
                 .HasForeignKey(d => d.ProductId)
@@ -946,6 +963,11 @@ public partial class CarServContext : DbContext
                 .HasForeignKey(d => d.ServiceId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Reviews_Services");
+
+            entity.HasOne(d => d.ServiceHistory).WithMany()
+                .HasForeignKey(d => d.ServiceHistoryId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Reviews_ServiceHistory");
         });
 
         modelBuilder.Entity<BlogCategory>(entity =>

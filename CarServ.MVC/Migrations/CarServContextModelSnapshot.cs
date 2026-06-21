@@ -1386,15 +1386,27 @@ namespace CarServ.MVC.Migrations
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
 
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int")
+                        .HasColumnName("CustomerId");
+
                     b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<bool>("IsApproved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
+
+                    b.Property<int?>("OrderItemId")
+                        .HasColumnType("int")
+                        .HasColumnName("OrderItemId");
 
                     b.Property<int?>("ProductId")
                         .HasColumnType("int")
@@ -1403,6 +1415,10 @@ namespace CarServ.MVC.Migrations
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ServiceHistoryId")
+                        .HasColumnType("int")
+                        .HasColumnName("ServiceHistoryId");
+
                     b.Property<int?>("ServiceId")
                         .HasColumnType("int")
                         .HasColumnName("ServiceId");
@@ -1410,7 +1426,13 @@ namespace CarServ.MVC.Migrations
                     b.HasKey("Id")
                         .HasName("PK_Reviews");
 
+                    b.HasIndex(new[] { "CustomerId" }, "IX_Reviews_CustomerId");
+
+                    b.HasIndex(new[] { "OrderItemId" }, "IX_Reviews_OrderItemId");
+
                     b.HasIndex(new[] { "ProductId" }, "IX_Reviews_ProductId");
+
+                    b.HasIndex(new[] { "ServiceHistoryId" }, "IX_Reviews_ServiceHistoryId");
 
                     b.HasIndex(new[] { "ServiceId" }, "IX_Reviews_ServiceId");
 
@@ -2284,11 +2306,29 @@ namespace CarServ.MVC.Migrations
 
             modelBuilder.Entity("CarServ.MVC.Models.Review", b =>
                 {
+                    b.HasOne("CarServ.MVC.Models.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Reviews_Customers");
+
+                    b.HasOne("CarServ.MVC.Models.OrderItem", "OrderItem")
+                        .WithMany()
+                        .HasForeignKey("OrderItemId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Reviews_OrderItems");
+
                     b.HasOne("CarServ.MVC.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("FK_Reviews_Products");
+
+                    b.HasOne("CarServ.MVC.Models.ServiceHistory", "ServiceHistory")
+                        .WithMany()
+                        .HasForeignKey("ServiceHistoryId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Reviews_ServiceHistory");
 
                     b.HasOne("CarServ.MVC.Models.Service", "Service")
                         .WithMany()
@@ -2296,9 +2336,15 @@ namespace CarServ.MVC.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("FK_Reviews_Services");
 
+                    b.Navigation("Customer");
+
+                    b.Navigation("OrderItem");
+
                     b.Navigation("Product");
 
                     b.Navigation("Service");
+
+                    b.Navigation("ServiceHistory");
                 });
 
             modelBuilder.Entity("CarServ.MVC.Models.ServiceHistory", b =>

@@ -183,6 +183,78 @@ namespace CarServ.MVC.Areas.Admin.Controllers
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RecordInvoicePayment(int invoiceId)
+        {
+            var invoice = await _context.Invoices
+                .Include(i => i.ServiceHistory)
+                .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId);
+
+            if (invoice == null)
+            {
+                return NotFound();
+            }
+
+            var appointmentId = invoice.ServiceHistory?.AppointmentId;
+
+            if (invoice.PaymentStatus == AppConstants.PaymentStatus.Paid)
+            {
+                TempData["SuccessMessage"] = "Hóa đơn này đã được ghi nhận thanh toán.";
+                return RedirectAfterInvoicePayment(appointmentId);
+            }
+
+            var now = DateTime.Now;
+            var payment = await _context.Payments
+                .FirstOrDefaultAsync(p => p.InvoiceId == invoice.InvoiceId);
+
+            if (payment == null)
+            {
+                var count = await _context.Payments.CountAsync() + 1;
+                payment = new Payment
+                {
+                    PaymentCode = "PAY" + now.ToString("yyyyMMdd") + count.ToString("D4"),
+                    InvoiceId = invoice.InvoiceId,
+                    CustomerId = invoice.CustomerId,
+                    Amount = invoice.TotalAmount,
+                    PaymentMethod = AppConstants.PaymentMethod.Cash,
+                    PaymentStatus = AppConstants.PaymentStatus.Paid,
+                    PaymentDate = now,
+                    CompletedDate = now,
+                    Notes = "Ghi nhận thanh toán tiền mặt từ chi tiết lịch hẹn",
+                    CreatedBy = User.Identity?.Name,
+                    CreatedDate = now,
+                    UpdatedDate = now
+                };
+                _context.Payments.Add(payment);
+            }
+            else
+            {
+                payment.CustomerId = invoice.CustomerId;
+                payment.Amount = invoice.TotalAmount;
+                payment.PaymentMethod = string.IsNullOrWhiteSpace(payment.PaymentMethod)
+                    ? AppConstants.PaymentMethod.Cash
+                    : payment.PaymentMethod;
+                payment.PaymentStatus = AppConstants.PaymentStatus.Paid;
+                payment.PaymentDate = payment.PaymentDate == default ? now : payment.PaymentDate;
+                payment.CompletedDate ??= now;
+                payment.UpdatedDate = now;
+            }
+
+            invoice.PaymentStatus = AppConstants.PaymentStatus.Paid;
+            invoice.PaymentDate = now;
+            invoice.PaymentMethod = string.IsNullOrWhiteSpace(invoice.PaymentMethod)
+                ? AppConstants.PaymentMethod.Cash
+                : invoice.PaymentMethod;
+            invoice.Status = AppConstants.PaymentStatus.Paid;
+            invoice.UpdatedDate = now;
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Đã ghi nhận thanh toán thành công.";
+            return RedirectAfterInvoicePayment(appointmentId);
+        }
+
         // POST: Admin/Payment/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -596,6 +668,16 @@ namespace CarServ.MVC.Areas.Admin.Controllers
         private bool PaymentExists(int id)
         {
             return _context.Payments.Any(e => e.PaymentId == id);
+        }
+
+        private IActionResult RedirectAfterInvoicePayment(int? appointmentId)
+        {
+            if (appointmentId.HasValue)
+            {
+                return RedirectToAction("Details", "Appointment", new { area = "Admin", id = appointmentId.Value });
+            }
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

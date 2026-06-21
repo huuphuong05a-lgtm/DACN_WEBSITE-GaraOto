@@ -10,6 +10,7 @@
 
 <div id="content">
     <div class="container-fluid">
+        <!-- ═══ Header ═══ -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <div>
                 <h1 class="h3 mb-1 text-gray-800">Bảng điều khiển NHP-AUTO</h1>
@@ -29,6 +30,7 @@
             </a>
         </div>
 
+        <!-- ═══ Quick Access Cards ═══ -->
         <div class="row">
             <div class="col-xl-@(canOperate ? 3 : 4) col-md-6 mb-4">
                 <a class="text-decoration-none" href="@Url.Action("Index", "Appointment", new { area = "Admin" })">
@@ -100,118 +102,387 @@
 
         @if (canOperate)
         {
+            <!-- ═══ REVENUE CARDS (Interactive — click to open modal) ═══ -->
+            <div class="dashboard-section-title">
+                <i class="fas fa-chart-pie mr-1"></i> Phân tích doanh thu
+            </div>
             <div class="row">
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-danger shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Doanh thu hôm nay</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TodayRevenue.ToString("N0") đ</div>
+                <!-- Today -->
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card revenue-card revenue-card-today shadow" data-toggle="modal" data-target="#todayRevenueModal">
+                        <div class="card-body py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="revenue-icon mr-3">
+                                    <i class="fas fa-coins"></i>
                                 </div>
-                                <div class="col-auto"><i class="fas fa-coins fa-2x text-gray-300"></i></div>
+                                <div>
+                                    <div class="revenue-label">Doanh thu hôm nay</div>
+                                    <div class="revenue-amount">@Model.TodayRevenue.ToString("N0") đ</div>
+                                    <div class="revenue-hint">@Model.TodayTransactions.Count giao dịch</div>
+                                </div>
                             </div>
+                            <div class="click-hint">Nhấn để xem chi tiết <i class="fas fa-arrow-right"></i></div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-primary shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Doanh thu tháng này</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.MonthRevenue.ToString("N0") đ</div>
+                <!-- Week -->
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card revenue-card revenue-card-week shadow" data-toggle="modal" data-target="#weekRevenueModal">
+                        <div class="card-body py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="revenue-icon mr-3">
+                                    <i class="fas fa-calendar-week"></i>
                                 </div>
-                                <div class="col-auto"><i class="fas fa-chart-line fa-2x text-gray-300"></i></div>
+                                <div>
+                                    <div class="revenue-label">Doanh thu tuần này</div>
+                                    <div class="revenue-amount">@Model.WeekRevenue.ToString("N0") đ</div>
+                                    <div class="revenue-hint">@Model.WeekTransactions.Count giao dịch</div>
+                                </div>
                             </div>
+                            <div class="click-hint">Nhấn để xem chi tiết <i class="fas fa-arrow-right"></i></div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-success shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tổng doanh thu</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalRevenue.ToString("N0") đ</div>
+                <!-- Month -->
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card revenue-card revenue-card-month shadow" data-toggle="modal" data-target="#monthRevenueModal">
+                        <div class="card-body py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="revenue-icon mr-3">
+                                    <i class="fas fa-chart-line"></i>
                                 </div>
-                                <div class="col-auto"><i class="fas fa-wallet fa-2x text-gray-300"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-warning shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Lịch hẹn chờ xác nhận</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.PendingAppointmentCount</div>
+                                <div>
+                                    <div class="revenue-label">Doanh thu tháng này</div>
+                                    <div class="revenue-amount">@Model.MonthRevenue.ToString("N0") đ</div>
+                                    <div class="revenue-hint">@Model.MonthTransactions.Count giao dịch</div>
                                 </div>
-                                <div class="col-auto"><i class="fas fa-clock fa-2x text-gray-300"></i></div>
                             </div>
+                            <div class="click-hint">Nhấn để xem chi tiết <i class="fas fa-arrow-right"></i></div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- ═══ Summary Stats Row ═══ -->
+            <div class="row mb-2">
+                <!-- Pending Appointments -->
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <a href="@Url.Action("Index", "Appointment", new { area = "Admin", statusFilter = AppConstants.AppointmentStatus.Pending })" class="text-decoration-none">
+                        <div class="card stat-card shadow-sm h-100">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-icon mr-3" style="background: rgba(246,194,62,0.12); color: #f6c23e;">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Lịch hẹn chờ</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.PendingAppointmentCount</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Paid Orders -->
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <a href="@Url.Action("Index", "Order", new { area = "Admin", paymentStatusFilter = AppConstants.PaymentStatus.Paid })" class="text-decoration-none">
+                        <div class="card stat-card shadow-sm h-100">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-icon mr-3" style="background: rgba(28,200,138,0.12); color: #1cc88a;">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Đơn hàng đã TT</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.PaidOrderCount</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Paid Invoices -->
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <a href="@Url.Action("Index", "Payment", new { area = "Admin", statusFilter = AppConstants.PaymentStatus.Paid })" class="text-decoration-none">
+                        <div class="card stat-card shadow-sm h-100">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-icon mr-3" style="background: rgba(78,115,223,0.12); color: #4e73df;">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Hóa đơn đã TT</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.PaidInvoiceCount</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Low Stock Products -->
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <a href="@Url.Action("Index", "Product", new { area = "Admin", lowStock = true })" class="text-decoration-none">
+                        <div class="card stat-card shadow-sm h-100">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-icon mr-3" style="background: rgba(231,74,59,0.12); color: #e74a3b;">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">SP sắp hết hàng</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.LowStockProductCount</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- ═══ FILTER BAR ═══ -->
+            <div class="card shadow-sm mb-4" style="border:none; border-radius:12px; background: #ffffff;">
+                <div class="card-body py-2 py-md-3">
+                    <div class="d-flex align-items-center flex-wrap">
+                        <span class="font-weight-bold text-gray-800 mr-3 mb-2 mb-md-0" style="font-size:0.85rem; display: inline-flex; align-items: center;">
+                            <i class="fas fa-calendar-alt text-primary mr-2" style="font-size: 0.95rem;"></i> Lọc thời gian:
+                        </span>
+                        <div class="filter-segmented-control mb-2 mb-md-0" id="filterBar">
+                            <button class="filter-btn" data-period="today">Hôm nay</button>
+                            <button class="filter-btn active" data-period="7days">7 ngày</button>
+                            <button class="filter-btn" data-period="30days">30 ngày</button>
+                            <button class="filter-btn" data-period="3months">3 tháng</button>
+                            <button class="filter-btn" data-period="6months">6 tháng</button>
+                            <button class="filter-btn" data-period="1year">1 năm</button>
+                            <button class="filter-btn" data-period="custom">Tùy chọn</button>
+                        </div>
+                        <div class="filter-date-inputs ml-0 ml-md-3 mb-2 mb-md-0" id="customDateInputs">
+                            <input type="date" id="filterStartDate" class="form-control form-control-sm" style="width: 145px; display: inline-block;" />
+                            <span class="text-muted px-1">→</span>
+                            <input type="date" id="filterEndDate" class="form-control form-control-sm" style="width: 145px; display: inline-block;" />
+                            <button class="btn btn-sm btn-primary ml-2 px-3 btn-apply-date" id="applyCustomDate" style="border-radius: 8px; font-weight: 600;">Áp dụng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ CHARTS ROW ═══ -->
             <div class="row">
+                <!-- Daily Revenue Chart -->
                 <div class="col-lg-8 mb-4">
-                    <div class="card shadow h-100">
+                    <div class="card chart-card shadow h-100">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Doanh thu 7 ngày gần đây</h6>
-                            <span class="small text-muted">Đơn hàng + hóa đơn đã thanh toán</span>
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-chart-area mr-1"></i> Doanh thu theo ngày
+                            </h6>
+                            <span class="small text-muted" id="chartSubtitle">7 ngày gần đây</span>
                         </div>
                         <div class="card-body">
+                            <!-- Stats above chart -->
+                            <div class="row text-center mb-4">
+                                <div class="col-4 border-right">
+                                    <div class="text-xs font-weight-bold text-uppercase text-muted mb-1">Tổng doanh thu</div>
+                                    <div class="h5 mb-0 font-weight-bold text-primary" id="statPeriodTotal">0 đ</div>
+                                </div>
+                                <div class="col-4 border-right">
+                                    <div class="text-xs font-weight-bold text-uppercase text-muted mb-1">Số giao dịch</div>
+                                    <div class="h5 mb-0 font-weight-bold text-success" id="statPeriodCount">0</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-xs font-weight-bold text-uppercase text-muted mb-1" id="statPeriodAverageLabel">Trung bình/ngày</div>
+                                    <div class="h5 mb-0 font-weight-bold text-info" id="statPeriodAverage">0 đ</div>
+                                </div>
+                            </div>
+
                             <canvas id="dailyRevenueChart" height="110"></canvas>
+                            <p class="text-muted text-center small mt-2 mb-0">
+                                <i class="fas fa-hand-pointer mr-1"></i> Nhấn vào điểm dữ liệu để xem chi tiết ngày
+                            </p>
                         </div>
                     </div>
                 </div>
 
+                <!-- Doughnut: Revenue Source Split -->
                 <div class="col-lg-4 mb-4">
-                    <div class="card shadow h-100">
+                    <div class="card chart-card shadow h-100">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Tổng quan vận hành</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-chart-pie mr-1"></i> Nguồn doanh thu
+                            </h6>
                         </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span>Đơn hàng đã thanh toán</span>
-                                <strong class="text-success">@Model.PaidOrderCount</strong>
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <div class="doughnut-container">
+                                <canvas id="sourceChart"></canvas>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span>Hóa đơn dịch vụ đã thanh toán</span>
-                                <strong class="text-success">@Model.PaidInvoiceCount</strong>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span>Lịch hẹn hoàn thành</span>
-                                <strong class="text-primary">@Model.CompletedAppointmentCount</strong>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>Sản phẩm sắp hết hàng</span>
-                                <strong class="text-warning">@Model.LowStockProductCount</strong>
+                            <div class="doughnut-legend mt-3" id="sourceLegend">
+                                <div class="doughnut-legend-item">
+                                    <div class="doughnut-legend-dot" style="background: #4e73df;"></div>
+                                    <span>Sản phẩm</span>
+                                    <span class="doughnut-legend-value" id="legendProduct">@Model.ProductRevenue.ToString("N0") đ</span>
+                                </div>
+                                <div class="doughnut-legend-item">
+                                    <div class="doughnut-legend-dot" style="background: #1cc88a;"></div>
+                                    <span>Dịch vụ</span>
+                                    <span class="doughnut-legend-value" id="legendService">@Model.ServiceRevenue.ToString("N0") đ</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- ═══ TRANSACTION LIST IN FILTER PERIOD ═══ -->
             <div class="row">
                 <div class="col-lg-12 mb-4">
-                    <div class="card shadow h-100">
+                    <div class="card chart-card shadow">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-list mr-1"></i> Danh sách giao dịch trong kỳ
+                            </h6>
+                            @{
+                                var initialTx = Model.DailyRevenueDetails
+                                    .SelectMany(d => d.Transactions)
+                                    .OrderByDescending(t => t.PaymentDate)
+                                    .ToList();
+                                var hasInitialTx = initialTx.Any();
+                            }
+                            <span class="badge badge-primary px-3 py-2" id="periodTxCount" style="border-radius:30px; font-size:0.75rem;">@initialTx.Count giao dịch</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-hover mb-0 @(hasInitialTx ? "" : "d-none")" id="periodTxTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Mã giao dịch</th>
+                                            <th>Khách hàng</th>
+                                            <th>Dịch vụ / Sản phẩm</th>
+                                            <th>Phương thức TT</th>
+                                            <th>Nguồn</th>
+                                            <th class="text-right">Số tiền</th>
+                                            <th>Thời gian</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="periodTxBody">
+                                        @if (hasInitialTx)
+                                        {
+                                            @foreach (var tx in initialTx)
+                                            {
+                                                var bc = tx.Source == "Đơn hàng" ? "badge-order" : tx.Source == "Hóa đơn" ? "badge-invoice" : "badge-appointment";
+                                                <tr>
+                                                    <td><strong>@tx.TransactionCode</strong></td>
+                                                    <td>@tx.CustomerName</td>
+                                                    <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="@tx.ItemDescription">@tx.ItemDescription</td>
+                                                    <td>@tx.PaymentMethod</td>
+                                                    <td><span class="source-badge @bc">@tx.Source</span></td>
+                                                    <td class="text-right font-weight-bold text-success">@tx.Amount.ToString("N0") đ</td>
+                                                    <td>@tx.PaymentDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="periodTxEmpty" class="text-center py-5 text-muted @(hasInitialTx ? "d-none" : "")">
+                                <i class="fas fa-inbox fa-3x mb-3 d-block text-gray-300"></i>
+                                Không có giao dịch nào trong khoảng thời gian này.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ═══ TOP 5 WIDGETS ═══ -->
+            <div class="dashboard-section-title">
+                <i class="fas fa-trophy mr-1"></i> Top bán chạy
+            </div>
+            <div class="row">
+                <!-- Top 5 Products -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card chart-card shadow h-100">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Doanh thu 6 tháng gần đây</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-box mr-1"></i> Top 5 Sản phẩm bán chạy
+                            </h6>
                         </div>
                         <div class="card-body">
-                            <canvas id="monthlyRevenueChart" height="80"></canvas>
+                            @if (Model.TopProducts.Any())
+                            {
+                                var maxProductCount = Model.TopProducts.Max(p => p.Count);
+                                var rank = 0;
+                                foreach (var product in Model.TopProducts)
+                                {
+                                    rank++;
+                                    var pct = maxProductCount > 0 ? (int)((double)product.Count / maxProductCount * 100) : 0;
+                                    <div class="top-item">
+                                        <div class="top-rank @(rank <= 3 ? $"rank-{rank}" : "")">@rank</div>
+                                        <div class="top-item-info">
+                                            <div class="top-item-name">@product.Name</div>
+                                            <div class="top-item-count">@product.Count lượt bán</div>
+                                            <div class="top-progress">
+                                                <div class="top-progress-bar bar-product" style="width: @(pct)%"></div>
+                                            </div>
+                                        </div>
+                                        <div class="top-item-revenue">@product.Revenue.ToString("N0") đ</div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted text-center py-4 mb-0">
+                                    <i class="fas fa-inbox fa-2x d-block mb-2 text-gray-300"></i>
+                                    Chưa có dữ liệu sản phẩm
+                                </p>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <!-- Top 5 Services -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card chart-card shadow h-100">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-cogs mr-1"></i> Top 5 Dịch vụ bán chạy
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.TopServices.Any())
+                            {
+                                var maxServiceCount = Model.TopServices.Max(s => s.Count);
+                                var sRank = 0;
+                                foreach (var service in Model.TopServices)
+                                {
+                                    sRank++;
+                                    var sPct = maxServiceCount > 0 ? (int)((double)service.Count / maxServiceCount * 100) : 0;
+                                    <div class="top-item">
+                                        <div class="top-rank @(sRank <= 3 ? $"rank-{sRank}" : "")">@sRank</div>
+                                        <div class="top-item-info">
+                                            <div class="top-item-name">@service.Name</div>
+                                            <div class="top-item-count">@service.Count lượt sử dụng</div>
+                                            <div class="top-progress">
+                                                <div class="top-progress-bar bar-service" style="width: @(sPct)%"></div>
+                                            </div>
+                                        </div>
+                                        <div class="top-item-revenue">@service.Revenue.ToString("N0") đ</div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted text-center py-4 mb-0">
+                                    <i class="fas fa-inbox fa-2x d-block mb-2 text-gray-300"></i>
+                                    Chưa có dữ liệu dịch vụ
+                                </p>
+                            }
                         </div>
                     </div>
                 </div>
             </div>
         }
 
+        <!-- ═══ Technician-only View ═══ -->
         @if (isTechnician && !canOperate)
         {
             <div class="row">
@@ -253,6 +524,7 @@
         }
         else
         {
+            <!-- ═══ Admin/Staff Content Management ═══ -->
             <div class="row">
                 <div class="col-lg-8 mb-4">
                     <div class="card shadow h-100">
@@ -316,79 +588,464 @@
 
 @if (canOperate)
 {
+    <!-- ═══════════════════════════════════════════════════
+         MODALS
+         ═══════════════════════════════════════════════════ -->
+
+    @* ── Modal: Today Revenue ── *@
+    <div class="modal fade modal-revenue" id="todayRevenueModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-receipt mr-2"></i> Chi tiết doanh thu hôm nay</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body p-0">
+                    @if (Model.TodayTransactions.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead><tr><th>Mã giao dịch</th><th>Khách hàng</th><th>Dịch vụ / Sản phẩm</th><th>Phương thức TT</th><th>Nguồn</th><th class="text-right">Số tiền</th><th>Thời gian</th></tr></thead>
+                                <tbody>
+                                    @foreach (var tx in Model.TodayTransactions)
+                                    {
+                                        var bc = tx.Source == "Đơn hàng" ? "badge-order" : tx.Source == "Hóa đơn" ? "badge-invoice" : "badge-appointment";
+                                        <tr><td><strong>@tx.TransactionCode</strong></td><td>@tx.CustomerName</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="@tx.ItemDescription">@tx.ItemDescription</td><td>@tx.PaymentMethod</td><td><span class="source-badge @bc">@tx.Source</span></td><td class="text-right font-weight-bold">@tx.Amount.ToString("N0") đ</td><td>@tx.PaymentDate.ToString("dd/MM/yyyy")</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted"><i class="fas fa-inbox fa-3x mb-3 d-block text-gray-300"></i>Không có giao dịch nào.</div>
+                    }
+                </div>
+                <div class="modal-summary"><span>Tổng: @Model.TodayTransactions.Count giao dịch</span><span class="text-primary" style="font-size:1.1rem;">@Model.TodayRevenue.ToString("N0") đ</span></div>
+            </div>
+        </div>
+    </div>
+
+    @* ── Modal: Month Revenue ── *@
+    <div class="modal fade modal-revenue" id="monthRevenueModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-receipt mr-2"></i> Chi tiết doanh thu tháng này</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body p-0">
+                    @if (Model.MonthTransactions.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead><tr><th>Mã giao dịch</th><th>Khách hàng</th><th>Dịch vụ / Sản phẩm</th><th>Phương thức TT</th><th>Nguồn</th><th class="text-right">Số tiền</th><th>Thời gian</th></tr></thead>
+                                <tbody>
+                                    @foreach (var tx in Model.MonthTransactions)
+                                    {
+                                        var bc2 = tx.Source == "Đơn hàng" ? "badge-order" : tx.Source == "Hóa đơn" ? "badge-invoice" : "badge-appointment";
+                                        <tr><td><strong>@tx.TransactionCode</strong></td><td>@tx.CustomerName</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="@tx.ItemDescription">@tx.ItemDescription</td><td>@tx.PaymentMethod</td><td><span class="source-badge @bc2">@tx.Source</span></td><td class="text-right font-weight-bold">@tx.Amount.ToString("N0") đ</td><td>@tx.PaymentDate.ToString("dd/MM/yyyy")</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted"><i class="fas fa-inbox fa-3x mb-3 d-block text-gray-300"></i>Không có giao dịch nào.</div>
+                    }
+                </div>
+                <div class="modal-summary"><span>Tổng: @Model.MonthTransactions.Count giao dịch</span><span class="text-primary" style="font-size:1.1rem;">@Model.MonthRevenue.ToString("N0") đ</span></div>
+            </div>
+        </div>
+    </div>
+
+    @* ── Modal: Week Revenue ── *@
+    <div class="modal fade modal-revenue" id="weekRevenueModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-calendar-week mr-2"></i> Chi tiết doanh thu tuần này</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body p-0">
+                    @if (Model.WeekTransactions.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead><tr><th>Mã giao dịch</th><th>Khách hàng</th><th>Dịch vụ / Sản phẩm</th><th>Phương thức TT</th><th>Nguồn</th><th class="text-right">Số tiền</th><th>Thời gian</th></tr></thead>
+                                <tbody>
+                                    @foreach (var tx in Model.WeekTransactions)
+                                    {
+                                        var bc3 = tx.Source == "Đơn hàng" ? "badge-order" : tx.Source == "Hóa đơn" ? "badge-invoice" : "badge-appointment";
+                                        <tr><td><strong>@tx.TransactionCode</strong></td><td>@tx.CustomerName</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="@tx.ItemDescription">@tx.ItemDescription</td><td>@tx.PaymentMethod</td><td><span class="source-badge @bc3">@tx.Source</span></td><td class="text-right font-weight-bold">@tx.Amount.ToString("N0") đ</td><td>@tx.PaymentDate.ToString("dd/MM/yyyy")</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted"><i class="fas fa-inbox fa-3x mb-3 d-block text-gray-300"></i>Không có giao dịch nào.</div>
+                    }
+                </div>
+                <div class="modal-summary"><span>Tổng: @Model.WeekTransactions.Count giao dịch</span><span class="text-primary" style="font-size:1.1rem;">@Model.WeekRevenue.ToString("N0") đ</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Detail Modal (populated via JS) -->
+    <div class="modal fade modal-revenue" id="dailyDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-calendar-day mr-2"></i> Chi tiết doanh thu ngày <span id="dailyDetailDate"></span></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-0" id="dailyDetailBody">
+                    <div class="text-center py-5 text-muted">Đang tải...</div>
+                </div>
+                <div class="modal-summary">
+                    <span id="dailyDetailCount">0 giao dịch</span>
+                    <span class="text-primary" style="font-size:1.1rem;" id="dailyDetailTotal">0 đ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @section Scripts {
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-            const dailyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueLabels));
+            // ═══ Data from server ═══
+            const rawLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueLabels));
+            const dailyLabels = rawLabels.map(function(label) {
+                var parts = label.split('/');
+                return parts.length === 2 ? parts[1] + '/' + parts[0] : label;
+            });
             const dailyValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueValues));
-            const monthlyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenueLabels));
-            const monthlyValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenueValues));
+            let dailyDetails = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenueDetails, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+            let productRevenue = @((int)Model.ProductRevenue);
+            let serviceRevenue = @((int)Model.ServiceRevenue);
 
             const formatCurrency = value => new Intl.NumberFormat('vi-VN').format(value) + ' đ';
 
-            new Chart(document.getElementById('dailyRevenueChart'), {
+            const formatShortRevenue = value => {
+                if (value === 0) return '0';
+                if (value >= 1000000) {
+                    var val = value / 1000000;
+                    return val.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 1 }) + 'M';
+                }
+                if (value >= 1000) {
+                    var val = value / 1000;
+                    return val.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 1 }) + 'K';
+                }
+                return value.toLocaleString('vi-VN');
+            };
+
+            function getSourceBadge(source) {
+                if (source === 'Đơn hàng') return 'badge-order';
+                if (source === 'Hóa đơn') return 'badge-invoice';
+                return 'badge-appointment';
+            }
+
+            function updatePeriodStats(totalRevenue, transactionCount, daysCount, isMonthly) {
+                document.getElementById('statPeriodTotal').textContent = formatCurrency(totalRevenue);
+                document.getElementById('statPeriodCount').textContent = transactionCount;
+                
+                var average = daysCount > 0 ? Math.round(totalRevenue / daysCount) : 0;
+                document.getElementById('statPeriodAverage').textContent = formatCurrency(average);
+                
+                document.getElementById('statPeriodAverageLabel').textContent = isMonthly ? 'Trung bình/tháng' : 'Trung bình/ngày';
+            }
+
+            // Initialize statistics above chart
+            let initialTxCount = 0;
+            dailyDetails.forEach(d => initialTxCount += d.transactionCount !== undefined ? d.transactionCount : d.transactions.length);
+            let initialTotal = dailyValues.reduce((a, b) => a + b, 0);
+            updatePeriodStats(initialTotal, initialTxCount, dailyLabels.length, false);
+
+            // ═══ Daily Revenue Chart (with click-through) ═══
+            const dailyCtx = document.getElementById('dailyRevenueChart').getContext('2d');
+            const dailyGradient = dailyCtx.createLinearGradient(0, 0, 0, 300);
+            dailyGradient.addColorStop(0, 'rgba(0, 136, 255, 0.25)'); // Light blue gradient at top
+            dailyGradient.addColorStop(1, 'rgba(0, 136, 255, 0.01)'); // Transparent at bottom
+
+            const dailyChart = new Chart(dailyCtx, {
                 type: 'line',
                 data: {
                     labels: dailyLabels,
                     datasets: [{
                         label: 'Doanh thu',
                         data: dailyValues,
-                        borderColor: '#e74a3b',
-                        backgroundColor: 'rgba(231, 74, 59, 0.12)',
+                        borderColor: '#0088ff',
+                        borderWidth: 2,
+                        backgroundColor: dailyGradient,
                         fill: true,
-                        tension: 0.35,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#e74a3b'
+                        tension: 0.15,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#ffffff',
+                        pointHoverBorderColor: '#0088ff',
+                        pointHoverBorderWidth: 3
                     }]
                 },
                 options: {
                     responsive: true,
+                    interaction: { intersect: false, mode: 'index' },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            backgroundColor: '#ffffff',
+                            titleColor: '#333333',
+                            titleFont: { size: 13, weight: 'bold' },
+                            bodyColor: '#5a5c69',
+                            bodyFont: { size: 12 },
+                            borderColor: '#dddfeb',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 6,
+                            displayColors: false,
                             callbacks: {
-                                label: context => formatCurrency(context.parsed.y || 0)
+                                title: function (context) {
+                                    const idx = context[0].dataIndex;
+                                    const detail = dailyDetails[idx];
+                                    const label = context[0].label;
+                                    const isMonthly = label.length === 7; // MM/yyyy is 7 chars
+                                    if (detail && detail.dateLabel) {
+                                        return (isMonthly ? 'Tháng: ' : 'Ngày: ') + detail.dateLabel;
+                                    }
+                                    return (isMonthly ? 'Tháng: ' : 'Ngày: ') + label;
+                                },
+                                label: function (context) {
+                                    const idx = context.dataIndex;
+                                    const detail = dailyDetails[idx];
+                                    const revenue = context.parsed.y || 0;
+                                    const txCount = detail ? (detail.transactionCount !== undefined ? detail.transactionCount : detail.transactions.length) : 0;
+                                    
+                                    return [
+                                        'Doanh thu: ' + formatCurrency(revenue),
+                                        'Số giao dịch: ' + txCount
+                                    ];
+                                }
                             }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { callback: value => formatCurrency(value) }
+                            grid: { 
+                                color: 'rgba(0,0,0,0.05)',
+                                borderDash: [4, 4],
+                                drawBorder: false
+                            },
+                            ticks: { callback: value => formatShortRevenue(value), font: { size: 11 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11, weight: 'bold' } }
+                        }
+                    },
+                    onClick: function (event, elements) {
+                        if (elements.length > 0) {
+                            const idx = elements[0].index;
+                            const detail = dailyDetails[idx];
+                            if (detail) showDailyDetail(detail);
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'verticalLine',
+                    afterDraw: (chart) => {
+                        if (chart.tooltip?._active?.length) {
+                            const activePoint = chart.tooltip._active[0];
+                            const ctx = chart.ctx;
+                            const x = activePoint.element.x;
+                            const topY = chart.scales.y.top;
+                            const bottomY = chart.scales.y.bottom;
+
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.moveTo(x, topY);
+                            ctx.lineTo(x, bottomY);
+                            ctx.lineWidth = 1;
+                            ctx.strokeStyle = '#cccccc';
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                    }
+                }]
+            });
+
+            // ═══ Daily Detail Modal (from chart click) ═══
+            function showDailyDetail(detail) {
+                document.getElementById('dailyDetailDate').textContent = detail.dateLabel;
+                document.getElementById('dailyDetailTotal').textContent = formatCurrency(detail.totalRevenue);
+                document.getElementById('dailyDetailCount').textContent = detail.transactions.length + ' giao dịch';
+
+                let html = '';
+                if (detail.transactions.length > 0) {
+                    html = '<div class="table-responsive"><table class="table table-hover mb-0"><thead><tr>' +
+                        '<th>Mã giao dịch</th><th>Khách hàng</th><th>Dịch vụ / Sản phẩm</th>' +
+                        '<th>Phương thức TT</th><th>Nguồn</th><th class="text-right">Số tiền</th></tr></thead><tbody>';
+                    detail.transactions.forEach(function (tx) {
+                        html += '<tr>' +
+                            '<td><strong>' + tx.transactionCode + '</strong></td>' +
+                            '<td>' + tx.customerName + '</td>' +
+                            '<td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + tx.itemDescription + '</td>' +
+                            '<td>' + tx.paymentMethod + '</td>' +
+                            '<td><span class="source-badge ' + getSourceBadge(tx.source) + '">' + tx.source + '</span></td>' +
+                            '<td class="text-right font-weight-bold">' + formatCurrency(tx.amount) + '</td></tr>';
+                    });
+                    html += '</tbody></table></div>';
+                } else {
+                    html = '<div class="text-center py-5 text-muted"><i class="fas fa-inbox fa-3x mb-3 d-block text-gray-300"></i>Không có giao dịch nào.</div>';
+                }
+
+                document.getElementById('dailyDetailBody').innerHTML = html;
+                $('#dailyDetailModal').modal('show');
+            }
+
+            // ═══ Source Split Doughnut Chart ═══
+            let sourceChart = new Chart(document.getElementById('sourceChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Sản phẩm', 'Dịch vụ'],
+                    datasets: [{
+                        data: [productRevenue, serviceRevenue],
+                        backgroundColor: ['#4e73df', '#1cc88a'],
+                        borderWidth: 0,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            padding: 10,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function (context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                    return context.label + ': ' + formatCurrency(context.parsed) + ' (' + pct + '%)';
+                                }
+                            }
                         }
                     }
                 }
             });
 
-            new Chart(document.getElementById('monthlyRevenueChart'), {
-                type: 'bar',
-                data: {
-                    labels: monthlyLabels,
-                    datasets: [{
-                        label: 'Doanh thu',
-                        data: monthlyValues,
-                        backgroundColor: '#4e73df',
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: context => formatCurrency(context.parsed.y || 0)
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { callback: value => formatCurrency(value) }
-                        }
+
+            // ═══ Filter Bar Logic (AJAX) ═══
+            const filterUrl = '@Url.Action("RevenueByPeriod", "Home", new { area = "Admin" })';
+
+            document.querySelectorAll('#filterBar .filter-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    // Toggle active
+                    document.querySelectorAll('#filterBar .filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const period = this.dataset.period;
+                    const customInputs = document.getElementById('customDateInputs');
+
+                    if (period === 'custom') {
+                        customInputs.classList.add('show');
+                        return;
+                    } else {
+                        customInputs.classList.remove('show');
                     }
+
+                    fetchRevenueData(period);
+                });
+            });
+
+            document.getElementById('applyCustomDate').addEventListener('click', function () {
+                const start = document.getElementById('filterStartDate').value;
+                const end = document.getElementById('filterEndDate').value;
+                if (start && end) {
+                    fetchRevenueData('custom', start, end);
                 }
             });
+
+            function fetchRevenueData(period, startDate, endDate) {
+                let url = filterUrl + '?period=' + period;
+                if (startDate) url += '&startDate=' + startDate;
+                if (endDate) url += '&endDate=' + endDate;
+
+                // Update subtitle
+                const subtitles = {
+                    'today': 'Hôm nay',
+                    '7days': '7 ngày gần đây',
+                    '30days': '30 ngày gần đây',
+                    '3months': '3 tháng gần đây',
+                    '6months': '6 tháng gần đây',
+                    '1year': '1 năm gần đây',
+                    'custom': 'Tùy chọn'
+                };
+                document.getElementById('chartSubtitle').textContent = subtitles[period] || '';
+
+                fetch(url)
+                    .then(r => r.json())
+                    .then(data => {
+                        // Update daily chart
+                        dailyDetails = data.pointDetails;
+                        const isMonthly = period === '3months' || period === '6months' || period === '1year';
+
+                        dailyChart.data.labels = data.labels.map(label => {
+                            const parts = label.split('/');
+                            return parts.length === 2 ? parts[1] + '/' + parts[0] : label;
+                        });
+                        dailyChart.data.datasets[0].data = data.values;
+                        dailyChart.update();
+
+                        // Update stats above chart
+                        const txCount = data.transactions.length;
+                        updatePeriodStats(data.totalRevenue, txCount, data.labels.length, isMonthly);
+
+                        // Update source doughnut
+                        sourceChart.data.datasets[0].data = [data.productRevenue, data.serviceRevenue];
+                        sourceChart.update();
+                        document.getElementById('legendProduct').textContent = formatCurrency(data.productRevenue);
+                        document.getElementById('legendService').textContent = formatCurrency(data.serviceRevenue);
+
+                        // Update transaction table
+                        const txBody = document.getElementById('periodTxBody');
+                        const txCountBadge = document.getElementById('periodTxCount');
+                        const txEmptyDiv = document.getElementById('periodTxEmpty');
+                        const txTable = document.getElementById('periodTxTable');
+
+                        txCountBadge.textContent = data.transactions.length + ' giao dịch';
+
+                        if (data.transactions.length > 0) {
+                            txEmptyDiv.classList.add('d-none');
+                            txTable.classList.remove('d-none');
+                            
+                            let html = '';
+                            data.transactions.forEach(function (tx) {
+                                html += '<tr>' +
+                                    '<td><strong>' + tx.transactionCode + '</strong></td>' +
+                                    '<td>' + tx.customerName + '</td>' +
+                                    '<td style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="' + tx.itemDescription + '">' + tx.itemDescription + '</td>' +
+                                    '<td>' + tx.paymentMethod + '</td>' +
+                                    '<td><span class="source-badge ' + getSourceBadge(tx.source) + '">' + tx.source + '</span></td>' +
+                                    '<td class="text-right font-weight-bold text-success">' + formatCurrency(tx.amount) + '</td>' +
+                                    '<td>' + tx.paymentDate + '</td>' +
+                                    '</tr>';
+                            });
+                            txBody.innerHTML = html;
+                        } else {
+                            txBody.innerHTML = '';
+                            txTable.classList.add('d-none');
+                            txEmptyDiv.classList.remove('d-none');
+                        }
+                    })
+                    .catch(err => console.error('Filter error:', err));
+            }
         </script>
     }
 }

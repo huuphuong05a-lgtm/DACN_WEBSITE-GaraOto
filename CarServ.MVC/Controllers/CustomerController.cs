@@ -232,8 +232,21 @@ namespace CarServ.MVC.Controllers
                 .Include(a => a.Service)
                 .Include(a => a.Technician)
                 .Include(a => a.Vehicle)
+                .Include(a => a.ServiceHistories)
                 .Where(a => a.CustomerId == customerId)
                 .OrderByDescending(a => a.AppointmentDate)
+                .ToListAsync();
+
+            var serviceHistoryIds = appointments
+                .SelectMany(a => a.ServiceHistories)
+                .Select(h => h.ServiceHistoryId)
+                .ToList();
+
+            ViewBag.ReviewedServiceHistoryIds = await _context.Reviews
+                .Where(r => r.CustomerId == customerId
+                    && r.ServiceHistoryId.HasValue
+                    && serviceHistoryIds.Contains(r.ServiceHistoryId.Value))
+                .Select(r => r.ServiceHistoryId!.Value)
                 .ToListAsync();
 
             return View(appointments);
@@ -252,12 +265,9 @@ namespace CarServ.MVC.Controllers
             {
                 return NotFound();
             }
-
-            // Chỉ cho phép hủy nếu chưa hoàn thành
-            if (appointment.Status == AppConstants.AppointmentStatus.Completed
-                || appointment.Status == AppConstants.AppointmentStatus.Canceled)
+            if (!AppConstants.AppointmentStatus.CanCustomerCancel(appointment.Status))
             {
-                TempData["ErrorMessage"] = "Không thể hủy lịch hẹn này.";
+                TempData["ErrorMessage"] = "Lịch hẹn đã được gara tiếp nhận xử lý, bạn không thể tự hủy. Vui lòng liên hệ gara để được hỗ trợ.";
                 return RedirectToAction(nameof(Appointments));
             }
 
@@ -320,6 +330,17 @@ namespace CarServ.MVC.Controllers
             {
                 return NotFound();
             }
+
+            var serviceHistoryIds = vehicle.ServiceHistories
+                .Select(h => h.ServiceHistoryId)
+                .ToList();
+
+            ViewBag.ReviewedServiceHistoryIds = await _context.Reviews
+                .Where(r => r.CustomerId == customerId
+                    && r.ServiceHistoryId.HasValue
+                    && serviceHistoryIds.Contains(r.ServiceHistoryId.Value))
+                .Select(r => r.ServiceHistoryId!.Value)
+                .ToListAsync();
 
             return View(vehicle);
         }
@@ -701,4 +722,5 @@ namespace CarServ.MVC.Controllers
         public string? Notes { get; set; }
     }
 }
+
 

@@ -1,4 +1,4 @@
-﻿using CarServ.MVC.Models;
+using CarServ.MVC.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
@@ -74,6 +74,9 @@ builder.Services.AddDbContext<CarServContext>(options =>
 
 // Register Payment Gateway Service
 builder.Services.AddScoped<CarServ.MVC.Services.IPaymentGatewayService, CarServ.MVC.Services.PaymentGatewayService>();
+
+// Register Availability Service
+builder.Services.AddScoped<CarServ.MVC.Services.IAppointmentAvailabilityService, CarServ.MVC.Services.AppointmentAvailabilityService>();
 
 var app = builder.Build();
 

@@ -90,6 +90,10 @@ namespace CarServ.MVC.Models
         {
             public const string Pending = "Chờ xác nhận";
             public const string Confirmed = "Đã xác nhận";
+            public const string Assigned = "Đã phân công";
+            public const string Inspecting = "Đang kiểm tra";
+            public const string Repairing = "Đang sửa chữa";
+            public const string WaitingParts = "Chờ phụ tùng";
             public const string InProgress = "Đang thực hiện";
             public const string Completed = "Hoàn thành";
             public const string Canceled = "Đã hủy";
@@ -99,6 +103,10 @@ namespace CarServ.MVC.Models
             {
                 Pending,
                 Confirmed,
+                Assigned,
+                Inspecting,
+                Repairing,
+                WaitingParts,
                 InProgress,
                 Completed,
                 Canceled,
@@ -109,8 +117,23 @@ namespace CarServ.MVC.Models
             {
                 Pending,
                 Confirmed,
+                Assigned,
+                Inspecting,
+                Repairing,
+                WaitingParts,
                 InProgress
             };
+
+            public static readonly string[] CustomerCancelable =
+            {
+                Pending,
+                Confirmed
+            };
+
+            public static bool CanCustomerCancel(string? status)
+            {
+                return CustomerCancelable.Contains(status);
+            }
         }
     }
 }

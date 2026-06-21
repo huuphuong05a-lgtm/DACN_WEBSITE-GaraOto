@@ -143,6 +143,9 @@ namespace CarServ.MVC.Controllers
             customer.LastLoginDate = DateTime.Now;
             await _context.SaveChangesAsync();
 
+            // Xóa session cũ để reset chat history của chatbot
+            HttpContext.Session.Clear();
+
             // Đăng nhập
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
@@ -165,6 +168,7 @@ namespace CarServ.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
+            HttpContext.Session.Clear();
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             _logger.LogInformation("Customer logged out");
             return RedirectToAction("Index", "Home");
@@ -173,6 +177,7 @@ namespace CarServ.MVC.Controllers
         // GET: Account/Logout (for GET request)
         public async Task<IActionResult> LogoutGet()
         {
+            HttpContext.Session.Clear();
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }

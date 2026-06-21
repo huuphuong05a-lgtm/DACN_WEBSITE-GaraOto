@@ -22,10 +22,41 @@ namespace CarServ.MVC.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(int? serviceId)
+        public async Task<IActionResult> Index(int? serviceId, int? vehicleId)
         {
-            await LoadBookingOptionsAsync(serviceId, null);
-            return View();
+            var appointment = new Appointment
+            {
+                ServiceId = serviceId
+            };
+
+            if (vehicleId.HasValue)
+            {
+                var customerIdClaim = User.FindFirst("CustomerId");
+                if (customerIdClaim == null || !int.TryParse(customerIdClaim.Value, out var customerId))
+                {
+                    await LoadBookingOptionsAsync(serviceId, null, null);
+                    return View(appointment);
+                }
+
+                var vehicle = await _context.Vehicles
+                    .Include(v => v.Brand)
+                    .Include(v => v.Model)
+                    .FirstOrDefaultAsync(v => v.VehicleId == vehicleId.Value
+                        && v.CustomerId == customerId
+                        && v.IsActive == true);
+
+                if (vehicle == null)
+                {
+                    return Forbid();
+                }
+
+                appointment.VehicleId = vehicle.VehicleId;
+                appointment.VehicleInfo = BuildVehicleLabel(vehicle);
+                ViewData["SelectedVehicleLabel"] = appointment.VehicleInfo;
+            }
+
+            await LoadBookingOptionsAsync(serviceId, null, appointment.VehicleId);
+            return View(appointment);
         }
 
         [HttpPost]
@@ -99,7 +130,7 @@ namespace CarServ.MVC.Controllers
 
             if (!ModelState.IsValid)
             {
-                await LoadBookingOptionsAsync(appointment.ServiceId, appointment.TechnicianId);
+                await LoadBookingOptionsAsync(appointment.ServiceId, appointment.TechnicianId, appointment.VehicleId);
                 return View("Index", appointment);
             }
 
@@ -137,7 +168,7 @@ namespace CarServ.MVC.Controllers
             return Json(slots);
         }
 
-        private async Task LoadBookingOptionsAsync(int? serviceId, int? technicianId)
+        private async Task LoadBookingOptionsAsync(int? serviceId, int? technicianId, int? vehicleId)
         {
             ViewData["Services"] = new SelectList(
                 await _context.Services
@@ -176,9 +207,19 @@ namespace CarServ.MVC.Controllers
                 ViewData["Vehicles"] = new SelectList(
                     vehicles.Select(v => new { v.VehicleId, Label = BuildVehicleLabel(v) }),
                     "VehicleId",
-                    "Label");
+                    "Label",
+                    vehicleId);
 
                 ViewData["VehicleLabels"] = vehicles.ToDictionary(v => v.VehicleId, BuildVehicleLabel);
+
+                if (vehicleId.HasValue)
+                {
+                    var selectedVehicle = vehicles.FirstOrDefault(v => v.VehicleId == vehicleId.Value);
+                    if (selectedVehicle != null)
+                    {
+                        ViewData["SelectedVehicleLabel"] = BuildVehicleLabel(selectedVehicle);
+                    }
+                }
             }
         }
 
@@ -240,14 +281,19 @@ namespace CarServ.MVC.Controllers
                 return false;
             }
 
+            var activeTechnicianCount = await GetActiveTechnicianCountAsync();
+            var overlappingCount = await CountBlockingAppointmentsAsync(slotStart, slotEnd, excludeAppointmentId);
+            if (overlappingCount >= activeTechnicianCount)
+            {
+                return false;
+            }
+
             if (technicianId.HasValue)
             {
                 return !await HasTechnicianConflictAsync(slotStart, slotEnd, technicianId.Value, excludeAppointmentId);
             }
 
-            var activeTechnicianCount = await GetActiveTechnicianCountAsync();
-            var overlappingCount = await CountBlockingAppointmentsAsync(slotStart, slotEnd, excludeAppointmentId);
-            return overlappingCount < activeTechnicianCount;
+            return true;
         }
 
         private static bool IsInsideWorkingTime(DateTime slotStart, DateTime slotEnd)
@@ -262,12 +308,17 @@ namespace CarServ.MVC.Controllers
 
         private async Task<int> CountRemainingTechniciansAsync(DateTime slotStart, DateTime slotEnd, int? technicianId, int activeTechnicianCount, int? excludeAppointmentId)
         {
+            var overlappingCount = await CountBlockingAppointmentsAsync(slotStart, slotEnd, excludeAppointmentId);
+            if (overlappingCount >= activeTechnicianCount)
+            {
+                return 0;
+            }
+
             if (technicianId.HasValue)
             {
                 return await HasTechnicianConflictAsync(slotStart, slotEnd, technicianId.Value, excludeAppointmentId) ? 0 : 1;
             }
 
-            var overlappingCount = await CountBlockingAppointmentsAsync(slotStart, slotEnd, excludeAppointmentId);
             return Math.Max(activeTechnicianCount - overlappingCount, 0);
         }
 

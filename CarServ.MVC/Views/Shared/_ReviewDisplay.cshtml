@@ -1,0 +1,376 @@
+@model IEnumerable<CarServ.MVC.Models.Review>
+@{
+    var reviews = Model?.ToList() ?? new List<CarServ.MVC.Models.Review>();
+    var averageRating = ViewData["AverageRating"] as double? ?? 0.0;
+    var reviewCount = ViewData["ReviewCount"] as int? ?? reviews.Count;
+    var title = ViewData["ReviewTitle"] as string ?? "Đánh giá khách hàng";
+    var emptyText = ViewData["EmptyReviewText"] as string ?? "Chưa có đánh giá nào.";
+
+    string ResolveAvatarPath(string? avatar)
+    {
+        if (string.IsNullOrWhiteSpace(avatar))
+        {
+            return string.Empty;
+        }
+
+        var normalized = avatar.Trim().Replace("\\", "/");
+
+        if (normalized.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("/"))
+        {
+            return normalized;
+        }
+
+        if (normalized.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase))
+        {
+            return "/" + normalized;
+        }
+
+        return "/uploads/customer-avatars/" + normalized.TrimStart('/');
+    }
+}
+
+<section class="nhp-review-section">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+        <div>
+            <p class="nhp-review-eyebrow">Phản hồi khách hàng</p>
+            <h3 class="nhp-review-title">@title</h3>
+        </div>
+        <span class="nhp-review-count">@reviewCount lượt đánh giá</span>
+    </div>
+
+    <div class="nhp-review-summary">
+        <div class="nhp-review-score">
+            <strong>@averageRating.ToString("F1")</strong>
+            <div class="nhp-review-stars" aria-label="@averageRating.ToString("F1") sao">
+                @for (var i = 1; i <= 5; i++)
+                {
+                    if (i <= Math.Floor(averageRating))
+                    {
+                        <i class="fas fa-star"></i>
+                    }
+                    else if (i - 0.5 <= averageRating)
+                    {
+                        <i class="fas fa-star-half-alt"></i>
+                    }
+                    else
+                    {
+                        <i class="far fa-star"></i>
+                    }
+                }
+            </div>
+            <span>Dựa trên @reviewCount đánh giá đã xác thực</span>
+        </div>
+
+        <div class="nhp-review-breakdown">
+            @for (var star = 5; star >= 1; star--)
+            {
+                var count = reviews.Count(r => r.Rating == star);
+                var percentage = reviewCount > 0 ? count * 100.0 / reviewCount : 0;
+                <div class="nhp-review-bar-row">
+                    <span>@star <i class="fas fa-star"></i></span>
+                    <div class="nhp-review-bar">
+                        <div style="width:@percentage.ToString("F0")%"></div>
+                    </div>
+                    <strong>@count</strong>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (reviews.Any())
+    {
+        <div class="nhp-review-list">
+            @foreach (var review in reviews)
+            {
+                var displayName = string.IsNullOrWhiteSpace(review.Customer?.FullName)
+                    ? review.CustomerName
+                    : review.Customer!.FullName;
+                var avatar = ResolveAvatarPath(review.Customer?.Avatar);
+                var initial = string.IsNullOrWhiteSpace(displayName) ? "K" : displayName.Trim()[0].ToString().ToUpper();
+
+                <article class="nhp-review-card">
+                    <div class="nhp-review-avatar">
+                        @if (!string.IsNullOrWhiteSpace(avatar))
+                        {
+                            <img src="@avatar" alt="@displayName" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+                            <span style="display:none;">@initial</span>
+                        }
+                        else
+                        {
+                            <span>@initial</span>
+                        }
+                    </div>
+
+                    <div class="nhp-review-body">
+                        <div class="nhp-review-head">
+                            <div>
+                                <h5>@displayName</h5>
+                                <div class="nhp-review-stars small">
+                                    @for (var i = 1; i <= 5; i++)
+                                    {
+                                        <i class="@(i <= review.Rating ? "fas" : "far") fa-star"></i>
+                                    }
+                                </div>
+                            </div>
+                            <time>@review.CreatedDate.ToString("dd/MM/yyyy")</time>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(review.Comment))
+                        {
+                            <p>@review.Comment</p>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(review.ImageUrl))
+                        {
+                            <a class="nhp-review-photo" href="@review.ImageUrl" target="_blank" rel="noopener">
+                                <img src="@review.ImageUrl" alt="Ảnh đánh giá của @displayName" />
+                            </a>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="nhp-review-empty">
+            <i class="far fa-star"></i>
+            <p>@emptyText</p>
+        </div>
+    }
+</section>
+
+<style>
+    .nhp-review-section {
+        margin-top: 48px;
+    }
+
+    .nhp-review-eyebrow {
+        color: #e11d2e;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+    }
+
+    .nhp-review-title {
+        color: #07142f;
+        font-size: 28px;
+        font-weight: 900;
+        margin: 0;
+    }
+
+    .nhp-review-count {
+        background: #fff1f2;
+        border-radius: 999px;
+        color: #e11d2e;
+        font-size: 13px;
+        font-weight: 800;
+        padding: 8px 14px;
+    }
+
+    .nhp-review-summary {
+        align-items: stretch;
+        background: #fff;
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+        display: grid;
+        gap: 24px;
+        grid-template-columns: 280px 1fr;
+        margin-bottom: 24px;
+        padding: 24px;
+    }
+
+    .nhp-review-score {
+        align-items: center;
+        background: #f8fafc;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 22px;
+        text-align: center;
+    }
+
+    .nhp-review-score strong {
+        color: #07142f;
+        font-size: 48px;
+        font-weight: 900;
+        line-height: 1;
+    }
+
+    .nhp-review-score span {
+        color: #6b7280;
+        font-size: 13px;
+        margin-top: 8px;
+    }
+
+    .nhp-review-stars {
+        color: #f59e0b;
+        display: inline-flex;
+        gap: 3px;
+        margin-top: 8px;
+    }
+
+    .nhp-review-stars.small {
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .nhp-review-breakdown {
+        display: grid;
+        gap: 10px;
+    }
+
+    .nhp-review-bar-row {
+        align-items: center;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 46px 1fr 34px;
+    }
+
+    .nhp-review-bar-row span,
+    .nhp-review-bar-row strong {
+        color: #4b5563;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .nhp-review-bar-row i {
+        color: #f59e0b;
+        font-size: 11px;
+    }
+
+    .nhp-review-bar {
+        background: #eef2f7;
+        border-radius: 999px;
+        height: 9px;
+        overflow: hidden;
+    }
+
+    .nhp-review-bar div {
+        background: #e11d2e;
+        border-radius: inherit;
+        height: 100%;
+    }
+
+    .nhp-review-list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .nhp-review-card {
+        background: #fff;
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+        display: grid;
+        gap: 14px;
+        grid-template-columns: 48px 1fr;
+        padding: 18px;
+    }
+
+    .nhp-review-avatar {
+        align-items: center;
+        background: #fff1f2;
+        border-radius: 50%;
+        color: #e11d2e;
+        display: flex;
+        font-weight: 900;
+        height: 48px;
+        justify-content: center;
+        overflow: hidden;
+        width: 48px;
+    }
+
+    .nhp-review-avatar img {
+        height: 100%;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .nhp-review-head {
+        align-items: flex-start;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+    }
+
+    .nhp-review-head h5 {
+        color: #111827;
+        font-size: 16px;
+        font-weight: 900;
+        margin: 0;
+    }
+
+    .nhp-review-head time {
+        color: #94a3b8;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .nhp-review-body p {
+        color: #4b5563;
+        line-height: 1.7;
+        margin: 12px 0 0;
+    }
+
+    .nhp-review-photo {
+        display: inline-flex;
+        margin-top: 14px;
+    }
+
+    .nhp-review-photo img {
+        aspect-ratio: 1 / 1;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        height: 96px;
+        object-fit: cover;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        width: 96px;
+    }
+
+    .nhp-review-photo:hover img {
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.16);
+        transform: translateY(-2px);
+    }
+
+    .nhp-review-empty {
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        color: #64748b;
+        padding: 36px 20px;
+        text-align: center;
+    }
+
+    .nhp-review-empty i {
+        color: #e11d2e;
+        font-size: 30px;
+        margin-bottom: 12px;
+    }
+
+    .nhp-review-empty p {
+        margin: 0;
+    }
+
+    @@media (max-width: 767.98px) {
+        .nhp-review-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .nhp-review-card {
+            grid-template-columns: 42px 1fr;
+            padding: 14px;
+        }
+
+        .nhp-review-avatar {
+            height: 42px;
+            width: 42px;
+        }
+    }
+</style>

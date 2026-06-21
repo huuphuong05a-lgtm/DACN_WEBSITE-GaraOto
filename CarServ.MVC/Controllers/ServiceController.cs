@@ -14,8 +14,12 @@ namespace CarServ.MVC.Controllers
         }
 
         // GET: Service
-        public async Task<IActionResult> Index(string searchString, string categoryFilter)
+        public async Task<IActionResult> Index(string? searchString, string? keyword, string? categoryFilter, int page = 1)
         {
+            const int pageSize = 6;
+            searchString = string.IsNullOrWhiteSpace(searchString) ? keyword : searchString;
+            page = Math.Max(page, 1);
+
             ViewData["CurrentFilter"] = searchString;
             ViewData["CategoryFilter"] = categoryFilter;
 
@@ -44,7 +48,24 @@ namespace CarServ.MVC.Controllers
 
             services = services.OrderBy(s => s.SortOrder).ThenByDescending(s => s.CreatedDate);
 
-            return View(await services.ToListAsync());
+            var totalItems = await services.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages > 0 && page > totalPages)
+            {
+                page = totalPages;
+            }
+
+            ViewData["CurrentPage"] = page;
+            ViewData["PageSize"] = pageSize;
+            ViewData["TotalItems"] = totalItems;
+            ViewData["TotalPages"] = totalPages;
+
+            var pagedServices = await services
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return View(pagedServices);
         }
 
         // GET: Service/Details/5
@@ -83,6 +104,7 @@ namespace CarServ.MVC.Controllers
 
             // Get reviews (chỉ hiển thị đã duyệt)
             var reviews = await _context.Reviews
+                .Include(r => r.Customer)
                 .Where(r => r.ServiceId == service.ServiceId && r.IsApproved)
                 .OrderByDescending(r => r.CreatedDate)
                 .Take(10)

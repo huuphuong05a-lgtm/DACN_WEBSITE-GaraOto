@@ -4,10 +4,15 @@
 @{
     ViewData["Title"] = "Chi tiết lịch hẹn";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var isTechnician = User.IsInRole(AppConstants.AdminRole.Technician);
     var statusClass = Model.Status switch
     {
         AppConstants.AppointmentStatus.Pending => "badge-warning",
         AppConstants.AppointmentStatus.Confirmed => "badge-info",
+        AppConstants.AppointmentStatus.Assigned => "badge-primary",
+        AppConstants.AppointmentStatus.Inspecting => "badge-secondary",
+        AppConstants.AppointmentStatus.Repairing => "badge-primary",
+        AppConstants.AppointmentStatus.WaitingParts => "badge-warning",
         AppConstants.AppointmentStatus.InProgress => "badge-primary",
         AppConstants.AppointmentStatus.Completed => "badge-success",
         AppConstants.AppointmentStatus.Canceled => "badge-danger",
@@ -34,6 +39,7 @@
         AppConstants.PaymentStatus.Failed => "badge-danger",
         _ => "badge-light"
     };
+    var isInvoicePaid = latestInvoice?.PaymentStatus == AppConstants.PaymentStatus.Paid;
 }
 
 <div class="container-fluid">
@@ -46,9 +52,12 @@
                     <i class="fas fa-check"></i> Hoàn thành
                 </a>
             }
-            <a href="@Url.Action("Edit", "Appointment", new { area = "Admin", id = Model.AppointmentId })" class="btn btn-warning">
-                <i class="fas fa-edit"></i> Chỉnh sửa
-            </a>
+            @if (!isTechnician)
+            {
+                <a href="@Url.Action("Edit", "Appointment", new { area = "Admin", id = Model.AppointmentId })" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Chỉnh sửa
+                </a>
+            }
             <a href="@Url.Action("Index", "Appointment", new { area = "Admin" })" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Quay lại
             </a>
@@ -185,14 +194,28 @@
                         <div>Ngay tao: @latestInvoice.InvoiceDate.ToString("dd/MM/yyyy")</div>
                         <div>Tong tien: <strong class="text-danger">@latestInvoice.TotalAmount.ToString("N0") d</strong></div>
                         <div>Thanh toan: <span class="badge @invoiceStatusClass">@(latestInvoice.PaymentStatus ?? "-")</span></div>
-                        <div class="mt-3">
-                            <a href="@Url.Action("Create", "Payment", new { area = "Admin", invoiceId = latestInvoice.InvoiceId })" class="btn btn-sm btn-success">
-                                <i class="fas fa-money-bill"></i> Ghi nhan thanh toan
-                            </a>
-                            <a href="@Url.Action("Index", "Payment", new { area = "Admin", invoiceId = latestInvoice.InvoiceId })" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-list"></i> Lich su thanh toan
-                            </a>
-                        </div>
+                        @if (latestInvoice.PaymentDate.HasValue)
+                        {
+                            <div>Ngay thanh toan: @latestInvoice.PaymentDate.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                        }
+                        @if (!isTechnician)
+                        {
+                            <div class="mt-3">
+                                @if (!isInvoicePaid)
+                                {
+                                    <form asp-area="Admin" asp-controller="Payment" asp-action="RecordInvoicePayment" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="invoiceId" value="@latestInvoice.InvoiceId" />
+                                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Xac nhan ghi nhan thanh toan hoa don nay?');">
+                                            <i class="fas fa-money-bill"></i> Ghi nhan thanh toan
+                                        </button>
+                                    </form>
+                                }
+                                <a href="@Url.Action("Index", "Payment", new { area = "Admin", invoiceId = latestInvoice.InvoiceId })" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-list"></i> Lich su thanh toan
+                                </a>
+                            </div>
+                        }
                     </div>
                 </div>
             }

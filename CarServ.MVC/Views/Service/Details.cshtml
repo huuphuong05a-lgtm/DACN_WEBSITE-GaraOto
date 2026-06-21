@@ -63,7 +63,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="bg-light rounded p-4 mb-4">
+                <div class="service-info-card bg-light rounded p-4 mb-3">
                     <h4 class="mb-4">Thông Tin Dịch Vụ</h4>
                     
                     @if (Model.Price.HasValue)
@@ -87,17 +87,21 @@
                         </div>
                     }
 
-                    <a href="@Url.Action("Index", "Booking", new { serviceId = Model.ServiceId })" class="btn btn-primary w-100 py-3">
+                    <a href="@Url.Action("Index", "Booking", new { serviceId = Model.ServiceId })" class="btn btn-primary w-100 py-3 service-booking-btn">
                         <i class="fa fa-calendar-check me-2"></i>Đặt Lịch Ngay
                     </a>
                 </div>
 
                 @if (Model.IsFeatured)
                 {
-                    <div class="bg-primary text-white rounded p-4 text-center">
-                        <i class="fa fa-star fa-3x mb-3"></i>
-                        <h5>Dịch Vụ Nổi Bật</h5>
-                        <p class="mb-0">Dịch vụ được khách hàng yêu thích nhất</p>
+                    <div class="featured-service-card">
+                        <div class="featured-service-icon">
+                            <i class="fa fa-star"></i>
+                        </div>
+                        <div>
+                            <h5>Dịch Vụ Nổi Bật</h5>
+                            <p>Dịch vụ được khách hàng tin chọn và đánh giá cao tại NHP-AUTO.</p>
+                        </div>
                     </div>
                 }
             </div>
@@ -173,4 +177,62 @@
 </div>
 <!-- Service Details End -->
 
+<style>
+    .service-info-card {
+        border: 1px solid #edf0f4;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+    }
 
+    .service-booking-btn {
+        border-radius: 10px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        box-shadow: 0 10px 20px rgba(225, 29, 46, 0.16);
+    }
+
+    .featured-service-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 18px;
+        border: 1px solid rgba(225, 29, 46, 0.14);
+        border-radius: 16px;
+        background: linear-gradient(135deg, #fff, #fff7f8);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .featured-service-icon {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(225, 29, 46, 0.1);
+        color: #e11d2e;
+        font-size: 16px;
+        box-shadow: inset 0 0 0 1px rgba(225, 29, 46, 0.08);
+    }
+
+    .featured-service-card h5 {
+        margin: 0 0 6px;
+        color: #0f172a;
+        font-size: 17px;
+        font-weight: 800;
+        line-height: 1.25;
+    }
+
+    .featured-service-card p {
+        margin: 0;
+        color: #5f6b7a;
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    @@media (max-width: 991.98px) {
+        .featured-service-card {
+            margin-top: 12px;
+        }
+    }
+</style>

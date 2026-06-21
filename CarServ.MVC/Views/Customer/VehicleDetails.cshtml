@@ -29,6 +29,7 @@
     var invoices = Model.Invoices
         .OrderByDescending(i => i.InvoiceDate)
         .ToList();
+    var reviewedServiceHistoryIds = ViewBag.ReviewedServiceHistoryIds as List<int> ?? new List<int>();
 }
 
 <div class="container-fluid page-header mb-5 p-0" style="background-image: url(/img/carousel-bg-1.jpg);">
@@ -166,10 +167,24 @@
                     {
                         @foreach (var appointment in upcomingAppointments)
                         {
+                            var appointmentStatusClass = appointment.Status switch
+                            {
+                                AppConstants.AppointmentStatus.Pending => "warning",
+                                AppConstants.AppointmentStatus.Confirmed => "info",
+                                AppConstants.AppointmentStatus.Assigned => "primary",
+                                AppConstants.AppointmentStatus.Inspecting => "secondary",
+                                AppConstants.AppointmentStatus.Repairing => "primary",
+                                AppConstants.AppointmentStatus.WaitingParts => "warning",
+                                AppConstants.AppointmentStatus.InProgress => "primary",
+                                AppConstants.AppointmentStatus.Completed => "success",
+                                AppConstants.AppointmentStatus.Canceled => "danger",
+                                AppConstants.AppointmentStatus.NoShow => "dark",
+                                _ => "secondary"
+                            };
                             <div class="bg-white rounded p-3 mb-2">
                                 <div class="d-flex justify-content-between">
                                     <strong>@appointment.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</strong>
-                                    <span class="badge bg-info">@appointment.Status</span>
+                                    <span class="badge bg-@appointmentStatusClass">@appointment.Status</span>
                                 </div>
                                 <div>@(appointment.Service?.ServiceName ?? appointment.ServiceType)</div>
                                 <small class="text-muted">Kỹ thuật viên: @(appointment.Technician?.FullName ?? "Chưa phân công")</small>
@@ -219,6 +234,18 @@
                                 @if (!string.IsNullOrWhiteSpace(history.Notes))
                                 {
                                     <p class="mb-0 mt-2">@history.Notes</p>
+                                }
+                                @if (reviewedServiceHistoryIds.Contains(history.ServiceHistoryId))
+                                {
+                                    <div class="alert alert-success py-2 px-3 mt-3 mb-0" style="font-size: 13px;">
+                                        <i class="fa fa-check-circle me-1"></i>Bạn đã đánh giá dịch vụ này
+                                    </div>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Service", "Review", new { serviceHistoryId = history.ServiceHistoryId })" class="btn btn-sm btn-outline-primary mt-3">
+                                        <i class="fa fa-star me-1"></i>Đánh giá dịch vụ
+                                    </a>
                                 }
                             </div>
                         }

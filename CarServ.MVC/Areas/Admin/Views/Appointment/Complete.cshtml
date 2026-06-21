@@ -80,20 +80,20 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label asp-for="LaborCost">Tiền công</label>
-                                    <input asp-for="LaborCost" type="number" min="0" step="1000" class="form-control cost-input" />
+                                    <label asp-for="LaborCostInput">Tiền công</label>
+                                    <input asp-for="LaborCostInput" type="text" inputmode="numeric" class="form-control money-input cost-input" autocomplete="off" />
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label asp-for="PartsCost">Tiền phụ tùng</label>
-                                    <input asp-for="PartsCost" type="number" min="0" step="1000" class="form-control cost-input" />
+                                    <label asp-for="PartsCostInput">Tiền phụ tùng</label>
+                                    <input asp-for="PartsCostInput" type="text" inputmode="numeric" class="form-control money-input cost-input" autocomplete="off" />
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label asp-for="TotalCost">Tổng chi phí</label>
-                                    <input asp-for="TotalCost" type="number" min="0" step="1000" class="form-control" />
+                                    <label asp-for="TotalCostInput">Tổng chi phí</label>
+                                    <input asp-for="TotalCostInput" type="text" inputmode="numeric" class="form-control money-input" autocomplete="off" />
                                     <small class="form-text text-muted">Bỏ trống để tự cộng tiền công và phụ tùng.</small>
                                 </div>
                             </div>
@@ -144,4 +144,36 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const moneyInputs = Array.from(document.querySelectorAll('.money-input'));
+            const form = document.querySelector('form');
+
+            function normalizeMoney(value) {
+                return (value || '').replace(/[,.]/g, '').replace(/[^\d]/g, '');
+            }
+
+            function formatMoneyInput(input) {
+                const cleanValue = normalizeMoney(input.value);
+                input.value = cleanValue ? Number(cleanValue).toLocaleString('en-US') : '';
+            }
+
+            moneyInputs.forEach(function (input) {
+                formatMoneyInput(input);
+                input.addEventListener('input', function () {
+                    const cursorAtEnd = input.selectionStart === input.value.length;
+                    formatMoneyInput(input);
+                    if (cursorAtEnd) {
+                        input.setSelectionRange(input.value.length, input.value.length);
+                    }
+                });
+            });
+
+            form?.addEventListener('submit', function () {
+                moneyInputs.forEach(function (input) {
+                    input.value = normalizeMoney(input.value);
+                });
+            });
+        });
+    </script>
 }

@@ -24,17 +24,23 @@ namespace CarServ.MVC.Areas.Admin.Controllers
         }
 
         // GET: Admin/Product
-        public async Task<IActionResult> Index(string searchString, string categoryFilter, string statusFilter, string sortOrder)
+        public async Task<IActionResult> Index(string searchString, string categoryFilter, string statusFilter, string sortOrder, bool? lowStock)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentCategory"] = categoryFilter;
             ViewData["CurrentStatus"] = statusFilter;
             ViewData["CurrentSort"] = sortOrder;
+            ViewData["CurrentLowStock"] = lowStock;
             ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["PriceSortParm"] = sortOrder == "Price" ? "price_desc" : "Price";
             ViewData["SortOrderSortParm"] = sortOrder == "SortOrder" ? "sortorder_desc" : "SortOrder";
 
             var products = _context.Products.Include(p => p.Category).AsQueryable();
+
+            if (lowStock == true)
+            {
+                products = products.Where(p => (p.StockQuantity ?? 0) <= 5);
+            }
 
             // Search
             if (!string.IsNullOrEmpty(searchString))

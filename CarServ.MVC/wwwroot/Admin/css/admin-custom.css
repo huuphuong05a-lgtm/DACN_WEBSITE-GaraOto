@@ -385,3 +385,499 @@
         justify-content: flex-start;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   DASHBOARD UPGRADE - Revenue Cards, Filters, Charts, Top 5
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Revenue Cards (interactive, gradient) ── */
+.revenue-card {
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.revenue-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15) !important;
+}
+
+.revenue-card .card-body {
+    position: relative;
+    z-index: 1;
+}
+
+.revenue-card .revenue-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.revenue-card-today {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+}
+
+.revenue-card-today .revenue-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.revenue-card-month {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    color: white;
+}
+
+.revenue-card-month .revenue-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.revenue-card-total {
+    background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+    color: white;
+}
+
+.revenue-card-total .revenue-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.revenue-card-week {
+    background: linear-gradient(135deg, #6c5ce7 0%, #4834d4 100%);
+    color: white;
+}
+
+.revenue-card-week .revenue-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.revenue-card .revenue-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.85;
+    margin-bottom: 4px;
+}
+
+.revenue-card .revenue-amount {
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.revenue-card .revenue-hint {
+    font-size: 0.72rem;
+    opacity: 0.7;
+    margin-top: 4px;
+}
+
+.revenue-card .click-hint {
+    font-size: 0.68rem;
+    opacity: 0.5;
+    margin-top: 6px;
+}
+
+.revenue-card .click-hint i {
+    margin-left: 4px;
+}
+
+/* ── Summary stat cards ── */
+.stat-card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+/* ── Filter Bar & Segmented Control ── */
+.filter-segmented-control {
+    display: inline-flex;
+    background-color: #f8f9fc;
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid #e3e6f0;
+    gap: 2px;
+    align-items: center;
+}
+
+.filter-bar {
+    display: inline-flex;
+    background-color: #f8f9fc;
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid #e3e6f0;
+    gap: 2px;
+    align-items: center;
+}
+
+.filter-btn {
+    border: none;
+    background: transparent;
+    color: #5a5c69;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+}
+
+.filter-btn:hover {
+    color: #4e73df;
+    background: rgba(78, 115, 223, 0.06);
+}
+
+.filter-btn.active {
+    background: #ffffff;
+    color: #4e73df;
+    border-color: transparent;
+    box-shadow: 0 2px 6px rgba(78, 115, 223, 0.12), 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.filter-date-inputs {
+    display: none;
+    gap: 8px;
+    align-items: center;
+}
+
+.filter-date-inputs.show {
+    display: inline-flex;
+    animation: fadeInFilterDate 0.3s ease forwards;
+}
+
+@keyframes fadeInFilterDate {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.filter-date-inputs input[type="date"] {
+    font-size: 0.8rem;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d3e2;
+    background-color: #ffffff;
+    color: #495057;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.filter-date-inputs input[type="date"]:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.15);
+}
+
+.filter-date-inputs .btn-apply-date {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 8px;
+    background: #4e73df;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(78, 115, 223, 0.25);
+    transition: all 0.2s ease;
+}
+
+.filter-date-inputs .btn-apply-date:hover {
+    background: #2e59d9;
+    box-shadow: 0 4px 8px rgba(78, 115, 223, 0.35);
+    transform: translateY(-1px);
+}
+
+.filter-date-inputs .btn-apply-date:active {
+    transform: translateY(0);
+}
+
+/* ── Doughnut Chart Container ── */
+.doughnut-container {
+    position: relative;
+    max-width: 260px;
+    margin: 0 auto;
+}
+
+.doughnut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.doughnut-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+}
+
+.doughnut-legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.doughnut-legend-value {
+    margin-left: auto;
+    font-weight: 700;
+    color: #2e3440;
+}
+
+/* ── Top 5 Widgets ── */
+.top-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.top-item:last-child {
+    border-bottom: none;
+}
+
+.top-rank {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #f0f2f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.78rem;
+    color: #6c757d;
+    flex-shrink: 0;
+}
+
+.top-rank.rank-1 {
+    background: linear-gradient(135deg, #ffd700, #ffb800);
+    color: #fff;
+}
+
+.top-rank.rank-2 {
+    background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+    color: #fff;
+}
+
+.top-rank.rank-3 {
+    background: linear-gradient(135deg, #cd7f32, #b06020);
+    color: #fff;
+}
+
+.top-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.top-item-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #2e3440;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.top-item-count {
+    font-size: 0.72rem;
+    color: #6c757d;
+}
+
+.top-item-revenue {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #1cc88a;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.top-progress {
+    height: 4px;
+    border-radius: 2px;
+    background: #f0f2f5;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.top-progress-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s ease;
+}
+
+.top-progress-bar.bar-product {
+    background: linear-gradient(90deg, #4e73df, #224abe);
+}
+
+.top-progress-bar.bar-service {
+    background: linear-gradient(90deg, #1cc88a, #13855c);
+}
+
+/* ── Modal Enhancements ── */
+.modal-revenue .modal-header {
+    border-bottom: 2px solid #f0f2f5;
+    padding: 18px 24px;
+}
+
+.modal-revenue .modal-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.modal-revenue .modal-body {
+    padding: 20px 24px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.modal-revenue .table {
+    font-size: 0.82rem;
+}
+
+.modal-revenue .table thead th {
+    background: #f8f9fc;
+    border-bottom: 2px solid #e3e6f0;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #4e73df;
+    white-space: nowrap;
+}
+
+.modal-revenue .table tbody td {
+    vertical-align: middle;
+}
+
+.modal-revenue .modal-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    background: #f8f9fc;
+    border-top: 2px solid #e3e6f0;
+    font-weight: 700;
+}
+
+.source-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.source-badge.badge-order {
+    background: rgba(78, 115, 223, 0.12);
+    color: #4e73df;
+}
+
+.source-badge.badge-invoice {
+    background: rgba(28, 200, 138, 0.12);
+    color: #1cc88a;
+}
+
+.source-badge.badge-appointment {
+    background: rgba(246, 194, 62, 0.12);
+    color: #c49b1d;
+}
+
+/* ── Chart Card Styling ── */
+.chart-card {
+    border: none;
+    border-radius: 12px;
+}
+
+.chart-card .card-header {
+    background: transparent;
+    border-bottom: 1px solid #f0f2f5;
+    border-radius: 12px 12px 0 0;
+    padding: 16px 20px;
+}
+
+/* ── Dashboard Section Titles ── */
+.dashboard-section-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #b0b8c8;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f2f5;
+}
+
+/* ── Responsive Dashboard ── */
+@media (max-width: 992px) {
+    .filter-bar {
+        gap: 4px;
+    }
+
+    .filter-btn {
+        padding: 4px 10px;
+        font-size: 0.72rem;
+    }
+
+    .revenue-card .revenue-amount {
+        font-size: 1.1rem;
+    }
+
+    .doughnut-container {
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 576px) {
+    .revenue-card .revenue-amount {
+        font-size: 1rem;
+    }
+
+    .filter-bar {
+        justify-content: flex-start;
+    }
+
+    .top-item {
+        gap: 8px;
+    }
+
+    .modal-revenue .modal-body {
+        padding: 12px 14px;
+    }
+
+    .modal-revenue .table {
+        font-size: 0.75rem;
+    }
+}

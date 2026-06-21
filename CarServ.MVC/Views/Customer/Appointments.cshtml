@@ -1,6 +1,8 @@
 @model IEnumerable<CarServ.MVC.Models.Appointment>
+@using CarServ.MVC.Models
 @{
     ViewData["Title"] = "Lịch hẹn của tôi";
+    var reviewedServiceHistoryIds = ViewBag.ReviewedServiceHistoryIds as List<int> ?? new List<int>();
 }
 
 <!-- Page Header Start -->
@@ -93,6 +95,8 @@
                     <div class="row">
                         @foreach (var appointment in Model)
                         {
+                            var serviceHistory = appointment.ServiceHistories.FirstOrDefault();
+                            var hasServiceReview = serviceHistory != null && reviewedServiceHistoryIds.Contains(serviceHistory.ServiceHistoryId);
                             <div class="col-md-6 mb-4">
                                 <div class="bg-light rounded p-4 h-100">
                                     <div class="d-flex justify-content-between align-items-start mb-3">
@@ -103,10 +107,16 @@
                                         @{
                                             var statusClass = appointment.Status switch
                                             {
-                                                "Hoàn thành" => "success",
-                                                "Đang xử lý" => "info",
-                                                "Chờ xác nhận" => "warning",
-                                                "Đã hủy" => "danger",
+                                                AppConstants.AppointmentStatus.Pending => "warning",
+                                                AppConstants.AppointmentStatus.Confirmed => "info",
+                                                AppConstants.AppointmentStatus.Assigned => "primary",
+                                                AppConstants.AppointmentStatus.Inspecting => "secondary",
+                                                AppConstants.AppointmentStatus.Repairing => "primary",
+                                                AppConstants.AppointmentStatus.WaitingParts => "warning",
+                                                AppConstants.AppointmentStatus.InProgress => "primary",
+                                                AppConstants.AppointmentStatus.Completed => "success",
+                                                AppConstants.AppointmentStatus.Canceled => "danger",
+                                                AppConstants.AppointmentStatus.NoShow => "dark",
                                                 _ => "secondary"
                                             };
                                         }
@@ -158,7 +168,7 @@
                                         </div>
                                     }
 
-                                    @if (appointment.Status != "Hoàn thành" && appointment.Status != "Đã hủy")
+                                    @if (AppConstants.AppointmentStatus.CanCustomerCancel(appointment.Status))
                                     {
                                         <form asp-action="CancelAppointment" method="post" class="mt-3">
                                             <input type="hidden" name="id" value="@appointment.AppointmentId" />
@@ -166,6 +176,21 @@
                                                 <i class="fa fa-times me-1"></i>Hủy lịch hẹn
                                             </button>
                                         </form>
+                                    }
+                                    else if (appointment.Status == AppConstants.AppointmentStatus.Completed && serviceHistory != null)
+                                    {
+                                        if (hasServiceReview)
+                                        {
+                                            <div class="alert alert-success py-2 px-3 mt-3 mb-0" style="font-size: 13px;">
+                                                <i class="fa fa-check-circle me-1"></i>Bạn đã đánh giá dịch vụ này
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("Service", "Review", new { appointmentId = appointment.AppointmentId })" class="btn btn-sm btn-outline-primary mt-3">
+                                                <i class="fa fa-star me-1"></i>Đánh giá dịch vụ
+                                            </a>
+                                        }
                                     }
                                 </div>
                             </div>
@@ -177,5 +202,6 @@
     </div>
 </div>
 <!-- Appointments End -->
+
 
 

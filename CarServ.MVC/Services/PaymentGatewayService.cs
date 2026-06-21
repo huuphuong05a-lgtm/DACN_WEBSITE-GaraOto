@@ -98,11 +98,11 @@ namespace CarServ.MVC.Services
             // Bước 3: Sort tham số theo alphabet (A-Z)
             var sortedParams = paramsToSign.OrderBy(p => p.Key, StringComparer.Ordinal).ToList();
 
-            // Bước 4: Tạo signData dạng key=value&key=value (KHÔNG URL encode)
+            // Bước 4: Tạo signData dạng key=value&key=value (Sử dụng WebUtility.UrlEncode đồng nhất)
             var signData = string.Join("&",
-            sortedParams.Select(p =>
-            $"{WebUtility.UrlEncode(p.Key)}={WebUtility.UrlEncode(p.Value)}"
-            ));
+                sortedParams.Select(p =>
+                    $"{WebUtility.UrlEncode(p.Key)}={WebUtility.UrlEncode(p.Value)}"
+                ));
 
             _logger.LogInformation("VNPay sign data created for order {OrderId}", orderId);
 
@@ -114,15 +114,8 @@ namespace CarServ.MVC.Services
                 orderId, vnpSecureHash.Length);
 
             // Build URL redirect
-            // Giá trị param phải URL encode
-            var queryString = string.Join("&",
-            sortedParams.Select(p => $"{p.Key}={HttpUtility.UrlEncode(p.Value)}")
-);
-            queryString += "&vnp_SecureHashType=SHA512";
-            // vnp_SecureHash KHÔNG encode lại
-            queryString += $"&vnp_SecureHash={vnpSecureHash}";
-
-            var finalUrl = $"{vnpUrl}?{queryString}";
+            // Đảm bảo queryString và signData đồng nhất tuyệt đối về phương thức mã hóa và giá trị
+            var finalUrl = $"{vnpUrl}?{signData}&vnp_SecureHash={vnpSecureHash}";
             _logger.LogInformation("VNPay payment URL created for order {OrderId}", orderId);
 
             return finalUrl;
